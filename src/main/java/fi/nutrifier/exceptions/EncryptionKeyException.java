@@ -1,0 +1,7 @@
+package fi.nutrifier.exceptions;
+
+public class EncryptionKeyException extends Exception {
+    public EncryptionKeyException() {
+        super("Encryption key not found!");
+    }
+}
