@@ -35,7 +35,7 @@ public class JwtTokenUtil {
                 .subject(username)
                 .claim("roles", List.of(role.toString()))
                 .issueTime(new Date())
-                .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // One week
                 .build();
 
         RSASSASigner signer = new RSASSASigner(privateKey);
