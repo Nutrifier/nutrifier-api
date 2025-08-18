@@ -44,6 +44,13 @@ public class FoodController {
         return service.getFoodsByQuery(query);
     }
 
+    @Operation(summary = "Search for foods by barcode")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @GetMapping("/barcode")
+    public ResponseEntity<List<Food>> getFoodsByBarcode(@RequestParam String query) {
+        return service.getFoodsByBarcode(query);
+    }
+
     @Operation(summary = "Get all foods")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
