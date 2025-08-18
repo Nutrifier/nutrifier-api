@@ -88,4 +88,13 @@ public class FoodService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<List<Food>> getFoodsByBarcode(String query) {
+        try {
+            List<Food> data = repository.findFoodsByBarcodeContainingIgnoreCase(query);
+            return new ResponseEntity<>(data, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
