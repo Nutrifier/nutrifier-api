@@ -55,7 +55,7 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testRegister_ReturnCreated() throws Exception {
-        UUID id = UUID.randomUUID();
+        String id = UUID.randomUUID().toString();
         TestObjects.user1.setId(id); // Mock id generation
 
         when(service.isEmailTaken(anyString())).thenReturn(new ResponseEntity<>(false, HttpStatus.NOT_FOUND));
@@ -73,7 +73,7 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testLogin_ReturnOk() throws Exception {
-        UUID id = UUID.randomUUID();
+        String id = UUID.randomUUID().toString();
         TestObjects.user1.setId(id); // Mock id generation
 
         when(service.login(anyString(), anyString())).thenReturn(new ResponseEntity<>(TestObjects.user1.toUser(), HttpStatus.OK));

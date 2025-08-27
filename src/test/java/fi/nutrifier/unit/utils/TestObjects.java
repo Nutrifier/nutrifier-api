@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public class TestObjects {
 
-    public static UUID id;
-    public static UUID userId1;
-    public static UUID userId2;
+    public static String id;
+    public static String userId1;
+    public static String userId2;
 
     public static LocalDate date;
 
@@ -29,17 +29,17 @@ public class TestObjects {
     public static Food food3;
 
     public static void reset() {
-        id = UUID.randomUUID();
-        userId1 = UUID.randomUUID();
-        userId2 = UUID.randomUUID();
+        id = UUID.randomUUID().toString();
+        userId1 = UUID.randomUUID().toString();
+        userId2 = UUID.randomUUID().toString();
         date = LocalDate.of(2025, 1, 15);
         user1 = new UserDto(userId1, "test@gmail.com", "password", Role.ROLE_USER);
         user2 = new UserDto(userId2, "test2@gmail.com", "password2", Role.ROLE_USER);
-        log1 = new Log(UUID.randomUUID(), date, LocalTime.of(9,0, 0), "BREAKFAST", userId1, UUID.randomUUID(), 22.0);
-        log2 = new Log(UUID.randomUUID(), date, LocalTime.of(9,0, 0), "LUNCH", userId1, UUID.randomUUID(), 120.0);
-        log3 = new Log(UUID.randomUUID(), date, LocalTime.of(13,0, 0), "LUNCH", userId2, UUID.randomUUID(), 150.0);
-        food1 = new Food(UUID.randomUUID(), "Kanan rintafilee", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, userId1, UUID.randomUUID(), "", "");
-        food2 = new Food(UUID.randomUUID(), "Riisi (keitetty)", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, userId1, UUID.randomUUID(), "", "");
-        food3 = new Food(UUID.randomUUID(), "Kalkkunaleike", "", 100, 175.0, 0.0, 0.0, 0.0, userId2, UUID.randomUUID(), "", "");
+        log1 = new Log(UUID.randomUUID().toString(), date, LocalTime.of(9,0, 0), "BREAKFAST", userId1, UUID.randomUUID().toString(), 22.0);
+        log2 = new Log(UUID.randomUUID().toString(), date, LocalTime.of(9,0, 0), "LUNCH", userId1, UUID.randomUUID().toString(), 120.0);
+        log3 = new Log(UUID.randomUUID().toString(), date, LocalTime.of(13,0, 0), "LUNCH", userId2, UUID.randomUUID().toString(), 150.0);
+        food1 = new Food(UUID.randomUUID().toString(), "Kanan rintafilee", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, userId1, UUID.randomUUID().toString(), "", "");
+        food2 = new Food(UUID.randomUUID().toString(), "Riisi (keitetty)", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, userId1, UUID.randomUUID().toString(), "", "");
+        food3 = new Food(UUID.randomUUID().toString(), "Kalkkunaleike", "", 100, 175.0, 0.0, 0.0, 0.0, userId2, UUID.randomUUID().toString(), "", "");
     }
 }

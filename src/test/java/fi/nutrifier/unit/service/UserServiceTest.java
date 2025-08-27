@@ -82,8 +82,8 @@ public class UserServiceTest {
         // The service expects the emails to be encrypted
         String email = SecurityUtil.encrypt("maija@gmail.com");
 
-        User user1 = new User(UUID.randomUUID(), email, "password", Role.ROLE_USER);
-        User user2 = new User(UUID.randomUUID(), email, "password", Role.ROLE_USER);
+        User user1 = new User(UUID.randomUUID().toString(), email, "password", Role.ROLE_USER);
+        User user2 = new User(UUID.randomUUID().toString(), email, "password", Role.ROLE_USER);
 
         List<User> users = List.of(user1, user2);
 

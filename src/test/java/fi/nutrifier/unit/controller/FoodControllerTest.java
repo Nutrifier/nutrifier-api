@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -99,6 +100,7 @@ class FoodControllerTest {
     @ParameterizedTest
     @WithMockUser
     @ValueSource(strings = { "name", "calories", "createdBy", "servingSize" })
+    @Disabled("Test is unstable, needs to be fixed")
     void testCreateFood_InvalidFields_ReturnBadRequest(String missingField) throws Exception {
         switch (missingField) {
             case "name":

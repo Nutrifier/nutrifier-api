@@ -38,7 +38,7 @@ class AdminUserControllerIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        testUser = new UserDto(UUID.randomUUID(), "test@gmail.com", "pA55word!", Role.ROLE_USER);
+        testUser = new UserDto(UUID.randomUUID().toString(), "test@gmail.com", "pA55word!", Role.ROLE_USER);
         userRepository.deleteAll();
     }
 
