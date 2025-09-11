@@ -3,6 +3,7 @@
 #-----------------------------------------------------------------------#
 .gradle/
 /build/
+/bin/
 .gradletasknamecache
 .gradlerepo/
 *.jar
