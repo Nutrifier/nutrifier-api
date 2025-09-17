@@ -45,5 +45,5 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ github.ref == 'refs/heads/main' && 'nutrifier-prod' || 'nutrifier-dev' }}
-          images: DOCKER|${{ secrets.DOCKER_USERNAME }}/nutrifier:${GITHUB_REF##*/}
+          images: ${{ 'DOCKER|' + secrets.DOCKER_USERNAME + '/nutrifier:' + (github.ref == 'refs/heads/main' && 'main' || 'develop') }}
           publish-profile: ${{ github.ref == 'refs/heads/main' && secrets.AZURE_PUBLISH_PROFILE || secrets.AZURE_PUBLISH_PROFILE_DEV }}
