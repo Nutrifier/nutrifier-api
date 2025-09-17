@@ -4,34 +4,15 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-      
+      - devel      
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
-
-      - name: Build with Gradle
-        env:
-          AES_KEY: ${{ secrets.AES_KEY }}
-          DB_URL: ${{ secrets.DB_HOST }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          RSA_PRIVATE_KEY: ${{ secrets.RSA_PRIVATE_KEY }}
-          RSA_PUBLIC_KEY: ${{ secrets.RSA_PUBLIC_KEY }}
-        run: ./gradlew build
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Docker Builder
         uses: docker/setup-buildx-action@v2
@@ -44,8 +25,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/recipeapp:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/recipeapp:latest
+          IMAGE_TAG=${GITHUB_REF##*/}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/nutrifier:${IMAGE_TAG} .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}
+          docker push ${{ secrets.DOCKER_USERNAME }}/nutrifier:${IMAGE_TAG}
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,5 +44,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'recipeapp-api'
+          app-name: ${{ github.ref == 'refs/heads/main' && 'nutrifier-prod' || 'nutrifier-dev' }} 'nutrifier'
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
