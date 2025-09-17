@@ -1,14 +1,12 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:21-jdk-slim
-
-# Set the working directory inside the container
+# Stage 1: Build
+FROM gradle:8.7-jdk17 AS build
 WORKDIR /app
+COPY . .
+RUN gradle build -x test
 
-# Copy the local Spring Boot JAR file into the container
-COPY ./build/libs/*.jar /app/app.jar
-
-# Expose the port the app will run on (default Spring Boot port is 8080)
+# Stage 2: Run
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-
-# Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
