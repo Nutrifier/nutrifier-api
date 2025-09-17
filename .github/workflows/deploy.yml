@@ -44,5 +44,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ github.ref == 'refs/heads/main' && 'nutrifier-prod' || 'nutrifier-dev' }} 'nutrifier'
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          app-name: ${{ github.ref == 'refs/heads/main' && 'nutrifier-prod' || 'nutrifier-dev' }}
+          images: ${{ secrets.DOCKER_USERNAME }}/nutrifier:${GITHUB_REF##*/}
+          publish-profile: ${{ github.ref == 'refs/heads/main' && secrets.AZURE_PUBLISH_PROFILE || secrets.AZURE_PUBLISH_PROFILE_DEV }}
