@@ -1,6 +1,6 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.entities.Log;
+import fi.nutrifier.entities.UserLog;
 import fi.nutrifier.repositories.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class LogService {
@@ -23,20 +22,20 @@ public class LogService {
         this.repository = repository;
     }
 
-    public ResponseEntity<Log> create(Log entity) {
+    public ResponseEntity<UserLog> create(UserLog entity) {
         try {
-            Log data = repository.save(entity);
+            UserLog data = repository.save(entity);
             return new ResponseEntity<>(data, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<Page<Log>> getAll(Integer page, Integer size) {
+    public ResponseEntity<Page<UserLog>> getAll(Integer page, Integer size) {
         System.out.println("Getting all logs");
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
-            Page<Log> data = repository.findAll(pageRequest);
+            Page<UserLog> data = repository.findAll(pageRequest);
 
             return new ResponseEntity<>(data, HttpStatus.OK);
         } catch (Exception e) {
@@ -45,9 +44,9 @@ public class LogService {
         }
     }
 
-    public ResponseEntity<Log> getById(String id) {
+    public ResponseEntity<UserLog> getById(String id) {
         try {
-            Log data = repository.findById(id).orElse(null);
+            UserLog data = repository.findById(id).orElse(null);
             if (data == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -57,12 +56,12 @@ public class LogService {
         }
     }
 
-    public ResponseEntity<Log> update(String id, Log entity) {
+    public ResponseEntity<UserLog> update(String id, UserLog entity) {
         try {
-            Log existingEntity = repository.findById(id).orElse(null);
+            UserLog existingEntity = repository.findById(id).orElse(null);
 
             if (existingEntity != null) {
-                Log data = repository.save(entity);
+                UserLog data = repository.save(entity);
                 return new ResponseEntity<>(data, HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -71,7 +70,7 @@ public class LogService {
         }
     }
 
-    public ResponseEntity<Log> delete(String id) {
+    public ResponseEntity<UserLog> delete(String id) {
         try {
             repository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -80,19 +79,19 @@ public class LogService {
         }
     }
 
-    public ResponseEntity<List<Log>> getLogsByDateAndUser(LocalDate date, String userId) {
+    public ResponseEntity<List<UserLog>> getLogsByDateAndUser(LocalDate date, String userId) {
         try {
-            List<Log> logs = repository.findByDateAndUserId(date, userId);
-            return new ResponseEntity<>(logs, HttpStatus.OK);
+            List<UserLog> userLogs = repository.findByDateAndUserId(date, userId);
+            return new ResponseEntity<>(userLogs, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<List<Log>> getLogsByUserId(String id) {
+    public ResponseEntity<List<UserLog>> getLogsByUserId(String id) {
         try {
-            List<Log> logs = repository.findByUserId(id);
-            return new ResponseEntity<>(logs, HttpStatus.OK);
+            List<UserLog> userLogs = repository.findByUserId(id);
+            return new ResponseEntity<>(userLogs, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

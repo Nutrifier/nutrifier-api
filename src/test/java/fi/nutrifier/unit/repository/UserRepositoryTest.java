@@ -27,28 +27,37 @@ class UserRepositoryTest {
 
     @Test
     public void testSaveUser_ReturnsSavedUser() {
-        User saved = repository.save(TestObjects.user1.toUser());
+        User user = TestObjects.user1.toUser();
+        user.setPassword("qwerty");
+        User saved = repository.save(user);
 
         assertNotNull(saved.getId());
         assertEquals("test@gmail.com", saved.getEmail());
-        assertEquals("password", saved.getPassword());
+        assertEquals("qwerty", saved.getPassword());
     }
 
     @Test
     public void testFindById_ReturnsUser() {
-        User saved = repository.save(TestObjects.user1.toUser());
+        User user = TestObjects.user1.toUser();
+        user.setPassword("qwerty");
+        User saved = repository.save(user);
 
         User found = repository.findById(saved.getId()).get();
 
         assertNotNull(found);
         assertEquals("test@gmail.com", found.getEmail());
-        assertEquals("password", found.getPassword());
+        assertEquals("qwerty", found.getPassword());
     }
 
     @Test
     public void testFindAll_ReturnsMultipleUsers() {
-        repository.save(TestObjects.user1.toUser());
-        repository.save(TestObjects.user2.toUser());
+        User user1 = TestObjects.user1.toUser();
+        user1.setPassword("qwerty");
+        repository.save(user1);
+
+        User user2 = TestObjects.user2.toUser();
+        user2.setPassword("qwerty");
+        repository.save(user2);
 
         List<User> found = repository.findAll();
 
@@ -72,7 +81,9 @@ class UserRepositoryTest {
 
     @Test
     public void testDeleteUser_ReturnsEmptyList() {
-        User saved = repository.save(TestObjects.user1.toUser());
+        User user = TestObjects.user1.toUser();
+        user.setPassword("qwerty");
+        User saved = repository.save(user);
 
         repository.delete(saved);
         Optional<User> found = repository.findById(saved.getId());
@@ -83,7 +94,9 @@ class UserRepositoryTest {
 
     @Test
     public void testFindByEmail_ReturnsUser() {
-        User saved = repository.save(TestObjects.user1.toUser());
+        User user = TestObjects.user1.toUser();
+        user.setPassword("password");
+        User saved = repository.save(user);
 
         User found = repository.findByEmail(saved.getEmail()).get();
 

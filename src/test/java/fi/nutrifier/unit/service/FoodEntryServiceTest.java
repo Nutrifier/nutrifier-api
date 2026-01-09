@@ -1,9 +1,9 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
-import fi.nutrifier.entities.Log;
-import fi.nutrifier.repositories.LogRepository;
-import fi.nutrifier.services.LogService;
+import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.repositories.FoodEntryRepository;
+import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,13 +31,13 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
-public class LogServiceTest {
+public class FoodEntryServiceTest {
 
     @InjectMocks
-    private LogService service;
+    private FoodEntryService service;
 
     @Mock
-    private LogRepository repository;
+    private FoodEntryRepository repository;
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
@@ -50,9 +50,9 @@ public class LogServiceTest {
 
     @Test
     public void testSaveLog_ReturnsLog() {
-        when(repository.save(any(Log.class))).thenReturn(TestObjects.log1);
+        when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        ResponseEntity<Log> response = service.create(TestObjects.log1);
+        ResponseEntity<FoodEntry> response = service.create(TestObjects.foodEntry1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(22, response.getBody().getAmount());
@@ -61,9 +61,9 @@ public class LogServiceTest {
 
     @Test
     public void testFindById_ReturnsLog() {
-        when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.log1));
+        when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.foodEntry1));
 
-        ResponseEntity<Log> response = service.getById(TestObjects.id);
+        ResponseEntity<FoodEntry> response = service.getById(TestObjects.id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(22, response.getBody().getAmount());
@@ -72,14 +72,14 @@ public class LogServiceTest {
 
     @Test
     public void testFindAll_ReturnsMultipleLogs() {
-        List<Log> logs = List.of(TestObjects.log1, TestObjects.log2);
+        List<FoodEntry> foodEntries = List.of(TestObjects.foodEntry1, TestObjects.foodEntry2);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Log> mockPage = new PageImpl<>(logs, pageable, logs.size());
+        Page<FoodEntry> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
 
         when(repository.findAll(pageable)).thenReturn(mockPage);
 
-        ResponseEntity<Page<Log>> response = service.getAll(0, 10);
+        ResponseEntity<Page<FoodEntry>> response = service.getAll(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().getTotalElements());
@@ -87,12 +87,12 @@ public class LogServiceTest {
 
     @Test
     public void testUpdateUser_ReturnsLog() {
-        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.log1));
-        when(repository.save(any(Log.class))).thenReturn(TestObjects.log1);
+        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.foodEntry1));
+        when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        TestObjects.log1.setMeal("LUNCH");
-        TestObjects.log1.setAmount(54.0);
-        ResponseEntity<Log> response = service.update(TestObjects.id, TestObjects.log1);
+        TestObjects.foodEntry1.setMeal("LUNCH");
+        TestObjects.foodEntry1.setAmount(54.0);
+        ResponseEntity<FoodEntry> response = service.update(TestObjects.id, TestObjects.foodEntry1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -104,7 +104,7 @@ public class LogServiceTest {
     public void testDeleteUser_ReturnsNullBody() {
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<Log> response = service.delete(TestObjects.id);
+        ResponseEntity<FoodEntry> response = service.delete(TestObjects.id);
 
         verify(repository, times(1)).deleteById(TestObjects.id);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -113,13 +113,13 @@ public class LogServiceTest {
 
     @Test
     public void testFindLogsByDate_ReturnsMultipleLogs() {
-        List<Log> logs = new ArrayList<>();
-        logs.add(TestObjects.log1);
-        logs.add(TestObjects.log2);
+        List<FoodEntry> foodEntries = new ArrayList<>();
+        foodEntries.add(TestObjects.foodEntry1);
+        foodEntries.add(TestObjects.foodEntry2);
 
-        when(repository.findByDateAndUserId(TestObjects.date, TestObjects.id)).thenReturn(logs);
+        when(repository.findByDateAndUserId(TestObjects.date, TestObjects.id)).thenReturn(foodEntries);
 
-        ResponseEntity<List<Log>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
+        ResponseEntity<List<FoodEntry>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
@@ -127,13 +127,13 @@ public class LogServiceTest {
 
     @Test
     public void testFindLogsByUser_ReturnsMultipleLogs() {
-        List<Log> logs = new ArrayList<>();
-        logs.add(TestObjects.log1);
-        logs.add(TestObjects.log2);
+        List<FoodEntry> foodEntries = new ArrayList<>();
+        foodEntries.add(TestObjects.foodEntry1);
+        foodEntries.add(TestObjects.foodEntry2);
 
-        when(repository.findByUserId(TestObjects.userId1)).thenReturn(logs);
+        when(repository.findByUserId(TestObjects.userId1)).thenReturn(foodEntries);
 
-        ResponseEntity<List<Log>> response = service.getLogsByUserId(TestObjects.userId1);
+        ResponseEntity<List<FoodEntry>> response = service.getLogsByUserId(TestObjects.userId1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());

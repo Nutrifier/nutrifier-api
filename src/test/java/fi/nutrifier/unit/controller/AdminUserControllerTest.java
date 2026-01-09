@@ -106,7 +106,7 @@ public class AdminUserControllerTest {
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email", CoreMatchers.is("test@gmail.com")))
-                .andExpect(jsonPath("$.password", CoreMatchers.is("password")));
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test
@@ -125,7 +125,6 @@ public class AdminUserControllerTest {
     @WithMockUser(roles = "ADMIN")
     public void testUpdateUser_AsAdmin_ReturnUser() throws Exception {
         TestObjects.user1.setEmail("again@gmail.com");
-        TestObjects.user1.setPassword("mYS3cur3!Pa55");
 
         // Use eq(1L) to match the exact ID and any(User.class) to allow any User instance.
         when(service.update(eq(TestObjects.id), any(UserDto.class)))
@@ -136,19 +135,13 @@ public class AdminUserControllerTest {
                 .content(objectMapper.writeValueAsString(TestObjects.user1)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email", CoreMatchers.is("again@gmail.com")))
-                .andExpect(jsonPath("$.password", CoreMatchers.is("mYS3cur3!Pa55")));
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
-    @ParameterizedTest
+    @Test
     @WithMockUser(roles = "ADMIN")
-    @ValueSource(strings = { "email", "password" })
-    public void testUpdateUser_AsAdmin_InvalidInput_ReturnBadRequest(String values) throws Exception {
-        switch (values) {
-            case "email":
-                TestObjects.user1.setEmail("mywebsite.fi");
-            case "password":
-                TestObjects.user1.setPassword("qwerty");
-        }
+    public void testUpdateUser_AsAdmin_InvalidInput_ReturnBadRequest() throws Exception {
+        TestObjects.user1.setEmail("mywebsite.fi");
 
         mockMvc.perform(patch(baseUrl + "/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)

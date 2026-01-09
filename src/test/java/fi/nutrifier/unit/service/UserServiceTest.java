@@ -1,6 +1,8 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
+import fi.nutrifier.dto.AuthRequest;
+import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.entities.Role;
 import fi.nutrifier.entities.User;
 import fi.nutrifier.exceptions.EncryptionKeyException;
@@ -56,11 +58,12 @@ public class UserServiceTest {
     public void testSaveUser_ReturnsUser() {
         when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResponseEntity<User> response = service.create(TestObjects.user1);
+        AuthRequest authRequest = new AuthRequest(TestObjects.user1.getEmail(), "qwerty");
+
+        ResponseEntity<UserDto> response = service.create(authRequest);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
@@ -112,8 +115,6 @@ public class UserServiceTest {
         List<User> resUsers = page.getContent();
 
         assertFalse(resUsers.isEmpty());
-        assertNull(resUsers.get(0).getPassword());
-        assertNull(resUsers.get(1).getPassword());
     }
 
     @Test
@@ -143,8 +144,10 @@ public class UserServiceTest {
     @Test
     public void testLoginSuccess() {
         // Service expects a hashed password
-        TestObjects.user1.setPassword(SecurityUtil.hashPassword(TestObjects.user1.getPassword()));
-        when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(TestObjects.user1.toUser()));
+        User user = TestObjects.user1.toUser();
+        String hashedPassword = SecurityUtil.hashPassword("password");
+        user.setPassword(hashedPassword);
+        when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
         ResponseEntity<User> response = service.login("test@gmail.com", "password");
 
@@ -158,7 +161,6 @@ public class UserServiceTest {
     @Test
     public void testLoginFail() throws Exception {
         // Service expects a hashed password
-        TestObjects.user1.setPassword(SecurityUtil.hashPassword(TestObjects.user1.getPassword()));
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
 
         ResponseEntity<User> response = service.login("test@gmail.com", "wrong_password");
