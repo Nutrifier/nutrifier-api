@@ -22,11 +22,13 @@ public class UserDto {
     @Email
     private String email;
 
+    /*
     @NotNull
     @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
             message = "Password must have at least one uppercase letter, one lowercase letter, one digit, and one special character")
     private String password;
+    */
 
     private Role role;
 
@@ -35,13 +37,12 @@ public class UserDto {
     private List<MealPlan> mealPlans;
     private List<WeightEntries> weightEntries = new ArrayList<>();
 
-    public void initialize(String email, String password, Role role) {
+    public void initialize(String email, Role role) {
         this.setEmail(email);
-        this.setPassword(password);
         this.setRole(role);
     }
 
     public User toUser() {
-        return new User(this.id, this.email, this.password, this.role, this.settings, this.goals, this.mealPlans, this.weightEntries);
+        return new User(this.id, this.email, null, this.role, this.settings, this.goals, this.mealPlans, this.weightEntries);
     }
 }

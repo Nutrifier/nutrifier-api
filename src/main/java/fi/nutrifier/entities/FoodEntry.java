@@ -18,7 +18,7 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "logs")
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserLog {
+public class FoodEntry {
 
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")

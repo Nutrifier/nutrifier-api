@@ -33,19 +33,17 @@ public class AuthenticationController {
 
     @Operation(summary = "Register to the application")
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody AuthRequest authRequest) throws JOSEException {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest authRequest) throws JOSEException {
         ResponseEntity<Boolean> response = userService.isEmailTaken(authRequest.getEmail());
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
 
-            UserDto newUser = new UserDto();
-            newUser.initialize(authRequest.getEmail(), authRequest.getPassword(), Role.ROLE_USER);
-            ResponseEntity<User> created = userService.create(newUser);
+            ResponseEntity<UserDto> created = userService.create(authRequest);
 
             if (created.getStatusCode() == HttpStatus.CREATED) {
-                User user = created.getBody();
-                if (user != null) {
+                UserDto userDto = created.getBody();
+                if (userDto != null) {
                     String token = jwtTokenUtil.generateToken(authRequest.getEmail(), Role.ROLE_USER);
-                    AuthResponse authResponse = new AuthResponse(token, user.getId(), user.getEmail());
+                    AuthResponse authResponse = new AuthResponse(token, userDto.getId());
                     return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
                 }
             }
@@ -58,17 +56,13 @@ public class AuthenticationController {
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) throws JOSEException {
         ResponseEntity<User> response = userService.login(authRequest.getEmail(), authRequest.getPassword());
 
-        System.out.println("Login response: " + response);
-
         if (response.getStatusCode() == HttpStatus.OK) {
 
             User user = response.getBody();
             if (user != null) {
                 String token = jwtTokenUtil.generateToken(authRequest.getEmail(), user.getRole());
 
-                System.out.println("Login token: " + token);
-
-                AuthResponse authResponse = new AuthResponse(token, user.getId(), user.getEmail());
+                AuthResponse authResponse = new AuthResponse(token, user.getId());
                 return new ResponseEntity<>(authResponse, HttpStatus.OK);
             }
         }

@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class MealPlanPeriods {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meal_plan_id", nullable = false)
+    @JsonIgnore // No need to print out meal plan here
     private MealPlan mealPlan;
 
     @Column(name = "start_date", nullable = false)

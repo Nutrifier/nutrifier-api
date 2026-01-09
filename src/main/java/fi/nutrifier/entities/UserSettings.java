@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,11 +20,13 @@ public class UserSettings {
     @Id
     @Column(name = "user_id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)
+    @JsonIgnore
     private String user_id;
 
     @OneToOne
-    @MapsId
+    @MapsId // Tells JPA that user_id is taken from user.id
     @JoinColumn(name = "user_id")
+    @JsonIgnore // Eliminate infinite looping
     private User user;
 
     @Column(name = "weight_unit", nullable = false, length = 5)
@@ -70,5 +73,6 @@ public class UserSettings {
         this.setMealReminderEnabled(true);
         this.setWeighInReminderEnabled(true);
         this.setMotivationMessagesEnabled(true);
+        this.setUpdatedAt(LocalDateTime.now());
     }
 }

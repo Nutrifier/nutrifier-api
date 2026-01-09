@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,16 +21,12 @@ public class UserGoals {
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)
+    @JsonIgnore
     private String id;
 
-    @Id
-    @Column(name = "user_id", columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    private String user_id;
-
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonIgnore // Eliminate infinite looping
     private User user;
 
     @Column(name = "reasoning", length = 20)

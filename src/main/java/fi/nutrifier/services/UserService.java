@@ -1,5 +1,6 @@
 package fi.nutrifier.services;
 
+import fi.nutrifier.dto.AuthRequest;
 import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.entities.*;
 import fi.nutrifier.exceptions.EncryptionKeyException;
@@ -32,20 +33,38 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<User> create(UserDto userDto) {
+    public ResponseEntity<UserDto> create(AuthRequest authRequest) {
         try {
-            String encryptedEmail = SecurityUtil.encrypt(userDto.getEmail());
-            String hashedPassword = SecurityUtil.hashPassword(userDto.getPassword());
+            String encryptedEmail = SecurityUtil.encrypt(authRequest.getEmail());
+
+            String hashedPassword = SecurityUtil.hashPassword(authRequest.getPassword());
 
             User user = new User();
-            user.initialize(encryptedEmail, hashedPassword, Role.ROLE_USER);
-            User data = repository.save(user);
+            user.setEmail(encryptedEmail);
+            user.setPassword(hashedPassword);
+            user.setRole(Role.ROLE_USER); // Default to regular user
 
-            // Plain text email for the return object
-            data.setEmail(userDto.getEmail());
-            data.setPassword(null);
+            // Initialize user settings
+            UserSettings settings = new UserSettings();
+            settings.initialize();
+            settings.setUser(user);
+            user.setSettings(settings);
 
-            return new ResponseEntity<>(data, HttpStatus.CREATED);
+            // Initialize user goals
+            UserGoals goals = new UserGoals();
+            goals.setUser(user);
+            goals.setId(UUID.randomUUID().toString());
+            user.setGoals(goals);
+
+            User savedUser = repository.save(user);
+
+            UserDto userDto = new UserDto();
+            String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
+            userDto.setId(savedUser.getId());
+            userDto.setEmail(decryptedEmail);
+            userDto.setRole(savedUser.getRole());
+
+            return new ResponseEntity<>(userDto, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
