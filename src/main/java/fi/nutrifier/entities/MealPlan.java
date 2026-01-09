@@ -35,4 +35,9 @@ public class MealPlan {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public void initialize(String name, List<MealPlanPeriods> periods) {
+        this.setName(name);
+        this.setPeriods(periods);
+    }
 }

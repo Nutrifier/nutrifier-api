@@ -1,17 +1,20 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.entities.Role;
-import fi.nutrifier.entities.User;
+import fi.nutrifier.entities.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.util.UUID;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
     private String id;
 
@@ -27,7 +30,18 @@ public class UserDto {
 
     private Role role;
 
+    private UserSettings settings;
+    private UserGoals goals;
+    private List<MealPlan> mealPlans;
+    private List<WeightEntries> weightEntries = new ArrayList<>();
+
+    public void initialize(String email, String password, Role role) {
+        this.setEmail(email);
+        this.setPassword(password);
+        this.setRole(role);
+    }
+
     public User toUser() {
-        return new User(this.id, this.email, this.password, this.role);
+        return new User(this.id, this.email, this.password, this.role, this.settings, this.goals, this.mealPlans, this.weightEntries);
     }
 }

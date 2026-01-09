@@ -1,7 +1,7 @@
 package fi.nutrifier.services;
 
 import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.entities.*;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.exceptions.FailedDecryptionException;
@@ -13,9 +13,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import fi.nutrifier.entities.User;
 import fi.nutrifier.utils.SecurityUtil;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,12 +31,14 @@ public class UserService {
         this.repository = repository;
     }
 
+    @Transactional
     public ResponseEntity<User> create(UserDto userDto) {
         try {
             String encryptedEmail = SecurityUtil.encrypt(userDto.getEmail());
             String hashedPassword = SecurityUtil.hashPassword(userDto.getPassword());
 
-            User user = new User(null, encryptedEmail, hashedPassword, Role.ROLE_USER);
+            User user = new User();
+            user.initialize(encryptedEmail, hashedPassword, Role.ROLE_USER);
             User data = repository.save(user);
 
             // Plain text email for the return object
@@ -71,6 +76,7 @@ public class UserService {
     }
 
     public ResponseEntity<User> getById(String id) {
+        System.out.println("getting user by id");
         try {
             User user = repository.findById(id).orElse(null);
 

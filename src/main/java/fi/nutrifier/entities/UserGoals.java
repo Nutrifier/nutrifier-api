@@ -49,4 +49,10 @@ public class UserGoals {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void initialize(String reasoning, Double targetWeight, LocalDate targetDate) {
+        this.setReasoning(reasoning);
+        this.setTargetWeight(targetWeight);
+        this.setTargetDate(targetDate);
+    }
 }

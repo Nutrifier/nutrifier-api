@@ -58,4 +58,17 @@ public class UserSettings {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void initialize() {
+        this.setWeightUnit("kg");
+        this.setEnergyUnit("kcal");
+        this.setLanguage("en");
+        this.setTimeBetweenMeals(3);
+        this.setDiet("omnivore");
+        this.setWeekStartsOn(1);
+        this.setProteinEfficiencyEnabled(true);
+        this.setMealReminderEnabled(true);
+        this.setWeighInReminderEnabled(true);
+        this.setMotivationMessagesEnabled(true);
+    }
 }

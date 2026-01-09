@@ -51,6 +51,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WeightEntries> weightEntries = new ArrayList<>();
 
+    public void initialize(String encryptedEmail, String hashedPassword, Role role) {
+        this.setEmail(encryptedEmail);
+        this.setPassword(hashedPassword);
+        this.setRole(Role.ROLE_USER);
+    }
+
     public void setEmail(String email) {
         if (email.length() > 5 && email.contains("@")) {
             this.email = email;

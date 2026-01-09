@@ -37,7 +37,8 @@ public class AuthenticationController {
         ResponseEntity<Boolean> response = userService.isEmailTaken(authRequest.getEmail());
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
 
-            UserDto newUser = new UserDto(null, authRequest.getEmail(), authRequest.getPassword(), Role.ROLE_USER);
+            UserDto newUser = new UserDto();
+            newUser.initialize(authRequest.getEmail(), authRequest.getPassword(), Role.ROLE_USER);
             ResponseEntity<User> created = userService.create(newUser);
 
             if (created.getStatusCode() == HttpStatus.CREATED) {
@@ -71,6 +72,7 @@ public class AuthenticationController {
                 return new ResponseEntity<>(authResponse, HttpStatus.OK);
             }
         }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

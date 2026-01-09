@@ -48,4 +48,9 @@ public class MealPlanPeriods {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void initialize(LocalDate startDate, LocalDate endDate) {
+        this.setStartDate(startDate);
+        this.setEndDate(endDate);
+    }
 }
