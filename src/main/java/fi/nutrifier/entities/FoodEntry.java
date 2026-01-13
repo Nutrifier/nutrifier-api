@@ -20,6 +20,7 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 public class FoodEntry {
 
+    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)

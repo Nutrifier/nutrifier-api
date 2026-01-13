@@ -13,7 +13,7 @@ import fi.nutrifier.entities.User;
 
 import java.util.UUID;
 
-@Tag(name = "Admin Users Controller")
+@Tag(name = "User Profile (Admin)")
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminUserController {

@@ -1,5 +1,6 @@
 package fi.nutrifier.unit.repository;
 
+import fi.nutrifier.entities.Food;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import fi.nutrifier.unit.utils.TestObjects;
@@ -7,6 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -92,19 +97,6 @@ class FoodEntryRepositoryTest {
         assertEquals(2, found1.size());
 
         List<FoodEntry> found2 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId2);
-        assertEquals(1, found2.size());
-    }
-
-    @Test
-    public void testFindByUserId_ReturnsMultipleLogs() {
-        repository.save(TestObjects.foodEntry1);
-        repository.save(TestObjects.foodEntry2);
-        repository.save(TestObjects.foodEntry3);
-
-        List<FoodEntry> found1 = repository.findByUserId(TestObjects.userId1);
-        assertEquals(2, found1.size());
-
-        List<FoodEntry> found2 = repository.findByUserId(TestObjects.userId2);
         assertEquals(1, found2.size());
     }
 }

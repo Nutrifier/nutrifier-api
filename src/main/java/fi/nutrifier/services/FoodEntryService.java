@@ -1,5 +1,6 @@
 package fi.nutrifier.services;
 
+import fi.nutrifier.entities.Food;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,9 @@ public class FoodEntryService {
         this.repository = repository;
     }
 
-    public ResponseEntity<FoodEntry> create(FoodEntry entity) {
+    public ResponseEntity<FoodEntry> create(String userId, FoodEntry entity) {
         try {
+            entity.setUserId(userId);
             FoodEntry data = repository.save(entity);
             return new ResponseEntity<>(data, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -32,10 +34,21 @@ public class FoodEntryService {
     }
 
     public ResponseEntity<Page<FoodEntry>> getAll(Integer page, Integer size) {
-        System.out.println("Getting all logs");
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<FoodEntry> data = repository.findAll(pageRequest);
+
+            return new ResponseEntity<>(data, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Page<FoodEntry>> getAllByUserId(String userId, Integer page, Integer size) {
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            Page<FoodEntry> data = repository.findByUserId(userId, pageRequest);
 
             return new ResponseEntity<>(data, HttpStatus.OK);
         } catch (Exception e) {
@@ -56,9 +69,21 @@ public class FoodEntryService {
         }
     }
 
-    public ResponseEntity<FoodEntry> update(String id, FoodEntry entity) {
+    public ResponseEntity<FoodEntry> getByIdAndUserId(String id, String userId) {
         try {
-            FoodEntry existingEntity = repository.findById(id).orElse(null);
+            FoodEntry data = repository.findByIdAndUserId(id, userId).orElse(null);
+            if (data == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(data, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<FoodEntry> update(String userId, String id, FoodEntry entity) {
+        try {
+            FoodEntry existingEntity = repository.findByIdAndUserId(id, userId).orElse(null);
 
             if (existingEntity != null) {
                 FoodEntry data = repository.save(entity);
@@ -70,9 +95,9 @@ public class FoodEntryService {
         }
     }
 
-    public ResponseEntity<FoodEntry> delete(String id) {
+    public ResponseEntity<FoodEntry> delete(String userId, String id) {
         try {
-            repository.deleteById(id);
+            repository.deleteByIdAndUserId(id, userId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -82,15 +107,6 @@ public class FoodEntryService {
     public ResponseEntity<List<FoodEntry>> getLogsByDateAndUser(LocalDate date, String userId) {
         try {
             List<FoodEntry> foodEntries = repository.findByDateAndUserId(date, userId);
-            return new ResponseEntity<>(foodEntries, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public ResponseEntity<List<FoodEntry>> getLogsByUserId(String id) {
-        try {
-            List<FoodEntry> foodEntries = repository.findByUserId(id);
             return new ResponseEntity<>(foodEntries, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

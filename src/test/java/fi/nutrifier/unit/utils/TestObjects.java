@@ -4,6 +4,7 @@ import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.entities.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +78,12 @@ public class TestObjects {
         mealPlanList = new ArrayList<>();
         mealPlanList.add(newMealPlan);
 
-
+        List<WeightEntry> weightEntryList = new ArrayList<>();
+        WeightEntry newWeightEntry = new WeightEntry();
+        newWeightEntry.setDate(LocalDateTime.now());
+        newWeightEntry.setWeight(84.0);
+        newWeightEntry.setUser(user1.toUser());
+        weightEntryList.add(newWeightEntry);
+        user1.setWeightEntries(weightEntryList);
     }
 }

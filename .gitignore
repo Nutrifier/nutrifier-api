@@ -30,6 +30,7 @@ Thumbs.db
 .env
 *.pem
 local.properties
+*.key
 
 #-----------------------------------------------------------------------#
 #                                DEPENDENCIES                           #

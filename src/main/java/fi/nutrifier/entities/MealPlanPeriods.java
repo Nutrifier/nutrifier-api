@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class MealPlanPeriods {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "CHAR(36)")
     private String id;
 

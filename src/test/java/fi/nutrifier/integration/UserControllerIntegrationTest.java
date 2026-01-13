@@ -1,5 +1,6 @@
 package fi.nutrifier.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nutrifier.dto.AuthRequest;
 import fi.nutrifier.dto.UserDto;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,16 +50,22 @@ class UserControllerIntegrationTest {
 
         // Register user
         String responseJson = mockMvc.perform(post("/api/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(authRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(authRequest)))
             .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-        String userId = objectMapper.readTree(responseJson).get("userId").asText();
+        JsonNode json = objectMapper.readTree(responseJson);
+        String token = json.get("token").asText();
+        String userId = json.get("userId").asText();
 
         // Fetch user data
-        mockMvc.perform(get("/api/users/" + userId))
+        mockMvc.perform(get("/api/users")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(userId))
             .andExpect(jsonPath("$.settings").exists());
     }
 }

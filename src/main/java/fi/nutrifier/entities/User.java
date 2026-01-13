@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class User {
 
+    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)
@@ -33,6 +35,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column
@@ -43,11 +46,14 @@ public class User {
     private UserSettings settings;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private UserGoals goals;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<MealPlan> mealPlans;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WeightEntries> weightEntries = new ArrayList<>();
+    @JsonIgnore
+    private List<WeightEntry> weightEntries = new ArrayList<>();
 }

@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,9 +13,10 @@ import java.time.LocalDateTime;
 @Table(name = "weight_entries")
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeightEntries {
+public class WeightEntry {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "CHAR(36)")
     private String id;
 

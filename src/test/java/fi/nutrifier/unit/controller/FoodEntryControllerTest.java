@@ -4,6 +4,7 @@ import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.FoodEntryController;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.services.FoodEntryService;
+import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,12 +47,15 @@ public class FoodEntryControllerTest {
     private FoodEntryService service;
 
     @MockBean
+    private UserService userService;
+
+    @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final String baseUrl = "/api/logs";
+    private final String baseUrl = "/api/food-entries";
 
     @BeforeEach
     public void setup() {
@@ -61,14 +67,16 @@ public class FoodEntryControllerTest {
     public void testCreateLog_ReturnCreated() throws Exception {
         // Use any(Log.class) because the User instance created during JSON deserialization
         // won't match the exact instance in the test setup.
-        when(service.create(any(FoodEntry.class))).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1, HttpStatus.CREATED));
+        when(service.create(any(String.class), any(FoodEntry.class)))
+                .thenReturn(new ResponseEntity<>(TestObjects.foodEntry1, HttpStatus.CREATED));
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.foodEntry1)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
-                .andExpect(jsonPath("$.meal", CoreMatchers.is(TestObjects.foodEntry1.getMeal())));
+                .content(objectMapper.writeValueAsString(TestObjects.foodEntry1))
+                .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
+            .andExpect(jsonPath("$.meal", CoreMatchers.is(TestObjects.foodEntry1.getMeal())));
     }
 
     @Test
@@ -94,14 +102,15 @@ public class FoodEntryControllerTest {
         TestObjects.foodEntry1.setMeal("SNACKS");
 
         // Use eq(1L) to match the exact ID and any(Log.class) to allow any User instance.
-        when(service.update(eq(TestObjects.id), any(FoodEntry.class))).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1, HttpStatus.OK));
+        when(service.update(eq(TestObjects.userId1), eq(TestObjects.id), any(FoodEntry.class))).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1, HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.foodEntry1)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", CoreMatchers.is(100.0)))
-                .andExpect(jsonPath("$.meal", CoreMatchers.is("SNACKS")));
+                .content(objectMapper.writeValueAsString(TestObjects.foodEntry1))
+                .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.amount", CoreMatchers.is(100.0)))
+            .andExpect(jsonPath("$.meal", CoreMatchers.is("SNACKS")));
     }
 
     @Test
@@ -112,7 +121,7 @@ public class FoodEntryControllerTest {
     @Test
     @WithMockUser
     public void testDeleteLog_ReturnEmpty() throws Exception {
-        when(service.delete(TestObjects.id)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+        when(service.delete(TestObjects.userId1, TestObjects.id)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         MvcResult result = mockMvc.perform(delete(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk()).andReturn();
 

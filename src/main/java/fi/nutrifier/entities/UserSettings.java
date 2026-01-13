@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,7 +20,7 @@ public class UserSettings {
     @Column(name = "user_id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @JsonIgnore
-    private String user_id;
+    private String userId;
 
     @OneToOne
     @MapsId // Tells JPA that user_id is taken from user.id

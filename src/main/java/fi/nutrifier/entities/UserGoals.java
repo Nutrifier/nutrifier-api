@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserGoals {
 
+    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)

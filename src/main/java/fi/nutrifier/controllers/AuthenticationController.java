@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Authentication Controller")
+@Tag(name = "Authentication")
 @RestController
 @RequestMapping("/api")
 public class AuthenticationController {
@@ -42,7 +42,7 @@ public class AuthenticationController {
             if (created.getStatusCode() == HttpStatus.CREATED) {
                 UserDto userDto = created.getBody();
                 if (userDto != null) {
-                    String token = jwtTokenUtil.generateToken(authRequest.getEmail(), Role.ROLE_USER);
+                    String token = jwtTokenUtil.generateToken(userDto.getId(), Role.ROLE_USER);
                     AuthResponse authResponse = new AuthResponse(token, userDto.getId());
                     return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
                 }
@@ -60,7 +60,7 @@ public class AuthenticationController {
 
             User user = response.getBody();
             if (user != null) {
-                String token = jwtTokenUtil.generateToken(authRequest.getEmail(), user.getRole());
+                String token = jwtTokenUtil.generateToken(user.getId(), user.getRole());
 
                 AuthResponse authResponse = new AuthResponse(token, user.getId());
                 return new ResponseEntity<>(authResponse, HttpStatus.OK);

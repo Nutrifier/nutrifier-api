@@ -54,6 +54,8 @@ public class UserService {
             UserGoals goals = new UserGoals();
             goals.setUser(user);
             goals.setId(UUID.randomUUID().toString());
+            goals.setCreatedAt(LocalDateTime.now());
+            goals.setUpdatedAt(LocalDateTime.now());
             user.setGoals(goals);
 
             User savedUser = repository.save(user);

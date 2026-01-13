@@ -42,14 +42,14 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testGenerateToken() throws Exception {
-        String token = jwtTokenUtil.generateToken("test@gmail.com", Role.ROLE_USER);
-        assertNotEquals("test@gmail.com", token);
+        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
+        assertNotEquals("123456789", token);
         assertTrue(token.startsWith("eyJ"));
     }
 
     @Test
     public void testValidateToken_validToken() throws Exception {
-        String token = jwtTokenUtil.generateToken("test@gmail.com", Role.ROLE_USER);
+        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
         boolean valid = jwtTokenUtil.validateToken(token);
         assertTrue(valid);
     }
@@ -62,18 +62,18 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testExtractUser() throws Exception {
-        String token = jwtTokenUtil.generateToken("test@gmail.com", Role.ROLE_USER);
-        String extractedUsername = jwtTokenUtil.extractUsername(token);
-        assertEquals("test@gmail.com", extractedUsername);
+        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
+        String extractedId = jwtTokenUtil.extractUserId(token);
+        assertEquals("123456789", extractedId);
     }
 
     @Test
     public void testExtractRole() throws Exception {
-        String token = jwtTokenUtil.generateToken("test@gmail.com", Role.ROLE_USER);
+        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
         List<String> roles = jwtTokenUtil.extractRole(token);
         assertEquals("ROLE_USER", roles.get(0));
 
-        String token2 = jwtTokenUtil.generateToken("test@gmail.com", Role.ROLE_ADMIN);
+        String token2 = jwtTokenUtil.generateToken("123456789", Role.ROLE_ADMIN);
         List<String> roles2 = jwtTokenUtil.extractRole(token2);
         assertEquals("ROLE_ADMIN", roles2.get(0));
     }

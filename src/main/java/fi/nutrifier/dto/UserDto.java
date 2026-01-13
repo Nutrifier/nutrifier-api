@@ -3,8 +3,6 @@ package fi.nutrifier.dto;
 import fi.nutrifier.entities.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +33,7 @@ public class UserDto {
     private UserSettings settings;
     private UserGoals goals;
     private List<MealPlan> mealPlans;
-    private List<WeightEntries> weightEntries = new ArrayList<>();
+    private List<WeightEntry> weightEntries = new ArrayList<>();
 
     public void initialize(String email, Role role) {
         this.setEmail(email);
