@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
@@ -26,13 +27,20 @@ public class UserSettings {
     @MapsId // Tells JPA that user_id is taken from user.id
     @JoinColumn(name = "user_id")
     @JsonIgnore // Eliminate infinite looping
+    @ToString.Exclude
     private User user;
 
     @Column(name = "weight_unit", nullable = false, length = 5)
     private String weightUnit;
 
+    @Column(name = "macro_weight_unit", nullable = false, length = 5)
+    private String macroWeightUnit;
+
     @Column(name = "energy_unit", nullable = false, length = 5)
     private String energyUnit;
+
+    @Column(name = "nutrient_display_mode", nullable = false, length = 20)
+    private String nutrientDisplayMode;
 
     @Column(name = "language", nullable = false, length = 5)
     private String language;
@@ -62,11 +70,13 @@ public class UserSettings {
     private LocalDateTime updatedAt;
 
     public void initialize() {
-        this.setWeightUnit("kg");
-        this.setEnergyUnit("kcal");
-        this.setLanguage("en");
+        this.setWeightUnit("G");
+        this.setMacroWeightUnit("G");
+        this.setEnergyUnit("KCAL");
+        this.setNutrientDisplayMode("FULL_CIRCLE");
+        this.setLanguage("EN");
         this.setTimeBetweenMeals(3);
-        this.setDiet("omnivore");
+        this.setDiet("STANDARD");
         this.setWeekStartsOn(1);
         this.setProteinEfficiencyEnabled(true);
         this.setMealReminderEnabled(true);

@@ -1,6 +1,5 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.entities.Food;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -95,6 +94,7 @@ public class FoodEntryService {
         }
     }
 
+    @Transactional
     public ResponseEntity<FoodEntry> delete(String userId, String id) {
         try {
             repository.deleteByIdAndUserId(id, userId);

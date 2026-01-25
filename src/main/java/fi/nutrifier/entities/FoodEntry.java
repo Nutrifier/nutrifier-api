@@ -53,6 +53,8 @@ public class FoodEntry {
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private String foodId;
 
+    private Integer fineliId;
+
     @Column(nullable = false)
     @NotNull
     @Min(value = 0)

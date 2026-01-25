@@ -140,13 +140,14 @@ public class FoodEntryControllerTest {
         foodEntries.add(TestObjects.foodEntry1);
         foodEntries.add(TestObjects.foodEntry2);
 
-        when(service.getLogsByDateAndUser(TestObjects.date, TestObjects.id)).thenReturn(new ResponseEntity<>(foodEntries, HttpStatus.OK));
+        when(service.getLogsByDateAndUser(TestObjects.date, TestObjects.userId1))
+                .thenReturn(new ResponseEntity<>(foodEntries, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/by-date")
                 .param("date", TestObjects.date.toString())
-                .param("userId", TestObjects.id.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", CoreMatchers.is(2)));
+                .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()", CoreMatchers.is(2)));
     }
 
     @Test

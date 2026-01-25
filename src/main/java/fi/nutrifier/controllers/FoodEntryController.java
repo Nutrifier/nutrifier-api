@@ -57,7 +57,8 @@ public class FoodEntryController {
     @Operation(summary = "Get logs by date and user id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping("/by-date")
-    public ResponseEntity<List<FoodEntry>> getLogsByDateAndUser(@RequestParam String date, @RequestParam String userId) {
+    public ResponseEntity<List<FoodEntry>> getLogsByDateAndUser(Authentication authentication, @RequestParam String date) {
+        String userId = authentication.getName();
         LocalDate parsedDate = LocalDate.parse(date);
         return service.getLogsByDateAndUser(parsedDate, userId);
     }

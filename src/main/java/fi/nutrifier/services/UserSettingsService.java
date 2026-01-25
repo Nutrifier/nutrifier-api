@@ -53,7 +53,10 @@ public class UserSettingsService {
 
     public ResponseEntity<UserSettings> update(String userId, UserSettingsUpdateRequest request) {
         try {
+            System.out.println("Updating settings userId: " + userId + " request: " + request);
             UserSettings settings = settingsRepository.findByUserId(userId).orElse(null);
+
+            System.out.println("Previous settings: " + settings);
 
             if (settings == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -61,8 +64,14 @@ public class UserSettingsService {
             if (request.getWeightUnit() != null) {
                 settings.setWeightUnit(request.getWeightUnit());
             }
+            if (request.getMacroWeightUnit() != null) {
+                settings.setMacroWeightUnit(request.getMacroWeightUnit());
+            }
             if (request.getEnergyUnit() != null) {
                 settings.setEnergyUnit(request.getEnergyUnit());
+            }
+            if (request.getNutrientDisplayMode() != null) {
+                settings.setNutrientDisplayMode(request.getNutrientDisplayMode());
             }
             if (request.getLanguage() != null) {
                 settings.setLanguage(request.getLanguage());

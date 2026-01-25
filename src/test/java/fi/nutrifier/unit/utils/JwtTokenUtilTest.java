@@ -42,14 +42,14 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testGenerateToken() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
+        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
         assertNotEquals("123456789", token);
         assertTrue(token.startsWith("eyJ"));
     }
 
     @Test
     public void testValidateToken_validToken() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
+        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
         boolean valid = jwtTokenUtil.validateToken(token);
         assertTrue(valid);
     }
@@ -62,19 +62,23 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testExtractUser() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
+        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
         String extractedId = jwtTokenUtil.extractUserId(token);
         assertEquals("123456789", extractedId);
     }
 
     @Test
     public void testExtractRole() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.ROLE_USER);
+        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
         List<String> roles = jwtTokenUtil.extractRole(token);
-        assertEquals("ROLE_USER", roles.get(0));
+        assertEquals("REGULAR", roles.get(0));
 
-        String token2 = jwtTokenUtil.generateToken("123456789", Role.ROLE_ADMIN);
+        String token2 = jwtTokenUtil.generateToken("123456789", Role.PREMIUM);
         List<String> roles2 = jwtTokenUtil.extractRole(token2);
-        assertEquals("ROLE_ADMIN", roles2.get(0));
+        assertEquals("PREMIUM", roles2.get(0));
+
+        String token3 = jwtTokenUtil.generateToken("123456789", Role.ADMIN);
+        List<String> roles3 = jwtTokenUtil.extractRole(token3);
+        assertEquals("ADMIN", roles3.get(0));
     }
 }

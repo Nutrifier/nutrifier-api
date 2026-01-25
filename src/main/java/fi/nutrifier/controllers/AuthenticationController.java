@@ -13,10 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Authentication")
 @RestController
@@ -42,7 +39,7 @@ public class AuthenticationController {
             if (created.getStatusCode() == HttpStatus.CREATED) {
                 UserDto userDto = created.getBody();
                 if (userDto != null) {
-                    String token = jwtTokenUtil.generateToken(userDto.getId(), Role.ROLE_USER);
+                    String token = jwtTokenUtil.generateToken(userDto.getId(), Role.REGULAR);
                     AuthResponse authResponse = new AuthResponse(token, userDto.getId());
                     return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
                 }
@@ -68,5 +65,16 @@ public class AuthenticationController {
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @Operation(summary = "Valide authorization token")
+    @PostMapping("/validate")
+    public ResponseEntity<String> validate(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+
+        boolean isValid = jwtTokenUtil.validateToken(token);
+        return isValid
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

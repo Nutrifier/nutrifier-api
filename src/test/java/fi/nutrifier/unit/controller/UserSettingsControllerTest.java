@@ -61,14 +61,14 @@ public class UserSettingsControllerTest {
         mockMvc.perform(get("/api/users/settings")
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.language").value("en"))
-            .andExpect(jsonPath("$.weightUnit").value("kg"))
+            .andExpect(jsonPath("$.language").value("EN"))
+            .andExpect(jsonPath("$.weightUnit").value("G"))
             .andExpect(jsonPath("$.weighInReminderEnabled").value(true));
     }
 
     @Test
     public void testUpdateUsersSettings_ReturnOk() throws Exception {
-        TestObjects.settings.setLanguage("se");
+        TestObjects.settings.setLanguage("SE");
         TestObjects.user1.setSettings(TestObjects.settings);
 
         when(userSettingsService.update(eq(TestObjects.userId1), any()))
@@ -79,8 +79,8 @@ public class UserSettingsControllerTest {
                 .content(objectMapper.writeValueAsString(TestObjects.settings))
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.language").value("se"))
-            .andExpect(jsonPath("$.weightUnit").value("kg"))
+            .andExpect(jsonPath("$.language").value("SE"))
+            .andExpect(jsonPath("$.weightUnit").value("G"))
             .andExpect(jsonPath("$.weighInReminderEnabled").value(true));
     }
 }

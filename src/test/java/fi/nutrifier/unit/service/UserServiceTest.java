@@ -5,9 +5,11 @@ import fi.nutrifier.dto.AuthRequest;
 import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.entities.Role;
 import fi.nutrifier.entities.User;
+import fi.nutrifier.entities.UserSettings;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.repositories.UserRepository;
+import fi.nutrifier.repositories.UserSettingsRepository;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -45,6 +47,9 @@ public class UserServiceTest {
     @Mock
     private UserRepository repository;
 
+    @Mock
+    private UserSettingsRepository userSettingsRepository;
+
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
@@ -56,7 +61,8 @@ public class UserServiceTest {
 
     @Test
     public void testSaveUser_ReturnsUser() {
-        when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(User.class))) .thenAnswer(invocation -> invocation.getArgument(0));
+        when(userSettingsRepository.save(any(UserSettings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
 
         AuthRequest authRequest = new AuthRequest(TestObjects.user1.getEmail(), "qwerty");
 
@@ -89,13 +95,13 @@ public class UserServiceTest {
         user1.setId(UUID.randomUUID().toString());
         user1.setEmail(email);
         user1.setPassword("password");
-        user1.setRole(Role.ROLE_USER);
+        user1.setRole(Role.REGULAR);
 
         User user2 = new User();
         user2.setId(UUID.randomUUID().toString());
         user2.setEmail(email);
         user2.setPassword("password");
-        user2.setRole(Role.ROLE_USER);
+        user2.setRole(Role.REGULAR);
 
         List<User> users = List.of(user1, user2);
 

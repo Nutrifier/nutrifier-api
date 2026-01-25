@@ -8,6 +8,7 @@ import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.exceptions.FailedDecryptionException;
 import fi.nutrifier.exceptions.FailedEncryptionException;
 import fi.nutrifier.repositories.UserRepository;
+import fi.nutrifier.repositories.UserSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,18 +19,18 @@ import fi.nutrifier.utils.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Service
 public class UserService {
 
     private final UserRepository repository;
+    private final UserSettingsRepository userSettingsRepository;
 
     @Autowired
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository, UserSettingsRepository userSettingsRepository) {
         this.repository = repository;
+        this.userSettingsRepository = userSettingsRepository;
     }
 
     @Transactional
@@ -42,7 +43,7 @@ public class UserService {
             User user = new User();
             user.setEmail(encryptedEmail);
             user.setPassword(hashedPassword);
-            user.setRole(Role.ROLE_USER); // Default to regular user
+            user.setRole(Role.REGULAR); // Default to regular user
 
             // Initialize user settings
             UserSettings settings = new UserSettings();
@@ -60,6 +61,10 @@ public class UserService {
 
             User savedUser = repository.save(user);
 
+            // User id needs to be updated to settings, so we can fetch by user id
+            settings.setUserId(savedUser.getId());
+            userSettingsRepository.save(settings);
+
             UserDto userDto = new UserDto();
             String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
             userDto.setId(savedUser.getId());
@@ -68,6 +73,7 @@ public class UserService {
 
             return new ResponseEntity<>(userDto, HttpStatus.CREATED);
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

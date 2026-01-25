@@ -48,14 +48,14 @@ public class TestObjects {
 
         user1 = new UserDto();
         user1.setId(userId1);
-        user1.initialize("test@gmail.com", Role.ROLE_USER);
+        user1.initialize("test@gmail.com", Role.REGULAR);
         user2 = new UserDto();
         user2.setId(userId2);
-        user2.initialize("test2@gmail.com", Role.ROLE_USER);
+        user2.initialize("test2@gmail.com", Role.REGULAR);
 
-        foodEntry1 = new FoodEntry(UUID.randomUUID().toString(), date, LocalTime.of(9,0, 0), "BREAKFAST", userId1, UUID.randomUUID().toString(), 22.0);
-        foodEntry2 = new FoodEntry(UUID.randomUUID().toString(), date, LocalTime.of(9,0, 0), "LUNCH", userId1, UUID.randomUUID().toString(), 120.0);
-        foodEntry3 = new FoodEntry(UUID.randomUUID().toString(), date, LocalTime.of(13,0, 0), "LUNCH", userId2, UUID.randomUUID().toString(), 150.0);
+        foodEntry1 = new FoodEntry(UUID.randomUUID().toString(), date, LocalTime.of(9,0, 0), "BREAKFAST", userId1, UUID.randomUUID().toString(), null, 22.0);
+        foodEntry2 = new FoodEntry(UUID.randomUUID().toString(), date, LocalTime.of(9,0, 0), "LUNCH", userId1, UUID.randomUUID().toString(), null, 120.0);
+        foodEntry3 = new FoodEntry(UUID.randomUUID().toString(), date, LocalTime.of(13,0, 0), "LUNCH", userId2, UUID.randomUUID().toString(), null, 150.0);
 
         food1 = new Food(UUID.randomUUID().toString(), "Kanan rintafilee", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, userId1, UUID.randomUUID().toString(), "", "");
         food2 = new Food(UUID.randomUUID().toString(), "Riisi (keitetty)", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, userId1, UUID.randomUUID().toString(), "", "");

@@ -2,11 +2,8 @@ package fi.nutrifier.integration;
 
 import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.entities.Role;
-import fi.nutrifier.entities.User;
 import fi.nutrifier.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.nutrifier.unit.utils.TestObjects;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -43,7 +38,7 @@ class AdminUserControllerIntegrationTest {
     @BeforeEach
     public void setup() {
         UserDto userDto = new UserDto();
-        userDto.initialize("test@gmail.com", Role.ROLE_USER);
+        userDto.initialize("test@gmail.com", Role.REGULAR);
         testUser = userDto;
         userRepository.deleteAll();
     }
