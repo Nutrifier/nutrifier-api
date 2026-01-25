@@ -18,8 +18,9 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "logs")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Log {
+public class FoodEntry {
 
+    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)
@@ -51,6 +52,8 @@ public class Log {
 
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private String foodId;
+
+    private Integer fineliId;
 
     @Column(nullable = false)
     @NotNull

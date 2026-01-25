@@ -33,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 String jwtToken = token.substring(7); // Remove "Bearer " part
 
                 if (jwtTokenUtil.validateToken(jwtToken)) {
-                    String username = jwtTokenUtil.extractUsername(jwtToken);
+                    String username = jwtTokenUtil.extractUserId(jwtToken);
                     List<String> roles = jwtTokenUtil.extractRole(jwtToken);
 
                     List<GrantedAuthority> authorities = roles.stream()

@@ -12,7 +12,7 @@ import fi.nutrifier.entities.Food;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Foods Controller")
+@Tag(name = "Foods")
 @RestController
 @RequestMapping("/api/foods")
 public class FoodController {

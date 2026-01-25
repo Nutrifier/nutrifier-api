@@ -13,12 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Authentication Controller")
+@Tag(name = "Authentication")
 @RestController
 @RequestMapping("/api")
 public class AuthenticationController {
@@ -33,18 +30,17 @@ public class AuthenticationController {
 
     @Operation(summary = "Register to the application")
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody AuthRequest authRequest) throws JOSEException {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest authRequest) throws JOSEException {
         ResponseEntity<Boolean> response = userService.isEmailTaken(authRequest.getEmail());
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
 
-            UserDto newUser = new UserDto(null, authRequest.getEmail(), authRequest.getPassword(), Role.ROLE_USER);
-            ResponseEntity<User> created = userService.create(newUser);
+            ResponseEntity<UserDto> created = userService.create(authRequest);
 
             if (created.getStatusCode() == HttpStatus.CREATED) {
-                User user = created.getBody();
-                if (user != null) {
-                    String token = jwtTokenUtil.generateToken(authRequest.getEmail(), Role.ROLE_USER);
-                    AuthResponse authResponse = new AuthResponse(token, user.getId(), user.getEmail());
+                UserDto userDto = created.getBody();
+                if (userDto != null) {
+                    String token = jwtTokenUtil.generateToken(userDto.getId(), Role.REGULAR);
+                    AuthResponse authResponse = new AuthResponse(token, userDto.getId());
                     return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
                 }
             }
@@ -57,20 +53,28 @@ public class AuthenticationController {
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) throws JOSEException {
         ResponseEntity<User> response = userService.login(authRequest.getEmail(), authRequest.getPassword());
 
-        System.out.println("Login response: " + response);
-
         if (response.getStatusCode() == HttpStatus.OK) {
 
             User user = response.getBody();
             if (user != null) {
-                String token = jwtTokenUtil.generateToken(authRequest.getEmail(), user.getRole());
+                String token = jwtTokenUtil.generateToken(user.getId(), user.getRole());
 
-                System.out.println("Login token: " + token);
-
-                AuthResponse authResponse = new AuthResponse(token, user.getId(), user.getEmail());
+                AuthResponse authResponse = new AuthResponse(token, user.getId());
                 return new ResponseEntity<>(authResponse, HttpStatus.OK);
             }
         }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @Operation(summary = "Valide authorization token")
+    @PostMapping("/validate")
+    public ResponseEntity<String> validate(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+
+        boolean isValid = jwtTokenUtil.validateToken(token);
+        return isValid
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

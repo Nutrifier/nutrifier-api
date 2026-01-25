@@ -1,9 +1,9 @@
 package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
-import fi.nutrifier.controllers.admin.AdminLogController;
-import fi.nutrifier.entities.Log;
-import fi.nutrifier.services.LogService;
+import fi.nutrifier.controllers.admin.AdminFoodEntryController;
+import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
 import org.hamcrest.CoreMatchers;
@@ -30,21 +30,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminLogController.class)
+@WebMvcTest(AdminFoodEntryController.class)
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
-public class AdminLogControllerTest {
+public class AdminFoodEntryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private LogService service;
+    private FoodEntryService service;
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
-    private final String baseUrl = "/api/admin/logs";
+    private final String baseUrl = "/api/admin/food-entries";
 
     @BeforeEach
     public void setup() {
@@ -53,21 +53,22 @@ public class AdminLogControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void testGetAll_AsAdmin_ReturnLogs() throws Exception {
-        List<Log> logs = List.of(TestObjects.log1, TestObjects.log2);
+    public void testGetAllByUserId_AsAdmin_ReturnLogs() throws Exception {
+        List<FoodEntry> foodEntries = List.of(TestObjects.foodEntry1, TestObjects.foodEntry2);
 
         Pageable pageable = PageRequest.of(1, 10);
-        Page<Log> mockPage = new PageImpl<>(logs, pageable, logs.size());
+        Page<FoodEntry> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
 
         // Mock service layer
-        when(service.getAll(any(Integer.class), any(Integer.class)))
+        when(service.getAllByUserId(any(String.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
 
-        mockMvc.perform(get(baseUrl))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()", CoreMatchers.is(2)))
-                .andExpect(jsonPath("$.content[0].meal", CoreMatchers.is("BREAKFAST")))
-                .andExpect(jsonPath("$.content[1].meal", CoreMatchers.is("LUNCH")));
+        mockMvc.perform(get(baseUrl)
+                .param("userId", TestObjects.userId1))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()", CoreMatchers.is(2)))
+            .andExpect(jsonPath("$.content[0].meal", CoreMatchers.is("BREAKFAST")))
+            .andExpect(jsonPath("$.content[1].meal", CoreMatchers.is("LUNCH")));
     }
 
     @Test
@@ -83,13 +84,13 @@ public class AdminLogControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void testGetById_AsAdmin_ReturnOk() throws Exception {
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.log1, HttpStatus.OK));
+    public void testGetById_AsAdmin_ReturnUnauthorized() throws Exception {
+        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.log1.getAmount())))
-                .andExpect(jsonPath("$.meal", CoreMatchers.is(TestObjects.log1.getMeal())));
+                .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
+                .andExpect(jsonPath("$.meal", CoreMatchers.is(TestObjects.foodEntry1.getMeal())));
 
         verify(service, times(1)).getById(TestObjects.id);
     }
@@ -108,16 +109,23 @@ public class AdminLogControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetByUserId_AsAdmin_ReturnOk() throws Exception {
-        List<Log> logs = List.of(TestObjects.log1, TestObjects.log2);
+        List<FoodEntry> foodEntries = List.of(TestObjects.foodEntry1, TestObjects.foodEntry2);
 
-        when(service.getLogsByUserId(TestObjects.userId1)).thenReturn(new ResponseEntity<>(logs, HttpStatus.OK));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<FoodEntry> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
 
-        mockMvc.perform(get(baseUrl + "/by-user/{id}", TestObjects.userId1))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].amount").value(22.0))
-                .andExpect(jsonPath("$[1].meal").value("LUNCH"));
+        when(service.getAllByUserId(TestObjects.userId1, 0, 10))
+                .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
 
-        verify(service, times(1)).getLogsByUserId(TestObjects.userId1);
+        mockMvc.perform(get(baseUrl)
+                .param("userId", TestObjects.userId1)
+                .param("page", "0")
+                .param("size", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].amount").value(22.0))
+            .andExpect(jsonPath("$.content[1].meal").value("LUNCH"));
+
+        verify(service, times(1)).getAllByUserId(TestObjects.userId1, 0, 10);
     }
 
     @Test

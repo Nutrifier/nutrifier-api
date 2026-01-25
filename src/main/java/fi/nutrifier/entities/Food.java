@@ -21,6 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Food {
 
+    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
     @JdbcTypeCode(SqlTypes.VARCHAR)

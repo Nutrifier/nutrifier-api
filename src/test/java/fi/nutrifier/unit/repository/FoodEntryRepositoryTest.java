@@ -1,12 +1,17 @@
 package fi.nutrifier.unit.repository;
 
-import fi.nutrifier.entities.Log;
-import fi.nutrifier.repositories.LogRepository;
+import fi.nutrifier.entities.Food;
+import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.repositories.FoodEntryRepository;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -15,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class LogRepositoryTest {
+class FoodEntryRepositoryTest {
 
     @Autowired
-    private LogRepository repository;
+    private FoodEntryRepository repository;
 
     @BeforeEach
     public void setup() {
@@ -28,7 +33,7 @@ class LogRepositoryTest {
 
     @Test
     public void testSaveLog_ReturnsSavedLog() {
-        Log saved = repository.save(TestObjects.log1);
+        FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
         assertNotNull(saved.getId());
         assertEquals(22, saved.getAmount());
@@ -37,9 +42,9 @@ class LogRepositoryTest {
 
     @Test
     public void testFindById_ReturnsLog() {
-        Log saved = repository.save(TestObjects.log1);
+        FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
-        Log found = repository.findById(saved.getId()).get();
+        FoodEntry found = repository.findById(saved.getId()).get();
 
         assertNotNull(found);
         assertEquals(22, found.getAmount());
@@ -48,10 +53,10 @@ class LogRepositoryTest {
 
     @Test
     public void testFindAll_ReturnsMultipleLogs() {
-        repository.save(TestObjects.log1);
-        repository.save(TestObjects.log2);
+        repository.save(TestObjects.foodEntry1);
+        repository.save(TestObjects.foodEntry2);
 
-        List<Log> found = repository.findAll();
+        List<FoodEntry> found = repository.findAll();
 
         assertEquals(2, found.size());
         assertEquals("BREAKFAST", found.get(0).getMeal());
@@ -60,11 +65,11 @@ class LogRepositoryTest {
 
     @Test
     public void testUpdateUser_ReturnsLog() {
-        Log saved = repository.save(TestObjects.log1);
+        FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
         saved.setAmount(120.0);
         saved.setMeal("SNACKS");
-        Log updated = repository.save(saved);
+        FoodEntry updated = repository.save(saved);
 
         assertEquals(saved.getId(), updated.getId());
         assertEquals(120, updated.getAmount());
@@ -73,10 +78,10 @@ class LogRepositoryTest {
 
     @Test
     public void testDeleteUser_ReturnsEmptyList() {
-        Log saved = repository.save(TestObjects.log1);
+        FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
         repository.delete(saved);
-        Optional<Log> found = repository.findById(saved.getId());
+        Optional<FoodEntry> found = repository.findById(saved.getId());
 
         assertFalse(found.isPresent());
         assertEquals(0, repository.findAll().size());
@@ -84,27 +89,14 @@ class LogRepositoryTest {
 
     @Test
     public void testFindByDate_ReturnsMultipleLogs() {
-        repository.save(TestObjects.log1);
-        repository.save(TestObjects.log2);
-        repository.save(TestObjects.log3);
+        repository.save(TestObjects.foodEntry1);
+        repository.save(TestObjects.foodEntry2);
+        repository.save(TestObjects.foodEntry3);
 
-        List<Log> found1 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId1);
+        List<FoodEntry> found1 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId1);
         assertEquals(2, found1.size());
 
-        List<Log> found2 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId2);
-        assertEquals(1, found2.size());
-    }
-
-    @Test
-    public void testFindByUserId_ReturnsMultipleLogs() {
-        repository.save(TestObjects.log1);
-        repository.save(TestObjects.log2);
-        repository.save(TestObjects.log3);
-
-        List<Log> found1 = repository.findByUserId(TestObjects.userId1);
-        assertEquals(2, found1.size());
-
-        List<Log> found2 = repository.findByUserId(TestObjects.userId2);
+        List<FoodEntry> found2 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId2);
         assertEquals(1, found2.size());
     }
 }

@@ -14,9 +14,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.UUID;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -38,7 +37,9 @@ class AdminUserControllerIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        testUser = new UserDto(UUID.randomUUID().toString(), "test@gmail.com", "pA55word!", Role.ROLE_USER);
+        UserDto userDto = new UserDto();
+        userDto.initialize("test@gmail.com", Role.REGULAR);
+        testUser = userDto;
         userRepository.deleteAll();
     }
 

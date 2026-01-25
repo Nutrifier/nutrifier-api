@@ -1,47 +1,79 @@
 package fi.nutrifier.services;
 
+import fi.nutrifier.dto.AuthRequest;
 import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.entities.*;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.exceptions.FailedDecryptionException;
 import fi.nutrifier.exceptions.FailedEncryptionException;
 import fi.nutrifier.repositories.UserRepository;
+import fi.nutrifier.repositories.UserSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import fi.nutrifier.entities.User;
 import fi.nutrifier.utils.SecurityUtil;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 public class UserService {
 
     private final UserRepository repository;
+    private final UserSettingsRepository userSettingsRepository;
 
     @Autowired
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository, UserSettingsRepository userSettingsRepository) {
         this.repository = repository;
+        this.userSettingsRepository = userSettingsRepository;
     }
 
-    public ResponseEntity<User> create(UserDto userDto) {
+    @Transactional
+    public ResponseEntity<UserDto> create(AuthRequest authRequest) {
         try {
-            String encryptedEmail = SecurityUtil.encrypt(userDto.getEmail());
-            String hashedPassword = SecurityUtil.hashPassword(userDto.getPassword());
+            String encryptedEmail = SecurityUtil.encrypt(authRequest.getEmail());
 
-            User user = new User(null, encryptedEmail, hashedPassword, Role.ROLE_USER);
-            User data = repository.save(user);
+            String hashedPassword = SecurityUtil.hashPassword(authRequest.getPassword());
 
-            // Plain text email for the return object
-            data.setEmail(userDto.getEmail());
-            data.setPassword(null);
+            User user = new User();
+            user.setEmail(encryptedEmail);
+            user.setPassword(hashedPassword);
+            user.setRole(Role.REGULAR); // Default to regular user
 
-            return new ResponseEntity<>(data, HttpStatus.CREATED);
+            // Initialize user settings
+            UserSettings settings = new UserSettings();
+            settings.initialize();
+            settings.setUser(user);
+            user.setSettings(settings);
+
+            // Initialize user goals
+            UserGoals goals = new UserGoals();
+            goals.setUser(user);
+            goals.setId(UUID.randomUUID().toString());
+            goals.setCreatedAt(LocalDateTime.now());
+            goals.setUpdatedAt(LocalDateTime.now());
+            user.setGoals(goals);
+
+            User savedUser = repository.save(user);
+
+            // User id needs to be updated to settings, so we can fetch by user id
+            settings.setUserId(savedUser.getId());
+            userSettingsRepository.save(settings);
+
+            UserDto userDto = new UserDto();
+            String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
+            userDto.setId(savedUser.getId());
+            userDto.setEmail(decryptedEmail);
+            userDto.setRole(savedUser.getRole());
+
+            return new ResponseEntity<>(userDto, HttpStatus.CREATED);
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -71,6 +103,7 @@ public class UserService {
     }
 
     public ResponseEntity<User> getById(String id) {
+        System.out.println("getting user by id");
         try {
             User user = repository.findById(id).orElse(null);
 

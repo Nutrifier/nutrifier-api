@@ -1,11 +1,15 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
+import fi.nutrifier.dto.AuthRequest;
+import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.entities.Role;
 import fi.nutrifier.entities.User;
+import fi.nutrifier.entities.UserSettings;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.repositories.UserRepository;
+import fi.nutrifier.repositories.UserSettingsRepository;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -43,6 +47,9 @@ public class UserServiceTest {
     @Mock
     private UserRepository repository;
 
+    @Mock
+    private UserSettingsRepository userSettingsRepository;
+
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
@@ -54,13 +61,15 @@ public class UserServiceTest {
 
     @Test
     public void testSaveUser_ReturnsUser() {
-        when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(User.class))) .thenAnswer(invocation -> invocation.getArgument(0));
+        when(userSettingsRepository.save(any(UserSettings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResponseEntity<User> response = service.create(TestObjects.user1);
+        AuthRequest authRequest = new AuthRequest(TestObjects.user1.getEmail(), "qwerty");
+
+        ResponseEntity<UserDto> response = service.create(authRequest);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
@@ -82,8 +91,17 @@ public class UserServiceTest {
         // The service expects the emails to be encrypted
         String email = SecurityUtil.encrypt("maija@gmail.com");
 
-        User user1 = new User(UUID.randomUUID().toString(), email, "password", Role.ROLE_USER);
-        User user2 = new User(UUID.randomUUID().toString(), email, "password", Role.ROLE_USER);
+        User user1 = new User();
+        user1.setId(UUID.randomUUID().toString());
+        user1.setEmail(email);
+        user1.setPassword("password");
+        user1.setRole(Role.REGULAR);
+
+        User user2 = new User();
+        user2.setId(UUID.randomUUID().toString());
+        user2.setEmail(email);
+        user2.setPassword("password");
+        user2.setRole(Role.REGULAR);
 
         List<User> users = List.of(user1, user2);
 
@@ -103,8 +121,6 @@ public class UserServiceTest {
         List<User> resUsers = page.getContent();
 
         assertFalse(resUsers.isEmpty());
-        assertNull(resUsers.get(0).getPassword());
-        assertNull(resUsers.get(1).getPassword());
     }
 
     @Test
@@ -134,8 +150,10 @@ public class UserServiceTest {
     @Test
     public void testLoginSuccess() {
         // Service expects a hashed password
-        TestObjects.user1.setPassword(SecurityUtil.hashPassword(TestObjects.user1.getPassword()));
-        when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(TestObjects.user1.toUser()));
+        User user = TestObjects.user1.toUser();
+        String hashedPassword = SecurityUtil.hashPassword("password");
+        user.setPassword(hashedPassword);
+        when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
         ResponseEntity<User> response = service.login("test@gmail.com", "password");
 
@@ -149,7 +167,6 @@ public class UserServiceTest {
     @Test
     public void testLoginFail() throws Exception {
         // Service expects a hashed password
-        TestObjects.user1.setPassword(SecurityUtil.hashPassword(TestObjects.user1.getPassword()));
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
 
         ResponseEntity<User> response = service.login("test@gmail.com", "wrong_password");

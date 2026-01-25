@@ -99,18 +99,16 @@ class FoodControllerTest {
 
     @ParameterizedTest
     @WithMockUser
-    @ValueSource(strings = { "name", "calories", "createdBy", "servingSize" })
-    @Disabled("Test is unstable, needs to be fixed")
+    @ValueSource(strings = { "name", "calories", "servingSize" })
     void testCreateFood_InvalidFields_ReturnBadRequest(String missingField) throws Exception {
+        when(service.create(any(Food.class))).thenReturn(new ResponseEntity<>(TestObjects.food1, HttpStatus.CREATED));
+
         switch (missingField) {
             case "name":
                 TestObjects.food1.setName(null);
                 break;
             case "calories":
                 TestObjects.food1.setCalories(null);
-                break;
-            case "createdBy":
-                TestObjects.food1.setCreatedBy(null);
                 break;
             case "servingSize":
                 TestObjects.food1.setServingSize(0);

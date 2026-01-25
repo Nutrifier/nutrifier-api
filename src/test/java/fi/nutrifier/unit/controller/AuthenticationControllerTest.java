@@ -59,7 +59,7 @@ public class AuthenticationControllerTest {
         TestObjects.user1.setId(id); // Mock id generation
 
         when(service.isEmailTaken(anyString())).thenReturn(new ResponseEntity<>(false, HttpStatus.NOT_FOUND));
-        when(service.create(any(UserDto.class))).thenReturn(new ResponseEntity<>(TestObjects.user1.toUser(), HttpStatus.CREATED));
+        when(service.create(any(AuthRequest.class))).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.CREATED));
         when(jwtTokenUtil.generateToken(anyString(), any(Role.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post("/api/register")
@@ -67,8 +67,7 @@ public class AuthenticationControllerTest {
                 .content(objectMapper.writeValueAsString(TestObjects.user1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token", CoreMatchers.is("mock-jwt-token")))
-                .andExpect(jsonPath("$.userId", CoreMatchers.is(id.toString())))
-                .andExpect(jsonPath("$.userEmail", CoreMatchers.is("test@gmail.com")));
+                .andExpect(jsonPath("$.userId", CoreMatchers.is(id)));
     }
 
     @Test
@@ -84,7 +83,6 @@ public class AuthenticationControllerTest {
                 .content(objectMapper.writeValueAsString(new AuthRequest("test@gmail.com", "password"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", CoreMatchers.is("mock-jwt-token")))
-                .andExpect(jsonPath("$.userId", CoreMatchers.is(id.toString())))
-                .andExpect(jsonPath("$.userEmail", CoreMatchers.is("test@gmail.com")));
+                .andExpect(jsonPath("$.userId", CoreMatchers.is(id)));
     }
 }

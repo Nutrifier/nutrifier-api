@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Admin Foods Controller")
+@Tag(name = "Foods (Admin)")
 @RestController
 @RequestMapping("/api/admin/foods")
 public class AdminFoodController {
