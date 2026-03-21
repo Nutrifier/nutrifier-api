@@ -1,13 +1,19 @@
 package fi.nutrifier.controllers.admin;
 
+import fi.nutrifier.dto.FoodReportResponse;
+import fi.nutrifier.dto.FoodReportReviewRequest;
+import fi.nutrifier.dto.FoodRequest;
+import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.entities.Food;
 import fi.nutrifier.services.FoodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -26,37 +32,41 @@ public class AdminFoodController {
     @Operation(summary = "Update food")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @PatchMapping("/{id}")
-    public ResponseEntity<Food> update(@PathVariable("id") String id, @Valid @RequestBody Food updated) {
-        ResponseEntity<Food> response = service.getById(id);
-
-        if (!response.hasBody()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        Food existingFood = response.getBody();
-
-        if (existingFood == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        existingFood.setName(updated.getName());
-        existingFood.setCalories(updated.getCalories());
-        existingFood.setBarcode(updated.getBarcode());
-        existingFood.setServingSize(updated.getServingSize());
-        existingFood.setCarbs(updated.getCarbs());
-        existingFood.setProtein(updated.getProtein());
-        existingFood.setFat(updated.getFat());
-        existingFood.setEditedBy(updated.getEditedBy());
-        existingFood.setEdited(updated.getEdited());
-        // NOTE: Not updating createdBy and created
-
-        return service.update(id, existingFood);
+    public ResponseEntity<FoodResponse> update(
+            Authentication authentication,
+            @PathVariable("id") String id,
+            @Valid @RequestBody FoodRequest updated
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.update(UUID.fromString(id), userId, updated);
     }
 
     @Operation(summary = "Delete food")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Food> delete(@PathVariable("id") String id) {
-        return service.delete(id);
+    public ResponseEntity<FoodResponse> delete(@PathVariable("id") String id) {
+        return service.delete(UUID.fromString(id));
+    }
+
+    @Operation(summary = "List all food reports")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
+    @GetMapping("/report")
+    public ResponseEntity<Page<FoodReportResponse>> getAllReports(
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        return service.getAllReports(page, size);
+    }
+
+    @Operation(summary = "Review a food report")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
+    @PatchMapping("/report/{id}")
+    public ResponseEntity<String> reviewReport(
+            Authentication authentication,
+            @PathVariable("id") String id,
+            @Valid @RequestBody FoodReportReviewRequest request
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.reviewReport(UUID.fromString(id), userId, request);
     }
 }

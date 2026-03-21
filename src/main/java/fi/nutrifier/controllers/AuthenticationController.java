@@ -1,9 +1,10 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.AuthRequest;
-import fi.nutrifier.dto.AuthResponse;
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.dto.LoginRequest;
+import fi.nutrifier.dto.LoginResponse;
+import fi.nutrifier.dto.RegisterRequest;
+import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.enums.Role;
 import fi.nutrifier.entities.User;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -30,18 +31,31 @@ public class AuthenticationController {
 
     @Operation(summary = "Register to the application")
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest authRequest) throws JOSEException {
-        ResponseEntity<Boolean> response = userService.isEmailTaken(authRequest.getEmail());
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest registerRequest) throws JOSEException {
+        ResponseEntity<Boolean> response = userService.isEmailTaken(registerRequest.getEmail());
+
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+            System.out.println("Authentication controller 1");
+            ResponseEntity<UserResponse> created = userService.create(registerRequest);
 
-            ResponseEntity<UserDto> created = userService.create(authRequest);
-
+            System.out.println("Authentication controller 2" + created);
             if (created.getStatusCode() == HttpStatus.CREATED) {
-                UserDto userDto = created.getBody();
-                if (userDto != null) {
-                    String token = jwtTokenUtil.generateToken(userDto.getId(), Role.REGULAR);
-                    AuthResponse authResponse = new AuthResponse(token, userDto.getId());
-                    return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
+                UserResponse userResponse = created.getBody();
+
+                System.out.println("Authentication controller 3" + userResponse);
+
+                if (userResponse != null) {
+                    System.out.println("Authentication controller 4");
+
+                    String token = jwtTokenUtil.generateToken(userResponse.getId(), Role.REGULAR);
+
+                    System.out.println("Authentication controller 5" + token);
+
+                    LoginResponse loginResponse = new LoginResponse(token, userResponse.getId());
+
+                    System.out.println("Authentication controller 6" + loginResponse);
+
+                    return new ResponseEntity<>(loginResponse, HttpStatus.CREATED);
                 }
             }
         }
@@ -50,8 +64,8 @@ public class AuthenticationController {
 
     @Operation(summary = "Login to the application")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) throws JOSEException {
-        ResponseEntity<User> response = userService.login(authRequest.getEmail(), authRequest.getPassword());
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws JOSEException {
+        ResponseEntity<User> response = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (response.getStatusCode() == HttpStatus.OK) {
 
@@ -59,15 +73,15 @@ public class AuthenticationController {
             if (user != null) {
                 String token = jwtTokenUtil.generateToken(user.getId(), user.getRole());
 
-                AuthResponse authResponse = new AuthResponse(token, user.getId());
-                return new ResponseEntity<>(authResponse, HttpStatus.OK);
+                LoginResponse loginResponse = new LoginResponse(token, user.getId());
+                return new ResponseEntity<>(loginResponse, HttpStatus.OK);
             }
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @Operation(summary = "Valide authorization token")
+    @Operation(summary = "Validate authorization token")
     @PostMapping("/validate")
     public ResponseEntity<String> validate(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");

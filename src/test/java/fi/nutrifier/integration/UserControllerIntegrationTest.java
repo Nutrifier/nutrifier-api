@@ -2,13 +2,12 @@ package fi.nutrifier.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.nutrifier.dto.AuthRequest;
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.dto.RegisterRequest;
+import fi.nutrifier.enums.ActivityLevel;
+import fi.nutrifier.enums.GoalType;
+import fi.nutrifier.enums.Sex;
 import fi.nutrifier.repositories.UserRepository;
 import fi.nutrifier.unit.utils.TestObjects;
-import org.hamcrest.CoreMatchers;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,13 +46,24 @@ class UserControllerIntegrationTest {
 
     @Test
     @WithMockUser
-    void registeration_creates_default_user_settings() throws Exception {
-        AuthRequest authRequest = new AuthRequest("test@gmail.com", "qwerty");
+    void registrationCreatesDefaultUserSettings() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest(
+                "test@gmail.com",
+                "qwerty",
+                Sex.FEMALE,
+                20,
+                170,
+                ActivityLevel.SEDENTARY,
+                GoalType.JUST_FOR_FUN,
+                50.0,
+                50.0,
+                LocalDate.now().plusYears(1)
+        );
 
         // Register user
         String responseJson = mockMvc.perform(post("/api/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(authRequest)))
+                .content(objectMapper.writeValueAsString(registerRequest)))
             .andExpect(status().isCreated())
             .andReturn()
             .getResponse()

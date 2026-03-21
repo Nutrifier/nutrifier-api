@@ -1,6 +1,7 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
+import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import fi.nutrifier.services.FoodEntryService;
@@ -52,11 +53,11 @@ public class FoodEntryServiceTest {
     public void testSaveLog_ReturnsLog() {
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        ResponseEntity<FoodEntry> response = service.create(TestObjects.userId1, TestObjects.foodEntry1);
+        ResponseEntity<FoodEntryResponse> response = service.create(TestObjects.userId1, TestObjects.foodEntry1Request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(22, response.getBody().getAmount());
-        assertEquals("BREAKFAST", response.getBody().getMeal());
+        assertEquals("BREAKFAST", response.getBody().getMealType());
     }
 
     @Test
@@ -64,11 +65,11 @@ public class FoodEntryServiceTest {
         when(repository.findByIdAndUserId(TestObjects.id, TestObjects.userId1))
                 .thenReturn(Optional.ofNullable(TestObjects.foodEntry1));
 
-        ResponseEntity<FoodEntry> response = service.getByIdAndUserId(TestObjects.id, TestObjects.userId1);
+        ResponseEntity<FoodEntryResponse> response = service.getByIdAndUserId(TestObjects.id, TestObjects.userId1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(22, response.getBody().getAmount());
-        assertEquals("BREAKFAST", response.getBody().getMeal());
+        assertEquals("BREAKFAST", response.getBody().getMealType());
     }
 
     @Test
@@ -80,7 +81,7 @@ public class FoodEntryServiceTest {
 
         when(repository.findAll(pageable)).thenReturn(mockPage);
 
-        ResponseEntity<Page<FoodEntry>> response = service.getAll(0, 10);
+        ResponseEntity<Page<FoodEntryResponse>> response = service.getAll(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().getContent().size());
@@ -91,13 +92,13 @@ public class FoodEntryServiceTest {
         when(repository.findByIdAndUserId(TestObjects.id, TestObjects.userId1)).thenReturn(Optional.of(TestObjects.foodEntry1));
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        TestObjects.foodEntry1.setMeal("LUNCH");
+        TestObjects.foodEntry1.setMealType("LUNCH");
         TestObjects.foodEntry1.setAmount(54.0);
-        ResponseEntity<FoodEntry> response = service.update(TestObjects.userId1, TestObjects.id, TestObjects.foodEntry1);
+        ResponseEntity<FoodEntryResponse> response = service.update(TestObjects.userId1, TestObjects.id, TestObjects.foodEntry1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("LUNCH", response.getBody().getMeal());
+        assertEquals("LUNCH", response.getBody().getMealType());
         assertEquals(54, response.getBody().getAmount());
     }
 
@@ -105,7 +106,7 @@ public class FoodEntryServiceTest {
     public void testDeleteUser_ReturnsNullBody() {
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<FoodEntry> response = service.delete(TestObjects.userId1, TestObjects.id);
+        ResponseEntity<FoodEntryResponse> response = service.delete(TestObjects.userId1, TestObjects.id);
 
         verify(repository, times(1)).deleteByIdAndUserId(TestObjects.id, TestObjects.userId1);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -120,7 +121,7 @@ public class FoodEntryServiceTest {
 
         when(repository.findByDateAndUserId(TestObjects.date, TestObjects.id)).thenReturn(foodEntries);
 
-        ResponseEntity<List<FoodEntry>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
+        ResponseEntity<List<FoodEntryResponse>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());

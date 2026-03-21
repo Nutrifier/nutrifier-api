@@ -2,6 +2,7 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.admin.AdminFoodController;
+import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.entities.Food;
 import fi.nutrifier.services.FoodService;
 import fi.nutrifier.unit.utils.TestObjects;
@@ -23,11 +24,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,21 +73,24 @@ class AdminFoodControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testUpdateFood_AllFields_ReturnFood() throws Exception {
-        TestObjects.food1.setName("New name");
-        TestObjects.food1.setCalories(150.0);
-        TestObjects.food1.setBarcode("1536473434");
-        TestObjects.food1.setServingSize(400);
-        TestObjects.food1.setCarbs(128.0);
-        TestObjects.food1.setProtein(24.0);
-        TestObjects.food1.setFat(45.0);
+        TestObjects.foodResponse1.setName("New name");
+        TestObjects.foodResponse1.setCalories(150.0);
+        TestObjects.foodResponse1.setBarcode("1536473434");
+        TestObjects.foodResponse1.setServingSize(400);
+        TestObjects.foodResponse1.setCarbs(128.0);
+        TestObjects.foodResponse1.setProtein(24.0);
+        TestObjects.foodResponse1.setFat(45.0);
 
         // Use eq(1L) to match the exact ID and any(Food.class) to allow any User instance.
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.food1, HttpStatus.OK));
-        when(service.update(eq(TestObjects.id), any(Food.class))).thenReturn(new ResponseEntity<>(TestObjects.food1, HttpStatus.OK));
+        when(service.getById(TestObjects.id))
+                .thenReturn(new ResponseEntity<>(TestObjects.foodResponse1, HttpStatus.OK));
+        when(service.update(eq(TestObjects.id), any(UUID.class), any(FoodRequest.class))).
+                thenReturn(new ResponseEntity<>(TestObjects.foodResponse1, HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.food1)))
+                .content(objectMapper.writeValueAsString(TestObjects.foodRequest)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", CoreMatchers.is("New name")))
                 .andExpect(jsonPath("$.calories", CoreMatchers.is(150.0)))
@@ -96,24 +103,28 @@ class AdminFoodControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void testUpdateFood_InvalidObject_ReturnsNotFound() throws Exception {
-        TestObjects.food1.setCalories(-100.0);
+    void testUpdateFood_InvalidObject_ReturnsBadRequest() throws Exception {
+        TestObjects.foodRequest.setCalories(-100.0);
 
         mockMvc.perform(patch(baseUrl + "/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.food1)))
+                .content(objectMapper.writeValueAsString(TestObjects.foodRequest)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void testUpdateFood_InvalidId_ReturnsNotFound() throws Exception {
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    void updateFood_WhenServiceReturnsNotFound_Returns404() throws Exception {
+
+        when(service.update(eq(TestObjects.id), any(), any()))
+                .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.food1)))
+                .content(objectMapper.writeValueAsString(TestObjects.foodRequest)))
                 .andExpect(status().isNotFound());
+
+        verify(service).update(eq(TestObjects.id), any(), any());
     }
 
     @Test

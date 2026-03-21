@@ -1,5 +1,7 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.FoodEntryRequest;
+import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.services.FoodEntryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Food Entries")
 @RestController
@@ -26,39 +29,42 @@ public class FoodEntryController {
     @Operation(summary = "Create a log")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PostMapping
-    public ResponseEntity<FoodEntry> create(
+    public ResponseEntity<FoodEntryResponse> create(
             Authentication authentication,
-            @Valid @RequestBody FoodEntry entity
+            @Valid @RequestBody FoodEntryRequest request
     ) {
-        String userId = authentication.getName();
-        return service.create(userId, entity);
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.create(userId, request);
     }
 
     @Operation(summary = "Update log")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PatchMapping("/{id}")
-    public ResponseEntity<FoodEntry> update(
+    public ResponseEntity<FoodEntryResponse> update(
             Authentication authentication,
             @PathVariable("id") String id,
             @Valid @RequestBody FoodEntry item
     ) {
-        String userId = authentication.getName();
-        return service.update(userId, id, item);
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.update(userId, UUID.fromString(id), item);
     }
 
     @Operation(summary = "Delete log")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @DeleteMapping("/{id}")
-    public ResponseEntity<FoodEntry> delete(Authentication authentication, @PathVariable("id") String id) {
-        String userId = authentication.getName();
-        return service.delete(userId, id);
+    public ResponseEntity<FoodEntryResponse> delete(Authentication authentication, @PathVariable("id") String id) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.delete(userId, UUID.fromString(id));
     }
 
     @Operation(summary = "Get logs by date and user id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping("/by-date")
-    public ResponseEntity<List<FoodEntry>> getLogsByDateAndUser(Authentication authentication, @RequestParam String date) {
-        String userId = authentication.getName();
+    public ResponseEntity<List<FoodEntryResponse>> getLogsByDateAndUser(
+            Authentication authentication,
+            @RequestParam String date
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
         LocalDate parsedDate = LocalDate.parse(date);
         return service.getLogsByDateAndUser(parsedDate, userId);
     }

@@ -37,15 +37,21 @@ public class JwtFilter extends OncePerRequestFilter {
                     List<String> roles = jwtTokenUtil.extractRole(jwtToken);
 
                     List<GrantedAuthority> authorities = roles.stream()
-                            .map(SimpleGrantedAuthority::new)
+                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Spring expects roles to be prefixed with "ROLE_"
                             .collect(Collectors.toList());
 
                     Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    System.out.println("JWT validated successfully. User: " + username + ", Roles: " + roles);
+                } else {
+                    System.out.println("JWT token validation failed: " + jwtToken);
                 }
+            } else {
+                System.out.println("No Authorization header present");
             }
         } catch (Exception e) {
-            filterChain.doFilter(request, response);
+            System.out.println("Error processing JWT filter: " + e);
             return;
         }
 

@@ -1,6 +1,6 @@
 package fi.nutrifier.controllers.admin;
 
-import fi.nutrifier.dto.UserDto;
+import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -27,7 +27,7 @@ public class AdminUserController {
     @Operation(summary = "Get all users")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @GetMapping
-    public ResponseEntity<Page<User>> getAll(
+    public ResponseEntity<Page<UserResponse>> getAll(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
@@ -38,20 +38,20 @@ public class AdminUserController {
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @GetMapping("/{id}")
     public ResponseEntity<User> getById(@PathVariable("id") String id) {
-        return service.getById(id);
+        return service.getById(UUID.fromString(id));
     }
 
     @Operation(summary = "Update user")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @PatchMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable("id") String id, @Valid @RequestBody UserDto item) {
-        return service.update(id, item);
+    public ResponseEntity<User> update(@PathVariable("id") String id, @Valid @RequestBody UserResponse item) {
+        return service.update(UUID.fromString(id), item);
     }
 
     @Operation(summary = "Delete user")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @DeleteMapping("/{id}")
     public ResponseEntity<User> delete(@PathVariable("id") String id) {
-        return service.delete(id);
+        return service.delete(UUID.fromString(id));
     }
 }

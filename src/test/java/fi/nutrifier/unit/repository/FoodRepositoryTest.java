@@ -7,6 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Optional;
@@ -87,11 +90,12 @@ class FoodRepositoryTest {
         repository.save(TestObjects.food2);
         repository.save(TestObjects.food3);
 
-        List<Food> found = repository.findFoodsByNameContainingIgnoreCase("kA");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Food> found = repository.findFoodsByNameContainingIgnoreCase("kA", pageable);
 
-        assertEquals(2, found.size());
-        assertEquals("Kanan rintafilee", found.get(0).getName());
-        assertEquals("Kalkkunaleike", found.get(1).getName());
+        assertEquals(2, found.getContent().size());
+        assertEquals("Kanan rintafilee", found.getContent().getFirst().getName());
+        assertEquals("Kalkkunaleike", found.getContent().get(1).getName());
     }
 
     @Test
@@ -100,8 +104,9 @@ class FoodRepositoryTest {
         repository.save(TestObjects.food2);
         repository.save(TestObjects.food3);
 
-        List<Food> found = repository.findFoodsByNameContainingIgnoreCase("mai");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Food> found = repository.findFoodsByNameContainingIgnoreCase("mai", pageable);
 
-        assertEquals(0, found.size());
+        assertEquals(0, found.getContent().size());
     }
 }

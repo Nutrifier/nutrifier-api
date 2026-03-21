@@ -1,14 +1,14 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.AuthRequest;
-import fi.nutrifier.dto.UserDto;
+import fi.nutrifier.dto.RegisterRequest;
+import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.entities.*;
+import fi.nutrifier.enums.Role;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.exceptions.FailedDecryptionException;
 import fi.nutrifier.exceptions.FailedEncryptionException;
-import fi.nutrifier.repositories.UserRepository;
-import fi.nutrifier.repositories.UserSettingsRepository;
+import fi.nutrifier.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +19,8 @@ import fi.nutrifier.utils.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,70 +28,124 @@ public class UserService {
 
     private final UserRepository repository;
     private final UserSettingsRepository userSettingsRepository;
+    private final ProfileRepository profileRepository;
+    private final GoalsRepository goalsRepository;
+    private final WeightRepository weightRepository;
 
     @Autowired
-    public UserService(UserRepository repository, UserSettingsRepository userSettingsRepository) {
+    public UserService(
+            UserRepository repository,
+            UserSettingsRepository userSettingsRepository,
+            ProfileRepository profileRepository,
+            GoalsRepository goalsRepository,
+            WeightRepository weightRepository
+    ) {
         this.repository = repository;
         this.userSettingsRepository = userSettingsRepository;
+        this.profileRepository = profileRepository;
+        this.goalsRepository = goalsRepository;
+        this.weightRepository = weightRepository;
     }
 
     @Transactional
-    public ResponseEntity<UserDto> create(AuthRequest authRequest) {
+    public ResponseEntity<UserResponse> create(RegisterRequest registerRequest) {
         try {
-            String encryptedEmail = SecurityUtil.encrypt(authRequest.getEmail());
-
-            String hashedPassword = SecurityUtil.hashPassword(authRequest.getPassword());
+            String encryptedEmail = SecurityUtil.encrypt(registerRequest.getEmail());
+            String hashedPassword = SecurityUtil.hashPassword(registerRequest.getPassword());
 
             User user = new User();
             user.setEmail(encryptedEmail);
             user.setPassword(hashedPassword);
             user.setRole(Role.REGULAR); // Default to regular user
-
-            // Initialize user settings
-            UserSettings settings = new UserSettings();
-            settings.initialize();
-            settings.setUser(user);
-            user.setSettings(settings);
-
-            // Initialize user goals
-            UserGoals goals = new UserGoals();
-            goals.setUser(user);
-            goals.setId(UUID.randomUUID().toString());
-            goals.setCreatedAt(LocalDateTime.now());
-            goals.setUpdatedAt(LocalDateTime.now());
-            user.setGoals(goals);
-
             User savedUser = repository.save(user);
 
-            // User id needs to be updated to settings, so we can fetch by user id
-            settings.setUserId(savedUser.getId());
+            System.out.println("1 user saved" + savedUser);
+
+            // Initialize user settings
+            Settings settings = new Settings(
+                    savedUser.getId(),
+                    "G",
+                    "G",
+                    "KCAL",
+                    "FULL_CIRCLE",
+                    "EN",
+                    3,
+                    "STANDARD",
+                    1,
+                    true,
+                    true,
+                    true,
+                    true,
+                    LocalDateTime.now()
+            );
             userSettingsRepository.save(settings);
 
-            UserDto userDto = new UserDto();
-            String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
-            userDto.setId(savedUser.getId());
-            userDto.setEmail(decryptedEmail);
-            userDto.setRole(savedUser.getRole());
+            System.out.println("2 settings saved" + settings);
 
-            return new ResponseEntity<>(userDto, HttpStatus.CREATED);
+            // Initialize user goals
+            Goals goals = new Goals();
+            goals.setUserId(savedUser.getId());
+            goals.setGoalType(registerRequest.getGoalType());
+            goals.setTargetWeight(registerRequest.getTargetWeight());
+            goals.setTargetDate(registerRequest.getTargetDate());
+            goals.setCreatedAt(LocalDateTime.now());
+            goals.setUpdatedAt(LocalDateTime.now());
+            goalsRepository.save(goals);
+
+            System.out.println("3 goals saved" + goals);
+
+            // Initialize weight
+            WeightEntry firstWeightEntry = new WeightEntry();
+            firstWeightEntry.setUser(savedUser);
+            firstWeightEntry.setDate(LocalDateTime.now());
+            firstWeightEntry.setWeight(registerRequest.getCurrentWeight());
+            weightRepository.save(firstWeightEntry);
+
+            System.out.println("4 weight saved" + firstWeightEntry);
+
+            // Initialize profile
+            UserProfile profile = new UserProfile();
+            profile.setUserId(savedUser.getId());
+            profile.setSex(registerRequest.getSex());
+            profile.setAge(registerRequest.getAge());
+            profile.setHeight(registerRequest.getHeight());
+            profile.setActivityLevel(registerRequest.getActivityLevel());
+            profile.setUpdatedAt(LocalDateTime.now());
+            profileRepository.save(profile);
+
+            System.out.println("5 profile saved" + profile);
+
+            UserResponse userResponse = new UserResponse();
+            String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
+            userResponse.setId(savedUser.getId());
+            userResponse.setEmail(decryptedEmail);
+            userResponse.setRole(savedUser.getRole());
+
+            System.out.println("6 response generated" + userResponse);
+
+            return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
         } catch (Exception e) {
-            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<Page<User>> getAll(Integer page, Integer size) {
+    public ResponseEntity<Page<UserResponse>> getAll(Integer page, Integer size) {
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<User> data = repository.findAll(pageRequest);
 
             // Decrypting user data
-            Page<User> decryptedUsers = data.map(user -> {
+            Page<UserResponse> decryptedUsers = data.map(user -> {
                 try {
                     String decryptedEmail = SecurityUtil.decrypt(user.getEmail());
                     user.setEmail(decryptedEmail);
                     user.setPassword(null);
-                    return user;
+
+                    return new UserResponse(
+                            user.getId(),
+                            user.getEmail(),
+                            user.getRole()
+                    );
                 } catch (FailedCryptionException | EncryptionKeyException e) {
                     return null;
                 }
@@ -102,8 +158,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<User> getById(String id) {
-        System.out.println("getting user by id");
+    public ResponseEntity<User> getById(UUID id) {
         try {
             User user = repository.findById(id).orElse(null);
 
@@ -114,22 +169,24 @@ public class UserService {
                 user.setPassword(null);
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } catch (FailedDecryptionException e) {
+                System.out.println("here: " + e.getMessage());
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<User> update(String id, UserDto userDto) {
+    public ResponseEntity<User> update(UUID id, UserResponse userResponse) {
         try {
             User existingUser = repository.findById(id).orElse(null);
 
             if (existingUser == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
             try {
-                userDto.setEmail(SecurityUtil.encrypt(userDto.getEmail()));
-                User data = repository.save(userDto.toUser());
+                userResponse.setEmail(SecurityUtil.encrypt(userResponse.getEmail()));
+                User data = repository.save(userResponse.toUser());
                 data.setPassword(null);
                 return new ResponseEntity<>(data, HttpStatus.OK);
             } catch (FailedEncryptionException e) {
@@ -155,11 +212,12 @@ public class UserService {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
+            System.out.println("login: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<User> delete(String id) {
+    public ResponseEntity<User> delete(UUID id) {
         try {
             repository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);

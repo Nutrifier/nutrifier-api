@@ -15,23 +15,15 @@ import org.hibernate.type.SqlTypes;
 
 @Entity
 @Data
-@Table(name = "logs")
+@Table(name = "food_entries")
 @NoArgsConstructor
 @AllArgsConstructor
 public class FoodEntry {
 
-    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    @Column(name = "id", columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    private String id;
-
-    @PrePersist
-    public void prePersist() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID().toString();
-        }
-    }
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "CHAR(36)")
+    private UUID id; // Id formed inside mapper
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(nullable = false)
@@ -45,13 +37,13 @@ public class FoodEntry {
 
     @Column(nullable = false)
     @NotNull
-    private String meal;
+    private String mealType;
 
     @Column(columnDefinition = "CHAR(36)", nullable = false)
-    private String userId;
+    private UUID userId;
 
     @Column(columnDefinition = "CHAR(36)", nullable = false)
-    private String foodId;
+    private UUID foodId;
 
     private Integer fineliId;
 

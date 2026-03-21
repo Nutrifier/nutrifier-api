@@ -1,27 +1,13 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.AuthRequest;
-import fi.nutrifier.dto.UserDto;
 import fi.nutrifier.dto.UserSettingsUpdateRequest;
-import fi.nutrifier.entities.Role;
-import fi.nutrifier.entities.User;
-import fi.nutrifier.entities.UserGoals;
-import fi.nutrifier.entities.UserSettings;
-import fi.nutrifier.exceptions.EncryptionKeyException;
-import fi.nutrifier.exceptions.FailedCryptionException;
-import fi.nutrifier.exceptions.FailedDecryptionException;
-import fi.nutrifier.exceptions.FailedEncryptionException;
+import fi.nutrifier.entities.Settings;
 import fi.nutrifier.repositories.UserRepository;
 import fi.nutrifier.repositories.UserSettingsRepository;
-import fi.nutrifier.utils.SecurityUtil;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -38,9 +24,9 @@ public class UserSettingsService {
         this.settingsRepository = settingsRepository;
     }
 
-    public ResponseEntity<UserSettings> get(String userId) {
+    public ResponseEntity<Settings> get(UUID userId) {
         try {
-            UserSettings settings = settingsRepository.findByUserId(userId).orElse(null);
+            Settings settings = settingsRepository.findByUserId(userId).orElse(null);
 
             if (settings == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -51,10 +37,10 @@ public class UserSettingsService {
         }
     }
 
-    public ResponseEntity<UserSettings> update(String userId, UserSettingsUpdateRequest request) {
+    public ResponseEntity<Settings> update(UUID userId, UserSettingsUpdateRequest request) {
         try {
             System.out.println("Updating settings userId: " + userId + " request: " + request);
-            UserSettings settings = settingsRepository.findByUserId(userId).orElse(null);
+            Settings settings = settingsRepository.findByUserId(userId).orElse(null);
 
             System.out.println("Previous settings: " + settings);
 
@@ -99,7 +85,7 @@ public class UserSettingsService {
             }
 
             settings.setUpdatedAt(LocalDateTime.now());
-            UserSettings updatedSettings = settingsRepository.save(settings);
+            Settings updatedSettings = settingsRepository.save(settings);
 
             return ResponseEntity.ok(updatedSettings);
 

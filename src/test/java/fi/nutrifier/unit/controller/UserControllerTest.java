@@ -44,13 +44,11 @@ public class UserControllerTest {
 
     @Test
     public void testGetUser_ReturnOk() throws Exception {
-        TestObjects.user1.setSettings(TestObjects.settings);
-
         when(userService.getById(eq(TestObjects.userId1)))
                 .thenReturn(ResponseEntity.ok(TestObjects.user1.toUser()));
 
         mockMvc.perform(get("/api/users")
-                .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1))))
+                .with(jwt().jwt(jwt -> jwt.subject(TestObjects.userId1.toString()))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(TestObjects.userId1))
             .andExpect(jsonPath("$.email").value("test@gmail.com"))

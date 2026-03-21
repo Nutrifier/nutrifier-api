@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.enums.FoodStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import lombok.Data;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -21,23 +23,17 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Food {
 
-    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    @Column(name = "id", columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    private String id;
-
-    @PrePersist
-    public void prePersist() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID().toString();
-        }
-    }
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "CHAR(36)")
+    private UUID id; // Generating id in the mapper
 
     @Column(nullable = false)
     @NotBlank
     private String name;
 
+    private String brand;
+    private String category; // TODO: Enumerate
     private String barcode;
 
     @Column(nullable = false)
@@ -58,17 +54,22 @@ public class Food {
     @Min(value = 0)
     private Double fat;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
-    private String createdBy;
+    private boolean verified;
+
+    @Enumerated(EnumType.STRING)
+    private FoodStatus status;
 
     @Column(columnDefinition = "CHAR(36)", nullable = false)
-    private String editedBy;
+    private UUID createdBy;
+
+    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    private UUID updatedBy;
 
     @CreationTimestamp
     @Column(nullable = false)
-    private String created;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(nullable = false)
-    private String edited;
+    private LocalDateTime updatedAt;
 }

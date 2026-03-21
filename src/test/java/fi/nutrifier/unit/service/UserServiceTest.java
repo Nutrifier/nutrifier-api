@@ -1,11 +1,14 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
-import fi.nutrifier.dto.AuthRequest;
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.dto.RegisterRequest;
+import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.enums.ActivityLevel;
+import fi.nutrifier.enums.GoalType;
+import fi.nutrifier.enums.Role;
 import fi.nutrifier.entities.User;
-import fi.nutrifier.entities.UserSettings;
+import fi.nutrifier.entities.Settings;
+import fi.nutrifier.enums.Sex;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.repositories.UserRepository;
@@ -29,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,11 +66,22 @@ public class UserServiceTest {
     @Test
     public void testSaveUser_ReturnsUser() {
         when(repository.save(any(User.class))) .thenAnswer(invocation -> invocation.getArgument(0));
-        when(userSettingsRepository.save(any(UserSettings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
+        when(userSettingsRepository.save(any(Settings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
 
-        AuthRequest authRequest = new AuthRequest(TestObjects.user1.getEmail(), "qwerty");
+        RegisterRequest registerRequest = new RegisterRequest(
+                TestObjects.user1.getEmail(),
+                "qwerty",
+                Sex.FEMALE,
+                20,
+                170,
+                ActivityLevel.SEDENTARY,
+                GoalType.JUST_FOR_FUN,
+                50.0,
+                50.0,
+                LocalDate.now()
+        );
 
-        ResponseEntity<UserDto> response = service.create(authRequest);
+        ResponseEntity<UserResponse> response = service.create(registerRequest);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("test@gmail.com", response.getBody().getEmail());
@@ -92,13 +107,13 @@ public class UserServiceTest {
         String email = SecurityUtil.encrypt("maija@gmail.com");
 
         User user1 = new User();
-        user1.setId(UUID.randomUUID().toString());
+        user1.setId(UUID.randomUUID());
         user1.setEmail(email);
         user1.setPassword("password");
         user1.setRole(Role.REGULAR);
 
         User user2 = new User();
-        user2.setId(UUID.randomUUID().toString());
+        user2.setId(UUID.randomUUID());
         user2.setEmail(email);
         user2.setPassword("password");
         user2.setRole(Role.REGULAR);
@@ -110,15 +125,15 @@ public class UserServiceTest {
 
         when(repository.findAll(pageable)).thenReturn(mockPage);
 
-        ResponseEntity<Page<User>> response = service.getAll(0, 10);
+        ResponseEntity<Page<UserResponse>> response = service.getAll(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        Page<User> page = response.getBody();
+        Page<UserResponse> page = response.getBody();
         assertNotNull(page);
         assertEquals(2, page.getTotalElements());
 
-        List<User> resUsers = page.getContent();
+        List<UserResponse> resUsers = page.getContent();
 
         assertFalse(resUsers.isEmpty());
     }

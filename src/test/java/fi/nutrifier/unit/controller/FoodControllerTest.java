@@ -2,7 +2,8 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.FoodController;
-import fi.nutrifier.entities.Food;
+import fi.nutrifier.dto.FoodRequest;
+import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.services.FoodService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -10,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -66,7 +67,8 @@ class FoodControllerTest {
     void testCreateFood_ReturnCreated() throws Exception {
         // Use any(Food.class) because the User instance created during JSON deserialization
         // won't match the exact instance in the test setup.
-        when(service.create(any(Food.class))).thenReturn(new ResponseEntity<>(TestObjects.food1, HttpStatus.CREATED));
+        when(service.create(any(FoodRequest.class), any(UUID.class)))
+                .thenReturn(new ResponseEntity<>(TestObjects.foodResponse1, HttpStatus.CREATED));
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,12 +81,13 @@ class FoodControllerTest {
     @Test
     @WithMockUser
     void testGetAll_ReturnsFoods() throws Exception {
-        List<Food> foods = Arrays.asList(TestObjects.food1, TestObjects.food2);
+        List<FoodResponse> foods = Arrays.asList(TestObjects.foodResponse1, TestObjects.foodResponse2);
         Pageable pageable = PageRequest.of(1, 10);
-        Page<Food> mockPage = new PageImpl<>(foods, pageable, foods.size());
+        Page<FoodResponse> mockPage = new PageImpl<>(foods, pageable, foods.size());
 
         // Mock service layer
-        when(service.getAll(any(Integer.class), any(Integer.class))).thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
+        when(service.getAll(any(Integer.class), any(Integer.class)))
+                .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
 
         // Act and Assert
         mockMvc.perform(get(baseUrl)
@@ -101,23 +104,24 @@ class FoodControllerTest {
     @WithMockUser
     @ValueSource(strings = { "name", "calories", "servingSize" })
     void testCreateFood_InvalidFields_ReturnBadRequest(String missingField) throws Exception {
-        when(service.create(any(Food.class))).thenReturn(new ResponseEntity<>(TestObjects.food1, HttpStatus.CREATED));
+        when(service.create(any(FoodRequest.class), any(UUID.class)))
+                .thenReturn(new ResponseEntity<>(TestObjects.foodResponse1, HttpStatus.CREATED));
 
         switch (missingField) {
             case "name":
-                TestObjects.food1.setName(null);
+                TestObjects.foodRequest.setName(null);
                 break;
             case "calories":
-                TestObjects.food1.setCalories(null);
+                TestObjects.foodRequest.setCalories(null);
                 break;
             case "servingSize":
-                TestObjects.food1.setServingSize(0);
+                TestObjects.foodRequest.setServingSize(0);
                 break;
         }
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.food1)))
+                .content(objectMapper.writeValueAsString(TestObjects.foodRequest)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -129,7 +133,8 @@ class FoodControllerTest {
     @Test
     @WithMockUser
     void testGetById_ReturnOk() throws Exception {
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.food1, HttpStatus.OK));
+        when(service.getById(TestObjects.id))
+                .thenReturn(new ResponseEntity<>(TestObjects.foodResponse1, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
@@ -152,14 +157,16 @@ class FoodControllerTest {
     @Test
     @WithMockUser
     void testQuery_ReturnOk() throws Exception {
-        List<Food> foods = List.of(TestObjects.food1, TestObjects.food2);
+        List<FoodResponse> foods = List.of(TestObjects.foodResponse1);
+        Page<FoodResponse> foodPage = new PageImpl<>(foods);
 
-        when(service.getFoodsByQuery(anyString())).thenReturn(new ResponseEntity<>(foods, HttpStatus.OK));
+        when(service.getFoodsByQuery(anyInt(), anyInt(), anyString()))
+                .thenReturn(new ResponseEntity<>(foodPage, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/query")
                 .param("query", "ka"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Kanan rintafilee"))
-                .andExpect(jsonPath("$[0].calories").value(250.0));
+                .andExpect(jsonPath("$.content[0].name").value("Kanan rintafilee"))
+                .andExpect(jsonPath("$.content[0].calories").value(250.0));
     }
 }

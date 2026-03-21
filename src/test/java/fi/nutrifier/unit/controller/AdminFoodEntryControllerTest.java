@@ -2,6 +2,7 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.admin.AdminFoodEntryController;
+import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.unit.utils.TestObjects;
@@ -24,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -54,21 +57,21 @@ public class AdminFoodEntryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetAllByUserId_AsAdmin_ReturnLogs() throws Exception {
-        List<FoodEntry> foodEntries = List.of(TestObjects.foodEntry1, TestObjects.foodEntry2);
+        List<FoodEntryResponse> foodEntries = List.of(TestObjects.foodEntry1Response, TestObjects.foodEntry2Response);
 
         Pageable pageable = PageRequest.of(1, 10);
-        Page<FoodEntry> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
+        Page<FoodEntryResponse> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
 
         // Mock service layer
-        when(service.getAllByUserId(any(String.class), any(Integer.class), any(Integer.class)))
+        when(service.getAllByUserId(any(UUID.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl)
-                .param("userId", TestObjects.userId1))
+                .param("userId", TestObjects.userId1.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()", CoreMatchers.is(2)))
-            .andExpect(jsonPath("$.content[0].meal", CoreMatchers.is("BREAKFAST")))
-            .andExpect(jsonPath("$.content[1].meal", CoreMatchers.is("LUNCH")));
+            .andExpect(jsonPath("$.content[0].mealType", CoreMatchers.is("BREAKFAST")))
+            .andExpect(jsonPath("$.content[1].mealType", CoreMatchers.is("LUNCH")));
     }
 
     @Test
@@ -85,12 +88,12 @@ public class AdminFoodEntryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetById_AsAdmin_ReturnUnauthorized() throws Exception {
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1, HttpStatus.OK));
+        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1Response, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
-                .andExpect(jsonPath("$.meal", CoreMatchers.is(TestObjects.foodEntry1.getMeal())));
+                .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType())));
 
         verify(service, times(1)).getById(TestObjects.id);
     }
@@ -109,21 +112,21 @@ public class AdminFoodEntryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetByUserId_AsAdmin_ReturnOk() throws Exception {
-        List<FoodEntry> foodEntries = List.of(TestObjects.foodEntry1, TestObjects.foodEntry2);
+        List<FoodEntryResponse> foodEntries = List.of(TestObjects.foodEntry1Response, TestObjects.foodEntry2Response);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<FoodEntry> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
+        Page<FoodEntryResponse> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
 
         when(service.getAllByUserId(TestObjects.userId1, 0, 10))
                 .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl)
-                .param("userId", TestObjects.userId1)
+                .param("userId", TestObjects.userId1.toString())
                 .param("page", "0")
                 .param("size", "10"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content[0].amount").value(22.0))
-            .andExpect(jsonPath("$.content[1].meal").value("LUNCH"));
+            .andExpect(jsonPath("$.content[1].mealType").value("LUNCH"));
 
         verify(service, times(1)).getAllByUserId(TestObjects.userId1, 0, 10);
     }

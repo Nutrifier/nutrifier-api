@@ -1,7 +1,7 @@
 package fi.nutrifier.integration;
 
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.enums.Role;
 import fi.nutrifier.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,14 +32,14 @@ class AdminUserControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private UserDto testUser;
+    private UserResponse testUser;
     private final String baseUrl = "/api/admin/users";
 
     @BeforeEach
     public void setup() {
-        UserDto userDto = new UserDto();
-        userDto.initialize("test@gmail.com", Role.REGULAR);
-        testUser = userDto;
+        UserResponse userResponse = new UserResponse();
+        userResponse.initialize("test@gmail.com", Role.REGULAR);
+        testUser = userResponse;
         userRepository.deleteAll();
     }
 

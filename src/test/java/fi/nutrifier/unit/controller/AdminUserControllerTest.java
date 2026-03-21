@@ -2,7 +2,7 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.admin.AdminUserController;
-import fi.nutrifier.dto.UserDto;
+import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.entities.User;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
@@ -11,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -67,10 +65,10 @@ public class AdminUserControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetAll_AsAdmin_ReturnLogs() throws Exception {
-        List<User> users = List.of(TestObjects.user1.toUser(), TestObjects.user2.toUser());
+        List<UserResponse> users = List.of(TestObjects.user1, TestObjects.user2);
 
         Pageable pageable = PageRequest.of(1, 10);
-        Page<User> mockPage = new PageImpl<>(users, pageable, users.size());
+        Page<UserResponse> mockPage = new PageImpl<>(users, pageable, users.size());
 
         // Mock service layer
         when(service.getAll(any(Integer.class), any(Integer.class)))
@@ -127,7 +125,7 @@ public class AdminUserControllerTest {
         TestObjects.user1.setEmail("again@gmail.com");
 
         // Use eq(1L) to match the exact ID and any(User.class) to allow any User instance.
-        when(service.update(eq(TestObjects.id), any(UserDto.class)))
+        when(service.update(eq(TestObjects.id), any(UserResponse.class)))
                 .thenReturn(new ResponseEntity<>(TestObjects.user1.toUser(), HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
