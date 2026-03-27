@@ -1,8 +1,8 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.UserProfileUpdateRequest;
-import fi.nutrifier.entities.UserProfile;
-import fi.nutrifier.services.UserProfileService;
+import fi.nutrifier.dto.ProfileResponse;
+import fi.nutrifier.dto.ProfileUpdateRequest;
+import fi.nutrifier.services.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,24 +18,24 @@ import java.util.UUID;
 @RequestMapping("/api/profile")
 public class ProfileController {
 
-    private final UserProfileService service;
+    private final ProfileService service;
 
-    public ProfileController(UserProfileService service) {
+    public ProfileController(ProfileService service) {
         this.service = service;
     }
 
-    @Operation(summary = "Get user goals by user id")
+    @Operation(summary = "Get user profile")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
-    public ResponseEntity<UserProfile> getGoals(Authentication authentication) {
+    public ResponseEntity<ProfileResponse> getProfile(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        return service.getUserGoals(userId);
+        return service.getProfile(userId);
     }
 
-    @Operation(summary = "Update user goals")
+    @Operation(summary = "Update user profile")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PatchMapping
-    public ResponseEntity<UserProfile> updateGoals(Authentication authentication, @Valid @RequestBody UserProfileUpdateRequest request) {
+    public ResponseEntity<ProfileResponse> updateGoals(Authentication authentication, @Valid @RequestBody ProfileUpdateRequest request) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.update(userId, request);
     }

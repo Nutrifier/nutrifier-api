@@ -19,12 +19,16 @@ public class FoodMapper implements EntityMapper<Food, FoodResponse, FoodRequest>
         return new FoodResponse(
                 food.getId(),
                 food.getName(),
+                food.getBrand(),
+                food.getCategory(),
                 food.getBarcode(),
                 food.getServingSize(),
                 food.getCalories(),
                 food.getCarbs(),
                 food.getProtein(),
-                food.getFat()
+                food.getFat(),
+                food.getVerified(),
+                food.getStatus()
         );
     }
 

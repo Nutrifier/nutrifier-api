@@ -1,6 +1,7 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,4 +37,12 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    public UserResponse toResponse() {
+        return new UserResponse(
+                this.id,
+                this.email,
+                this.role
+        );
+    }
 }

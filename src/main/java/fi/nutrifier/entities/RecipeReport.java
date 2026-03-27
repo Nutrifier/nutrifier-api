@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.RecipeReportResponse;
 import fi.nutrifier.enums.ReportStatus;
 import fi.nutrifier.enums.ReportType;
 import jakarta.persistence.*;
@@ -21,12 +22,15 @@ public class RecipeReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id; // Generating id in the mapper
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID recipeId;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID userId;
 
@@ -44,6 +48,7 @@ public class RecipeReport {
     private String description;
     private String decisionReasoning;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID reviewedBy;
 
@@ -52,4 +57,19 @@ public class RecipeReport {
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public RecipeReportResponse toResponse() {
+        return new RecipeReportResponse(
+                this.id,
+                this.recipeId,
+                this.userId,
+                this.type,
+                this.reason,
+                this.status,
+                this.description,
+                this.decisionReasoning,
+                this.reviewedBy,
+                this.reviewedAt
+        );
+    }
 }

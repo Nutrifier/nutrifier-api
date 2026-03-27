@@ -45,7 +45,7 @@ public class UserWeightService {
             if (user == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
             WeightEntry entry = new WeightEntry();
-            entry.setUser(user);
+            entry.setUserId(user.getId());
             entry.setWeight(weight);
             entry.setDate(LocalDateTime.now());
 

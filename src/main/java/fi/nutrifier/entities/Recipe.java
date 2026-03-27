@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.RecipeResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,9 +24,11 @@ public class Recipe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id; // Generating id in the mapper
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "owner_id", columnDefinition = "CHAR(36)")
     private UUID userId;
 
@@ -58,4 +61,19 @@ public class Recipe {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredientSection> ingredientSections = new ArrayList<>();
+
+    public RecipeResponse toResponse() {
+        return new RecipeResponse(
+                this.id,
+                this.userId,
+                this.name,
+                this.description,
+                this.servings,
+                this.preparationTime,
+                this.isPublic,
+                this.isForked,
+                this.steps,
+                this.ingredientSections
+        );
+    }
 }

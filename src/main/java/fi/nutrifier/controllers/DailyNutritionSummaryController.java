@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Tag(name = "Daily Nutrition Summary")
 @RestController
-@RequestMapping("/api/user/daily-nutrition-summary")
+@RequestMapping("/api/daily-nutrition-summary")
 public class DailyNutritionSummaryController {
 
     protected final DailyNutritionSummaryService service;

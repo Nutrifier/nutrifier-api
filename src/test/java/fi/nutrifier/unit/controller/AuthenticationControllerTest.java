@@ -7,20 +7,14 @@ import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.enums.Role;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
-import fi.nutrifier.utils.JwtTokenUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
@@ -33,24 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AuthenticationController.class)
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
-public class AuthenticationControllerTest {
+public class AuthenticationControllerTest extends ControllerTestInterface<UserService> {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private UserService service;
-
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-
-    @BeforeEach
-    public void setup() {
-        TestObjects.reset();
+    protected AuthenticationControllerTest() {
+        super("/api");
     }
 
     @Test
@@ -62,12 +42,12 @@ public class AuthenticationControllerTest {
         when(service.create(any(RegisterRequest.class))).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.CREATED));
         when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
 
-        mockMvc.perform(post("/api/register")
+        mockMvc.perform(post(baseUrl + "/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.user1)))
+                .content(objectMapper.writeValueAsString(TestObjects.registerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token", CoreMatchers.is("mock-jwt-token")))
-                .andExpect(jsonPath("$.userId", CoreMatchers.is(id)));
+                .andExpect(jsonPath("$.userId", CoreMatchers.is(id.toString())));
     }
 
     @Test
@@ -75,14 +55,14 @@ public class AuthenticationControllerTest {
         UUID id = UUID.randomUUID();
         TestObjects.user1.setId(id); // Mock id generation
 
-        when(service.login(anyString(), anyString())).thenReturn(new ResponseEntity<>(TestObjects.user1.toUser(), HttpStatus.OK));
+        when(service.login(anyString(), anyString())).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
         when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
 
-        mockMvc.perform(post("/api/login")
+        mockMvc.perform(post(baseUrl + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new LoginRequest("test@gmail.com", "password"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", CoreMatchers.is("mock-jwt-token")))
-                .andExpect(jsonPath("$.userId", CoreMatchers.is(id)));
+                .andExpect(jsonPath("$.userId", CoreMatchers.is(id.toString())));
     }
 }

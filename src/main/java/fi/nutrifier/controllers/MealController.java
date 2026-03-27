@@ -33,7 +33,7 @@ public class MealController {
     public ResponseEntity<MealResponse> create(
             Authentication authentication,
             @Valid @RequestBody MealRequest request
-            ) {
+    ) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.create(request, userId);
     }
@@ -76,7 +76,7 @@ public class MealController {
 
     @Operation(summary = "Get all favourite meals")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @DeleteMapping("/favourites")
+    @GetMapping("/favourites")
     public ResponseEntity<List<MealResponse>> getAllFavourites(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.getAllFavourites(userId);

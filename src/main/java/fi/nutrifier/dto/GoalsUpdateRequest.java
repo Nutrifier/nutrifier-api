@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
-public class UserGoalsUpdateRequest {
+public class GoalsUpdateRequest {
     private GoalType goalType;
     private Double targetWeight;
 

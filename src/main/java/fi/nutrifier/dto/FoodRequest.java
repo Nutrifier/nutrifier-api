@@ -11,6 +11,7 @@ import lombok.Data;
 public class FoodRequest {
 
     @NotBlank
+    @NotNull
     private String name;
 
     private String brand;

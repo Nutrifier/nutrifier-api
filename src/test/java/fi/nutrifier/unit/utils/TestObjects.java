@@ -2,9 +2,8 @@ package fi.nutrifier.unit.utils;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.enums.FoodStatus;
-import fi.nutrifier.enums.GoalType;
-import fi.nutrifier.enums.Role;
+import fi.nutrifier.enums.*;
+import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,11 +14,15 @@ import java.util.UUID;
 
 public class TestObjects {
 
-    public static UUID id;
-    public static UUID userId1;
-    public static UUID userId2;
+    public static UUID id = UUID.randomUUID();
+
+    public static UUID id1 = UUID.nameUUIDFromBytes("testId1".getBytes());
+    public static UUID id2 = UUID.nameUUIDFromBytes("testId2".getBytes());
+    public static UUID id3 = UUID.nameUUIDFromBytes("testId3".getBytes());
 
     public static LocalDate date;
+
+    public static RegisterRequest registerRequest;
 
     public static UserResponse user1;
     public static UserResponse user2;
@@ -28,93 +31,100 @@ public class TestObjects {
     public static FoodEntry foodEntry2;
     public static FoodEntry foodEntry3;
 
-    public static FoodEntryRequest foodEntry1Request;
-
-    public static FoodEntryResponse foodEntry1Response;
-    public static FoodEntryResponse foodEntry2Response;
-
     public static Food food1;
     public static Food food2;
     public static Food food3;
 
-    public static FoodRequest foodRequest;
-    public static FoodResponse foodResponse1;
-    public static FoodResponse foodResponse2;
+    public static FoodReport foodReport1;
+    public static FoodReport foodReport2;
+
+    public static AuditLog auditLog1;
+    public static AuditLog auditLog2;
+
+    public static Meal meal;
+
+    public static Recipe recipe;
+
+    public static RecipeReport recipeReport;
+
+    public static UserFeedback userFeedback;
+
+    public static DailyNutritionSummary dailyNutritionSummary;
 
     public static Settings settings;
 
     public static Goals goals;
 
-    public static GoalPeriods mealPlanPeriod;
-    public static List<GoalPeriods> mealPlanPeriodList;
-
     public static List<WeightEntry> weightEntries;
+
+    public static Profile profile;
 
 
     public static void reset() {
-        id = UUID.randomUUID();
-        userId1 = UUID.randomUUID();
-        userId2 = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+
+        registerRequest = new RegisterRequest(
+                "test@gmail.com",
+                "Qwerty123!",
+                Sex.FEMALE,
+                18,
+                180,
+                ActivityLevel.SEDENTARY,
+                GoalType.GAIN_MUSCLE,
+                80.0,
+                85.0,
+                LocalDate.of(now.plusYears(1).getYear(), 1, 1)
+        );
 
         date = LocalDate.of(2025, 1, 15);
 
-        user1 = new UserResponse();
-        user1.setId(userId1);
-        user1.initialize("test@gmail.com", Role.REGULAR);
-        user2 = new UserResponse();
-        user2.setId(userId2);
-        user2.initialize("test2@gmail.com", Role.REGULAR);
+        user1 = new UserResponse(id1, "test@gmail.com", Role.REGULAR);
+        user2 = new UserResponse(id2, "test2@gmail.com", Role.REGULAR);
 
-        foodEntry1 = new FoodEntry(UUID.randomUUID(), date, LocalTime.of(9,0, 0), "BREAKFAST", userId1, UUID.randomUUID(), null, 22.0);
-        foodEntry2 = new FoodEntry(UUID.randomUUID(), date, LocalTime.of(9,0, 0), "LUNCH", userId1, UUID.randomUUID(), null, 120.0);
-        foodEntry3 = new FoodEntry(UUID.randomUUID(), date, LocalTime.of(13,0, 0), "LUNCH", userId2, UUID.randomUUID(), null, 150.0);
+        food1 = new Food(id1, "Kanan rintafilee", "brand", "category", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id1, id1, now, now);
+        food2 = new Food(id2, "Riisi (keitetty)", "brand", "category", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);
+        food3 = new Food(id3, "Kalkkunaleike", "brand", "category", "", 100, 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id3, id3, now, now);
 
-        foodEntry1Request = new FoodEntryRequest(
-                foodEntry1.getDate(),
-                foodEntry1.getTime(),
-                foodEntry1Request.getMealType(),
-                foodEntry1Request.getFoodId(),
-                foodEntry1Request.getFineliId(),
-                foodEntry1Request.getAmount()
-        );
-        foodEntry1Response = new FoodEntryResponse(
-                foodEntry1.getId(),
-                foodEntry1.getDate(),
-                foodEntry1.getTime(),
-                foodEntry1.getMealType(),
-                foodEntry1.getUserId(),
-                foodEntry1.getFoodId(),
-                foodEntry1.getFineliId(),
-                foodEntry1.getAmount()
-        );
-        foodEntry2Response = new FoodEntryResponse(
-                foodEntry2.getId(),
-                foodEntry2.getDate(),
-                foodEntry2.getTime(),
-                foodEntry2.getMealType(),
-                foodEntry2.getUserId(),
-                foodEntry2.getFoodId(),
-                foodEntry2.getFineliId(),
-                foodEntry2.getAmount()
-        );
+        foodReport1 = new FoodReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Incorrect values", ReportStatus.APPROVED, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, "decision reasoning", id2, now, now);
+        foodReport2 = new FoodReport(id2, id2, id2, ReportType.REPORT, "Bad name", ReportStatus.PENDING, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, null, null, null, now);
 
-        food1 = new Food(UUID.randomUUID(), "Kanan rintafilee", "brand", "category", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, userId1, UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now());
-        food2 = new Food(UUID.randomUUID(), "Riisi (keitetty)", "brand", "category", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, userId1, UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now());
-        food3 = new Food(UUID.randomUUID(), "Kalkkunaleike", "brand", "category", "", 100, 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, userId2, UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now());
+        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), "BREAKFAST", "g", 120.0, 12.0, 50.0, 24.0, null, id1, id1);
+        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), "LUNCH", "g", 120.0, 12.0, 50.0, 24.0, null, id2, id2);
+        foodEntry3 = new FoodEntry(id3, 150.0, date, LocalTime.of(13,0, 0), "LUNCH", "g", 120.0, 12.0, 50.0, 24.0, null, id3, id3);
 
-        foodRequest = new FoodRequest("Kanan rintafilee", "brand", "category", "1234567890", 100, 250.0, 0.0, 0.0, 0.0);
+        auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
+        auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);
 
-        foodResponse1 = new FoodResponse(UUID.randomUUID(), "Kanan rintafilee", "1234567890", 100, 250.0, 0.0, 0.0, 0.0);
-        foodResponse2 = new FoodResponse(UUID.randomUUID(), "Riisi (keitetty)", "1234567890", 100, 350.0, 0.0, 0.0, 0.0);
+        List<MealEntry> entries = new ArrayList<>();
+        entries.add(new MealEntry(id1, null, food1, 100.0, "g"));
+        meal = new Meal(id1, id1, "My meal", false, false, now, now, entries);
+
+        List<RecipeStep> steps = new ArrayList<>();
+        steps.add(new RecipeStep(id1, null, 1, "Preheat the oven", now, now));
+        List<RecipeIngredientSection> ingredientSections = new ArrayList<>();
+        List<RecipeIngredient> ingredients = new ArrayList<>();
+        ingredients.add(new RecipeIngredient(id1, null, food1, 100.0, "g", now, now));
+        ingredientSections.add(new RecipeIngredientSection(id, null, 1, now, now, ingredients));
+        recipe = new Recipe(id1, id1, "My recipe", "description", 8, 40, false, false, now, now, steps, ingredientSections);
+
+        recipeReport = new RecipeReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Wrong values", ReportStatus.PENDING, "description", null, null, null, now);
+
+        userFeedback = new UserFeedback(id1, id1, FeedbackType.BUG, "My feedback", "message", FeedbackStatus.PENDING, null, null, null, now);
+
+        dailyNutritionSummary = new DailyNutritionSummary(id1, id1, today, 120.0, 50.0, 200.0, 150.0, 120.0, 50.0, 200.0, 150.0, now, now);
 
         settings = new Settings();
         settings.initialize();
 
-        goals = new Goals();
-        //goals.initialize(GoalType.JUST_FOR_FUN, 60.0, date.plusYears(1));
+        List<GoalPeriod> periods = new ArrayList<>();
+        periods.add(new GoalPeriod(id1, null, "period type", today, today.plusYears(1), 100.0, 20.0, 20.0, 20.0, now, now));
+        goals = new Goals(id1, id1, GoalType.JUST_FOR_FUN, today, 60.0, today.plusYears(1), 80.0, null, now, now, periods);
 
         List<WeightEntry> newWeightEntries = new ArrayList<>();
-        newWeightEntries.add(new WeightEntry(userId1, user1.toUser(), 70.0, LocalDateTime.now()));
+        newWeightEntries.add(new WeightEntry(id1, id1, 70.0, LocalDateTime.now()));
         weightEntries = newWeightEntries;
+
+        profile = new Profile(id1, 180, 18, Sex.FEMALE, ActivityLevel.SEDENTARY, now);
     }
 }

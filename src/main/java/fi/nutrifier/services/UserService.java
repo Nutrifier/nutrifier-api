@@ -18,9 +18,8 @@ import org.springframework.stereotype.Service;
 import fi.nutrifier.utils.SecurityUtil;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -50,6 +49,9 @@ public class UserService {
     @Transactional
     public ResponseEntity<UserResponse> create(RegisterRequest registerRequest) {
         try {
+            LocalDate today = LocalDate.now();
+            LocalDateTime now = LocalDateTime.now();
+
             String encryptedEmail = SecurityUtil.encrypt(registerRequest.getEmail());
             String hashedPassword = SecurityUtil.hashPassword(registerRequest.getPassword());
 
@@ -76,52 +78,47 @@ public class UserService {
                     true,
                     true,
                     true,
-                    LocalDateTime.now()
+                    now
             );
             userSettingsRepository.save(settings);
-
-            System.out.println("2 settings saved" + settings);
 
             // Initialize user goals
             Goals goals = new Goals();
             goals.setUserId(savedUser.getId());
             goals.setGoalType(registerRequest.getGoalType());
+            goals.setStartDate(today);
             goals.setTargetWeight(registerRequest.getTargetWeight());
             goals.setTargetDate(registerRequest.getTargetDate());
-            goals.setCreatedAt(LocalDateTime.now());
-            goals.setUpdatedAt(LocalDateTime.now());
-            goalsRepository.save(goals);
+            goals.setStartWeight(registerRequest.getCurrentWeight());
+            goals.setCreatedAt(now);
+            goals.setUpdatedAt(now);
 
-            System.out.println("3 goals saved" + goals);
+            System.out.println(goals);
+
+            goalsRepository.save(goals);
 
             // Initialize weight
             WeightEntry firstWeightEntry = new WeightEntry();
-            firstWeightEntry.setUser(savedUser);
-            firstWeightEntry.setDate(LocalDateTime.now());
+            firstWeightEntry.setUserId(savedUser.getId());
+            firstWeightEntry.setDate(now);
             firstWeightEntry.setWeight(registerRequest.getCurrentWeight());
             weightRepository.save(firstWeightEntry);
 
-            System.out.println("4 weight saved" + firstWeightEntry);
-
             // Initialize profile
-            UserProfile profile = new UserProfile();
+            Profile profile = new Profile();
             profile.setUserId(savedUser.getId());
-            profile.setSex(registerRequest.getSex());
-            profile.setAge(registerRequest.getAge());
             profile.setHeight(registerRequest.getHeight());
+            profile.setAge(registerRequest.getAge());
+            profile.setSex(registerRequest.getSex());
             profile.setActivityLevel(registerRequest.getActivityLevel());
-            profile.setUpdatedAt(LocalDateTime.now());
+            profile.setUpdatedAt(now);
             profileRepository.save(profile);
-
-            System.out.println("5 profile saved" + profile);
 
             UserResponse userResponse = new UserResponse();
             String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
             userResponse.setId(savedUser.getId());
             userResponse.setEmail(decryptedEmail);
             userResponse.setRole(savedUser.getRole());
-
-            System.out.println("6 response generated" + userResponse);
 
             return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -158,7 +155,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<User> getById(UUID id) {
+    public ResponseEntity<UserResponse> getById(UUID id) {
         try {
             User user = repository.findById(id).orElse(null);
 
@@ -167,7 +164,7 @@ public class UserService {
             try {
                 user.setEmail(SecurityUtil.decrypt(user.getEmail()));
                 user.setPassword(null);
-                return new ResponseEntity<>(user, HttpStatus.OK);
+                return new ResponseEntity<>(user.toResponse(), HttpStatus.OK);
             } catch (FailedDecryptionException e) {
                 System.out.println("here: " + e.getMessage());
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -178,7 +175,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<User> update(UUID id, UserResponse userResponse) {
+    public ResponseEntity<UserResponse> update(UUID id, UserResponse userResponse) {
         try {
             User existingUser = repository.findById(id).orElse(null);
 
@@ -188,7 +185,7 @@ public class UserService {
                 userResponse.setEmail(SecurityUtil.encrypt(userResponse.getEmail()));
                 User data = repository.save(userResponse.toUser());
                 data.setPassword(null);
-                return new ResponseEntity<>(data, HttpStatus.OK);
+                return new ResponseEntity<>(data.toResponse(), HttpStatus.OK);
             } catch (FailedEncryptionException e) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -197,7 +194,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<User> login(String email, String password) {
+    public ResponseEntity<UserResponse> login(String email, String password) {
         try {
             String encryptedEmail = SecurityUtil.encrypt(email);
             User existingUser = repository.findByEmail(encryptedEmail).orElse(null);
@@ -207,7 +204,7 @@ public class UserService {
             if (SecurityUtil.checkPassword(password, existingUser.getPassword())) {
                 existingUser.setPassword(null);
                 existingUser.setEmail(email);
-                return new ResponseEntity<>(existingUser, HttpStatus.OK);
+                return new ResponseEntity<>(existingUser.toResponse(), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
@@ -217,7 +214,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<User> delete(UUID id) {
+    public ResponseEntity<String> delete(UUID id) {
         try {
             repository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.OK);

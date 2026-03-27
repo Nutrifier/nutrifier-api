@@ -1,5 +1,6 @@
 package fi.nutrifier.dto;
 
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,10 +11,17 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 public class FoodEntryRequest {
+
+    @Min(0)
+    private Double amount;
     private LocalDate date;
     private LocalTime time;
     private String mealType;
-    private UUID foodId;
+    private String unit;
+    private Double caloriesSnapshot;
+    private Double fatSnapshot;
+    private Double carbsSnapshot;
+    private Double proteinSnapshot;
     private Integer fineliId;
-    private Double amount;
+    private UUID foodId;
 }

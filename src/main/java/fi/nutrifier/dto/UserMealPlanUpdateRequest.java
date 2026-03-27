@@ -1,6 +1,6 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.entities.GoalPeriods;
+import fi.nutrifier.entities.GoalPeriod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.util.List;
@@ -9,5 +9,5 @@ import java.util.List;
 @AllArgsConstructor
 public class UserMealPlanUpdateRequest {
     private String name;
-    private List<GoalPeriods> periods;
+    private List<GoalPeriod> periods;
 }

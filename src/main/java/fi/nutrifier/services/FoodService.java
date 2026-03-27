@@ -143,6 +143,7 @@ public class FoodService {
 
             return new ResponseEntity<>(dtoList, HttpStatus.OK);
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -190,7 +191,7 @@ public class FoodService {
             // No need to return anything
             reportRepository.save(report);
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -1,6 +1,6 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.UserGoalsUpdateRequest;
+import fi.nutrifier.dto.GoalsUpdateRequest;
 import fi.nutrifier.entities.*;
 import fi.nutrifier.repositories.GoalsRepository;
 import fi.nutrifier.repositories.ProfileRepository;
@@ -53,7 +53,7 @@ public class UserGoalsService {
         }
     }
 
-    public ResponseEntity<Goals> update(UUID userId, UserGoalsUpdateRequest request) {
+    public ResponseEntity<Goals> update(UUID userId, GoalsUpdateRequest request) {
         try {
             Goals goals = goalsRepository.findByUserId(userId).orElse(null);
 
@@ -86,7 +86,7 @@ public class UserGoalsService {
     public void createDailyNutritionSummary(Goals goals, User user) {
         List<DailyNutritionSummary> dailyNutritionSummaryList = new ArrayList<>();
 
-        for (GoalPeriods period : goals.getPeriods()) {
+        for (GoalPeriod period : goals.getPeriods()) {
             LocalDate start = period.getStartDate();
             LocalDate end = period.getEndDate();
 
@@ -116,7 +116,7 @@ public class UserGoalsService {
         // TODO: Take into account long weight loss periods which should include re-feed periods. These could be implemented with MealPlanPeriods.
         // TODO: Take into account users diet (regular, high protein, vegan...)
 
-        UserProfile profile = profileRepository.findByUserId(user.getId()).orElse(null);
+        Profile profile = profileRepository.findByUserId(user.getId()).orElse(null);
         Goals goals = goalsRepository.findByUserId(user.getId()).orElse(null);
         double weight = weightRepository.findByUserIdOrderByDateDesc(user.getId(), Pageable.ofSize(10)).getContent().getFirst().getWeight();
 
@@ -135,8 +135,8 @@ public class UserGoalsService {
         double dailyCarbs = CalculationUtil.calculateDailyCarbs(remainingCalories);
 
         Goals initialGoals = new Goals();
-        List<GoalPeriods> goalPeriods = new ArrayList<>();
-        GoalPeriods initialPeriod = new GoalPeriods();
+        List<GoalPeriod> goalPeriods = new ArrayList<>();
+        GoalPeriod initialPeriod = new GoalPeriod();
         initialPeriod.setGoals(initialGoals);
         initialPeriod.setStartDate(LocalDate.now());
         initialPeriod.setEndDate(goals.getTargetDate());

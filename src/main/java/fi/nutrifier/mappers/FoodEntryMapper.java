@@ -16,13 +16,18 @@ public class FoodEntryMapper implements EntityMapper<FoodEntry, FoodEntryRespons
         LocalDateTime now = LocalDateTime.now();
         return new FoodEntry(
                 UUID.randomUUID(),
+                request.getAmount(),
                 request.getDate(),
                 request.getTime(),
                 request.getMealType(),
-                userId,
-                request.getFoodId(),
+                request.getUnit(),
+                request.getCaloriesSnapshot(),
+                request.getFatSnapshot(),
+                request.getCarbsSnapshot(),
+                request.getProteinSnapshot(),
                 request.getFineliId(),
-                request.getAmount()
+                userId,
+                request.getFoodId()
         );
     }
 

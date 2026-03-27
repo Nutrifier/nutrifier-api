@@ -1,6 +1,6 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.UserSettingsUpdateRequest;
+import fi.nutrifier.dto.SettingsUpdateRequest;
 import fi.nutrifier.entities.Settings;
 import fi.nutrifier.repositories.UserRepository;
 import fi.nutrifier.repositories.UserSettingsRepository;
@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-public class UserSettingsService {
+public class SettingsService {
 
     private final UserRepository userRepository;
     private final UserSettingsRepository settingsRepository;
 
     @Autowired
-    public UserSettingsService(UserRepository userRepository, UserSettingsRepository settingsRepository) {
+    public SettingsService(UserRepository userRepository, UserSettingsRepository settingsRepository) {
         this.userRepository = userRepository;
         this.settingsRepository = settingsRepository;
     }
@@ -37,7 +37,7 @@ public class UserSettingsService {
         }
     }
 
-    public ResponseEntity<Settings> update(UUID userId, UserSettingsUpdateRequest request) {
+    public ResponseEntity<Settings> update(UUID userId, SettingsUpdateRequest request) {
         try {
             System.out.println("Updating settings userId: " + userId + " request: " + request);
             Settings settings = settingsRepository.findByUserId(userId).orElse(null);

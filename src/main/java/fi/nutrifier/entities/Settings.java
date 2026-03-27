@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "user_settings")
+@Table(name = "settings")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Settings {

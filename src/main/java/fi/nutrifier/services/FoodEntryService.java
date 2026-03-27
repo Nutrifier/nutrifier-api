@@ -55,6 +55,7 @@ public class FoodEntryService {
 
             return new ResponseEntity<>(mapper.toResponse(data), HttpStatus.CREATED);
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

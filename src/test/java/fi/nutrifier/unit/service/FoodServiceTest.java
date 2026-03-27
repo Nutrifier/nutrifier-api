@@ -22,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,11 +59,11 @@ public class FoodServiceTest {
         when(mapper.toEntity(any(UUID.class), any(FoodRequest.class)))
                 .thenReturn(TestObjects.food1);
         when(mapper.toResponse(any(Food.class)))
-                .thenReturn(TestObjects.foodResponse1);
+                .thenReturn(TestObjects.food1.toResponse());
         when(repository.save(any(Food.class)))
                 .thenReturn(TestObjects.food1);
 
-        ResponseEntity<FoodResponse> response = service.create(TestObjects.foodRequest, TestObjects.userId1);
+        ResponseEntity<FoodResponse> response = service.create(TestObjects.food1.toRequest(), TestObjects.id1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Kanan rintafilee", response.getBody().getName());
@@ -74,7 +73,7 @@ public class FoodServiceTest {
     @Test
     public void testFindById_ReturnsFood() {
         when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.food1));
-        when(mapper.toResponse(any(Food.class))).thenReturn(TestObjects.foodResponse1);
+        when(mapper.toResponse(any(Food.class))).thenReturn(TestObjects.food1.toResponse());
 
         ResponseEntity<FoodResponse> response = service.getById(TestObjects.id);
 
@@ -102,16 +101,14 @@ public class FoodServiceTest {
 
     @Test
     public void testUpdateFood_ReturnsFood() {
-        TestObjects.foodResponse1.setName("Riisi");
-        TestObjects.foodResponse1.setCalories(245.0);
         TestObjects.food1.setName("Riisi");
         TestObjects.food1.setCalories(245.0);
 
-        when(mapper.toResponse(any(Food.class))).thenReturn(TestObjects.foodResponse1);
+        when(mapper.toResponse(any(Food.class))).thenReturn(TestObjects.food1.toResponse());
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.food1));
         when(repository.save(any(Food.class))).thenReturn(TestObjects.food1);
 
-        ResponseEntity<FoodResponse> response = service.update(TestObjects.id, TestObjects.userId1, TestObjects.foodRequest);
+        ResponseEntity<FoodResponse> response = service.update(TestObjects.id, TestObjects.id1, TestObjects.food1.toRequest());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -142,12 +139,16 @@ public class FoodServiceTest {
             return new FoodResponse(
                     f.getId(),
                     f.getName(),
+                    f.getBrand(),
+                    f.getCategory(),
                     f.getBarcode(),
                     f.getServingSize(),
                     f.getCalories(),
                     f.getCarbs(),
                     f.getProtein(),
-                    f.getFat()
+                    f.getFat(),
+                    f.getVerified(),
+                    f.getStatus()
             );
         });
 

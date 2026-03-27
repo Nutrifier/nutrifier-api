@@ -1,7 +1,8 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.UserProfileUpdateRequest;
-import fi.nutrifier.entities.UserProfile;
+import fi.nutrifier.dto.ProfileResponse;
+import fi.nutrifier.dto.ProfileUpdateRequest;
+import fi.nutrifier.entities.Profile;
 import fi.nutrifier.repositories.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,31 +13,31 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-public class UserProfileService {
+public class ProfileService {
 
     private final ProfileRepository repository;
 
     @Autowired
-    public UserProfileService(ProfileRepository repository) {
+    public ProfileService(ProfileRepository repository) {
         this.repository = repository;
     }
 
-    public ResponseEntity<UserProfile> getUserGoals(UUID userId) {
+    public ResponseEntity<ProfileResponse> getProfile(UUID userId) {
         try {
-            UserProfile profile = repository.findByUserId(userId).orElse(null);
+            Profile profile = repository.findByUserId(userId).orElse(null);
 
             if (profile == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-            return new ResponseEntity<>(profile, HttpStatus.OK);
+            return new ResponseEntity<>(profile.toResponse(), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<UserProfile> update(UUID userId, UserProfileUpdateRequest request) {
+    public ResponseEntity<ProfileResponse> update(UUID userId, ProfileUpdateRequest request) {
         try {
-            UserProfile profile = repository.findByUserId(userId).orElse(null);
+            Profile profile = repository.findByUserId(userId).orElse(null);
 
             if (profile == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -55,9 +56,9 @@ public class UserProfileService {
             }
 
             profile.setUpdatedAt(LocalDateTime.now());
-            UserProfile updated = repository.save(profile);
+            Profile updated = repository.save(profile);
 
-            return new ResponseEntity<>(updated, HttpStatus.OK);
+            return new ResponseEntity<>(updated.toResponse(), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

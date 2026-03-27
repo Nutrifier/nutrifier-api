@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.MealResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,9 +24,11 @@ public class Meal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id; // Generating id in the mapper
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "owner_id", columnDefinition = "CHAR(36)")
     private UUID userId;
 
@@ -48,4 +51,15 @@ public class Meal {
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MealEntry> entries = new ArrayList<>();
+
+    public MealResponse toResponse() {
+        return new MealResponse(
+                this.id,
+                this.userId,
+                this.name,
+                this.isPublic,
+                this.isForked,
+                this.entries
+        );
+    }
 }

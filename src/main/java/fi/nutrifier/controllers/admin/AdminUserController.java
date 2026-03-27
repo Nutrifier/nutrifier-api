@@ -37,21 +37,21 @@ public class AdminUserController {
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable("id") String id) {
+    public ResponseEntity<UserResponse> getById(@PathVariable("id") String id) {
         return service.getById(UUID.fromString(id));
     }
 
     @Operation(summary = "Update user")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @PatchMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable("id") String id, @Valid @RequestBody UserResponse item) {
+    public ResponseEntity<UserResponse> update(@PathVariable("id") String id, @Valid @RequestBody UserResponse item) {
         return service.update(UUID.fromString(id), item);
     }
 
     @Operation(summary = "Delete user")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @DeleteMapping("/{id}")
-    public ResponseEntity<User> delete(@PathVariable("id") String id) {
+    public ResponseEntity<String> delete(@PathVariable("id") String id) {
         return service.delete(UUID.fromString(id));
     }
 }

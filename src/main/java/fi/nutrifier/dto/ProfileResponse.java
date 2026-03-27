@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserProfileUpdateRequest {
+public class ProfileResponse {
     private Integer height;
     private Integer age;
     private Sex sex;

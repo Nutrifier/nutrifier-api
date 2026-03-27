@@ -52,10 +52,10 @@ public class DailyNutritionSummaryMapperWithUpdate implements EntityMapper<
 
     public void updateEntityFromRequest(DailyNutritionSummaryUpdateRequest request, DailyNutritionSummary entity) {
         entity.setDate(request.getDate());
-        entity.setCaloriesTarget(request.getCaloriesGoal());
-        entity.setFatTarget(request.getFatGoal());
-        entity.setCarbTarget(request.getCarbsGoal());
-        entity.setProteinTarget(request.getProteinGoal());
+        entity.setCaloriesTarget(request.getCaloriesTarget());
+        entity.setFatTarget(request.getFatTarget());
+        entity.setCarbTarget(request.getCarbsTarget());
+        entity.setProteinTarget(request.getProteinTarget());
         entity.setCaloriesConsumed(request.getCaloriesConsumed());
         entity.setFatConsumed(request.getFatConsumed());
         entity.setCarbsConsumed(request.getCarbsConsumed());

@@ -1,5 +1,7 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.FoodReportCreateRequest;
+import fi.nutrifier.dto.FoodReportResponse;
 import fi.nutrifier.enums.ReportStatus;
 import fi.nutrifier.enums.ReportType;
 import jakarta.persistence.*;
@@ -21,12 +23,15 @@ public class FoodReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id; // Generating id in the mapper
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID foodId;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID userId;
 
@@ -49,6 +54,7 @@ public class FoodReport {
     private double proposedProtein;
     private String decisionReasoning;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID reviewedBy;
 
@@ -57,4 +63,37 @@ public class FoodReport {
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public FoodReportResponse toResponse() {
+        return new FoodReportResponse(
+                this.id,
+                this.foodId,
+                this.userId,
+                this.type,
+                this.reason,
+                this.status,
+                this.description,
+                this.proposedName,
+                this.proposedCalories,
+                this.proposedFat,
+                this.proposedCarbs,
+                this.proposedProtein,
+                this.decisionReasoning,
+                this.reviewedBy,
+                this.reviewedAt
+        );
+    }
+
+    public FoodReportCreateRequest toCreateRequest() {
+        return new FoodReportCreateRequest(
+                this.type,
+                this.reason,
+                this.description,
+                this.proposedName,
+                this.proposedCalories,
+                this.proposedFat,
+                this.proposedCarbs,
+                this.proposedProtein
+        );
+    }
 }

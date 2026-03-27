@@ -1,6 +1,6 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.UserGoalsUpdateRequest;
+import fi.nutrifier.dto.GoalsUpdateRequest;
 import fi.nutrifier.entities.Goals;
 import fi.nutrifier.services.UserGoalsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +24,7 @@ public class GoalsController {
         this.userGoalsService = userGoalsService;
     }
 
-    @Operation(summary = "Get user goals by user id")
+    @Operation(summary = "Get user's goals")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
     public ResponseEntity<Goals> getGoals(Authentication authentication) {
@@ -37,7 +37,7 @@ public class GoalsController {
     @PatchMapping
     public ResponseEntity<Goals> updateGoals(
             Authentication authentication,
-            @Valid @RequestBody UserGoalsUpdateRequest request
+            @Valid @RequestBody GoalsUpdateRequest request
     ) {
         UUID userId = UUID.fromString(authentication.getName());
         return userGoalsService.update(userId, request);
@@ -45,7 +45,7 @@ public class GoalsController {
 
     @Operation(summary = "Calculate new meal plan")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @GetMapping("/calculate")
+    @PostMapping("/calculate")
     public ResponseEntity<Goals> calculate(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return userGoalsService.recalculateGoals(userId);

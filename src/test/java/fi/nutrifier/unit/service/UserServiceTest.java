@@ -94,11 +94,10 @@ public class UserServiceTest {
 
         when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.user1.toUser()));
 
-        ResponseEntity<User> response = service.getById(TestObjects.id);
+        ResponseEntity<UserResponse> response = service.getById(TestObjects.id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
@@ -143,19 +142,18 @@ public class UserServiceTest {
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
         when(repository.save(any(User.class))).thenReturn(TestObjects.user1.toUser());
 
-        ResponseEntity<User> response = service.update(TestObjects.id, TestObjects.user1);
+        ResponseEntity<UserResponse> response = service.update(TestObjects.id, TestObjects.user1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
     public void testDeleteUser_ReturnsNullBody() {
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<User> response = service.delete(TestObjects.id);
+        ResponseEntity<String> response = service.delete(TestObjects.id);
 
         verify(repository, times(1)).deleteById(TestObjects.id);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -170,13 +168,12 @@ public class UserServiceTest {
         user.setPassword(hashedPassword);
         when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
-        ResponseEntity<User> response = service.login("test@gmail.com", "password");
+        ResponseEntity<UserResponse> response = service.login("test@gmail.com", "password");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         //assertTrue(response.getBody().getId() > 0);
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
@@ -184,7 +181,7 @@ public class UserServiceTest {
         // Service expects a hashed password
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
 
-        ResponseEntity<User> response = service.login("test@gmail.com", "wrong_password");
+        ResponseEntity<UserResponse> response = service.login("test@gmail.com", "wrong_password");
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());

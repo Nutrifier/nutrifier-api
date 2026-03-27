@@ -1,8 +1,8 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.UserSettingsUpdateRequest;
+import fi.nutrifier.dto.SettingsUpdateRequest;
 import fi.nutrifier.entities.Settings;
-import fi.nutrifier.services.UserSettingsService;
+import fi.nutrifier.services.SettingsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,10 +18,10 @@ import java.util.UUID;
 @RequestMapping("/api/settings")
 public class SettingsController {
 
-    private final UserSettingsService userSettingsService;
+    private final SettingsService settingsService;
 
-    public SettingsController(UserSettingsService userSettingsService) {
-        this.userSettingsService = userSettingsService;
+    public SettingsController(SettingsService settingsService) {
+        this.settingsService = settingsService;
     }
 
     @Operation(summary = "Get user settings by user id")
@@ -29,14 +29,14 @@ public class SettingsController {
     @GetMapping
     public ResponseEntity<Settings> getSettings(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        return userSettingsService.get(userId);
+        return settingsService.get(userId);
     }
 
     @Operation(summary = "Update user settings")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PatchMapping
-    public ResponseEntity<Settings> updateSettings(Authentication authentication, @Valid @RequestBody UserSettingsUpdateRequest item) {
+    public ResponseEntity<Settings> updateSettings(Authentication authentication, @Valid @RequestBody SettingsUpdateRequest item) {
         UUID userId = UUID.fromString(authentication.getName());
-        return userSettingsService.update(userId, item);
+        return settingsService.update(userId, item);
     }
 }

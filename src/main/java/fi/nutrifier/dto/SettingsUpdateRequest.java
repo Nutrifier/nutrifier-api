@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class UserSettingsUpdateRequest {
+public class SettingsUpdateRequest {
     private String weightUnit;
     private String macroWeightUnit;
     private String energyUnit;

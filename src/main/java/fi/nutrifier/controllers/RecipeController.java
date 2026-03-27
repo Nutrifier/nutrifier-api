@@ -1,5 +1,7 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.FoodReportCreateRequest;
+import fi.nutrifier.dto.RecipeReportCreateRequest;
 import fi.nutrifier.dto.RecipeRequest;
 import fi.nutrifier.dto.RecipeResponse;
 import fi.nutrifier.services.RecipeService;
@@ -43,7 +45,7 @@ public class RecipeController {
         return service.getById(UUID.fromString(id));
     }
 
-    @Operation(summary = "Mark food as favourite")
+    @Operation(summary = "Mark recipe as favourite")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PostMapping("/{id}/favourite")
     public ResponseEntity<String> markAsFavourite(Authentication authentication, @PathVariable("id") String id) {
@@ -51,7 +53,7 @@ public class RecipeController {
         return service.markAsFavourite(UUID.fromString(id), userId);
     }
 
-    @Operation(summary = "Remove food from favourites")
+    @Operation(summary = "Remove recipe from favourites")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @DeleteMapping("/{id}/favourite")
     public ResponseEntity<String> removeFavourite(Authentication authentication, @PathVariable("id") String id) {
@@ -59,11 +61,23 @@ public class RecipeController {
         return service.removeFavourite(UUID.fromString(id), userId);
     }
 
-    @Operation(summary = "Get all favourite foods")
+    @Operation(summary = "Get all favourite recipes")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @DeleteMapping("/favourites")
+    @GetMapping("/favourites")
     public ResponseEntity<List<RecipeResponse>> getAllFavourites(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.getAllFavourites(userId);
+    }
+
+    @Operation(summary = "Report a recipe")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @PostMapping("/{id}/report")
+    public ResponseEntity<String> report(
+            Authentication authentication,
+            @PathVariable("id") String id,
+            @Valid @RequestBody RecipeReportCreateRequest request
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.report(UUID.fromString(id), userId, request);
     }
 }

@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.UserFeedbackResponse;
 import fi.nutrifier.enums.FeedbackStatus;
 import fi.nutrifier.enums.FeedbackType;
 import jakarta.persistence.*;
@@ -21,9 +22,11 @@ public class UserFeedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id; // Generating id in the mapper
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID userId;
 
@@ -43,6 +46,7 @@ public class UserFeedback {
 
     private String decisionReasoning;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID reviewedBy;
 
@@ -51,4 +55,18 @@ public class UserFeedback {
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public UserFeedbackResponse toResponse() {
+        return new UserFeedbackResponse(
+                this.id,
+                this.userId,
+                this.type,
+                this.title,
+                this.message,
+                this.status,
+                this.decisionReasoning,
+                this.reviewedBy,
+                this.reviewedAt
+        );
+    }
 }

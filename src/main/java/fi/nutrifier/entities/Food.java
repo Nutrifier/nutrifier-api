@@ -1,5 +1,7 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.FoodRequest;
+import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.enums.FoodStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -25,6 +27,7 @@ public class Food {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id; // Generating id in the mapper
 
@@ -54,14 +57,16 @@ public class Food {
     @Min(value = 0)
     private Double fat;
 
-    private boolean verified;
+    private Boolean verified;
 
     @Enumerated(EnumType.STRING)
     private FoodStatus status;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private UUID createdBy;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private UUID updatedBy;
 
@@ -72,4 +77,35 @@ public class Food {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public FoodRequest toRequest() {
+        return new FoodRequest(
+                this.name,
+                this.brand,
+                this.category,
+                this.barcode,
+                this.servingSize,
+                this.calories,
+                this.carbs,
+                this.protein,
+                this.fat
+        );
+    }
+
+    public FoodResponse toResponse() {
+        return new FoodResponse(
+                this.id,
+                this.name,
+                this.brand,
+                this.category,
+                this.barcode,
+                this.servingSize,
+                this.calories,
+                this.carbs,
+                this.protein,
+                this.fat,
+                this.verified,
+                this.status
+        );
+    }
 }

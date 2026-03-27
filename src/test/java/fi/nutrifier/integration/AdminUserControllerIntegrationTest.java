@@ -4,6 +4,7 @@ import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.enums.Role;
 import fi.nutrifier.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +38,7 @@ class AdminUserControllerIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        UserResponse userResponse = new UserResponse();
-        userResponse.initialize("test@gmail.com", Role.REGULAR);
-        testUser = userResponse;
-        userRepository.deleteAll();
+        TestObjects.reset();
     }
 
     @Test

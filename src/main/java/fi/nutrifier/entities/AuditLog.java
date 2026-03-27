@@ -1,6 +1,8 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.nutrifier.dto.AuditRequest;
+import fi.nutrifier.dto.AuditResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +27,7 @@ public class AuditLog {
     private UUID id;
 
     @Column(columnDefinition = "CHAR(36)")
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID userId;
 
     @Column(nullable = false)
@@ -46,4 +49,30 @@ public class AuditLog {
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public AuditResponse toResponse() {
+        return new AuditResponse(
+                this.id,
+                this.userId,
+                this.action,
+                this.category,
+                this.source,
+                this.datetime,
+                this.oldValue,
+                this.newValue,
+                this.session
+        );
+    }
+
+    public AuditRequest toRequest() {
+        return new AuditRequest(
+                this.action,
+                this.category,
+                this.source,
+                this.datetime,
+                this.oldValue,
+                this.newValue,
+                this.session
+        );
+    }
 }

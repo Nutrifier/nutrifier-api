@@ -101,7 +101,7 @@ public class FoodController {
 
     @Operation(summary = "Get all favourite foods")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @DeleteMapping("/favourites")
+    @GetMapping("/favourites")
     public ResponseEntity<List<FoodResponse>> getAllFavourites(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.getAllFavourites(userId);

@@ -1,6 +1,9 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import fi.nutrifier.dto.DailyNutritionSummaryCreateRequest;
+import fi.nutrifier.dto.DailyNutritionSummaryResponse;
+import fi.nutrifier.dto.DailyNutritionSummaryUpdateRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,16 +18,18 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "daily-nutrition-summary")
+@Table(name = "daily-nutrition_summary")
 @NoArgsConstructor
 @AllArgsConstructor
 public class DailyNutritionSummary {
 
     @Id
     @Column(columnDefinition = "CHAR(36)")
+    @JdbcTypeCode(SqlTypes.CHAR)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private UUID userId;
 
@@ -63,4 +68,43 @@ public class DailyNutritionSummary {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public DailyNutritionSummaryResponse toResponse() {
+        return new DailyNutritionSummaryResponse(
+                this.id,
+                this.date,
+                this.caloriesTarget,
+                this.fatTarget,
+                this.carbTarget,
+                this.proteinTarget,
+                this.caloriesConsumed,
+                this.fatConsumed,
+                this.carbsConsumed,
+                this.proteinConsumed
+        );
+    }
+
+    public DailyNutritionSummaryCreateRequest toCreateRequest() {
+        return new DailyNutritionSummaryCreateRequest(
+                this.date,
+                this.caloriesTarget,
+                this.fatTarget,
+                this.carbTarget,
+                this.proteinTarget
+        );
+    }
+
+    public DailyNutritionSummaryUpdateRequest toUpdateRequest() {
+        return new DailyNutritionSummaryUpdateRequest(
+                this.date,
+                this.caloriesTarget,
+                this.fatTarget,
+                this.carbTarget,
+                this.proteinTarget,
+                this.caloriesConsumed,
+                this.fatConsumed,
+                this.carbsConsumed,
+                this.proteinConsumed
+        );
+    }
 }

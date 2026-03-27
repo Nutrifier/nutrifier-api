@@ -1,6 +1,5 @@
 package fi.nutrifier.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import fi.nutrifier.enums.GoalType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,18 +15,19 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "user_goals")
+@Table(name = "goals")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Goals {
 
     @Id
-    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(columnDefinition = "CHAR(36)")
     private UUID id;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "user_id", columnDefinition = "CHAR(36)", nullable = false)
     private UUID userId;
 
     @Column(nullable = false, length = 20)
@@ -41,7 +41,7 @@ public class Goals {
     private LocalDate targetDate;
 
     @Column(nullable = false)
-    private LocalDate startWeight;
+    private Double startWeight;
 
     private LocalDate reachedDate;
 
@@ -52,5 +52,5 @@ public class Goals {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "goals", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GoalPeriods> periods = new ArrayList<>();
+    private List<GoalPeriod> periods = new ArrayList<>();
 }

@@ -1,19 +1,14 @@
-package fi.nutrifier.unit.controller;
+package fi.nutrifier.unit.controller.admin;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.admin.AdminUserController;
 import fi.nutrifier.dto.UserResponse;
-import fi.nutrifier.entities.User;
 import fi.nutrifier.services.UserService;
+import fi.nutrifier.unit.controller.ControllerTestInterface;
 import fi.nutrifier.unit.utils.TestObjects;
-import fi.nutrifier.utils.JwtTokenUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,12 +19,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,25 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AdminUserController.class)
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
-public class AdminUserControllerTest {
+public class AdminUserControllerTest extends ControllerTestInterface<UserService> {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private UserService service;
-
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private final String baseUrl = "/api/admin/users";
-
-    @BeforeEach
-    public void setup() {
-        TestObjects.reset();
+    protected AdminUserControllerTest() {
+        super("/api/admin/users");
     }
 
     @Test
@@ -99,7 +78,7 @@ public class AdminUserControllerTest {
     @WithMockUser(roles = "ADMIN")
     public void testGetById_AsAdmin_ReturnOk() throws Exception {
         when(service.getById(TestObjects.id))
-                .thenReturn(new ResponseEntity<>(TestObjects.user1.toUser(), HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
@@ -126,7 +105,7 @@ public class AdminUserControllerTest {
 
         // Use eq(1L) to match the exact ID and any(User.class) to allow any User instance.
         when(service.update(eq(TestObjects.id), any(UserResponse.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.user1.toUser(), HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -141,7 +120,7 @@ public class AdminUserControllerTest {
     public void testUpdateUser_AsAdmin_InvalidInput_ReturnBadRequest() throws Exception {
         TestObjects.user1.setEmail("mywebsite.fi");
 
-        mockMvc.perform(patch(baseUrl + "/{id}", 1)
+        mockMvc.perform(patch(baseUrl + "/{id}", UUID.randomUUID().toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(TestObjects.user1)))
                 .andExpect(status().isBadRequest());

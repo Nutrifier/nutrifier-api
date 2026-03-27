@@ -13,16 +13,16 @@ public class DailyNutritionSummaryUpdateRequest {
     private LocalDate date;
 
     @NotNull
-    private double caloriesGoal;
+    private double caloriesTarget;
 
     @NotNull
-    private double fatGoal;
+    private double fatTarget;
 
     @NotNull
-    private double carbsGoal;
+    private double carbsTarget;
 
     @NotNull
-    private double proteinGoal;
+    private double proteinTarget;
 
     @NotNull
     private double caloriesConsumed;

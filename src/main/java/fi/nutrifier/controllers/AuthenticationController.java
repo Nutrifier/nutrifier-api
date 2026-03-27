@@ -35,25 +35,14 @@ public class AuthenticationController {
         ResponseEntity<Boolean> response = userService.isEmailTaken(registerRequest.getEmail());
 
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-            System.out.println("Authentication controller 1");
             ResponseEntity<UserResponse> created = userService.create(registerRequest);
 
-            System.out.println("Authentication controller 2" + created);
             if (created.getStatusCode() == HttpStatus.CREATED) {
                 UserResponse userResponse = created.getBody();
 
-                System.out.println("Authentication controller 3" + userResponse);
-
                 if (userResponse != null) {
-                    System.out.println("Authentication controller 4");
-
                     String token = jwtTokenUtil.generateToken(userResponse.getId(), Role.REGULAR);
-
-                    System.out.println("Authentication controller 5" + token);
-
                     LoginResponse loginResponse = new LoginResponse(token, userResponse.getId());
-
-                    System.out.println("Authentication controller 6" + loginResponse);
 
                     return new ResponseEntity<>(loginResponse, HttpStatus.CREATED);
                 }
@@ -65,11 +54,11 @@ public class AuthenticationController {
     @Operation(summary = "Login to the application")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws JOSEException {
-        ResponseEntity<User> response = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        ResponseEntity<UserResponse> response = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (response.getStatusCode() == HttpStatus.OK) {
 
-            User user = response.getBody();
+            UserResponse user = response.getBody();
             if (user != null) {
                 String token = jwtTokenUtil.generateToken(user.getId(), user.getRole());
 
@@ -82,12 +71,10 @@ public class AuthenticationController {
     }
 
     @Operation(summary = "Validate authorization token")
-    @PostMapping("/validate")
+    @GetMapping("/validate")
     public ResponseEntity<String> validate(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-
-        boolean isValid = jwtTokenUtil.validateToken(token);
-        return isValid
+        return jwtTokenUtil.validateToken(token)
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }

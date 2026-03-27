@@ -27,10 +27,10 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
-            final String token = request.getHeader("Authorization");
+            final String header = request.getHeader("Authorization");
 
-            if (token != null) {
-                String jwtToken = token.substring(7); // Remove "Bearer " part
+            if (header != null) {
+                String jwtToken = header.substring(7); // Remove "Bearer " part
 
                 if (jwtTokenUtil.validateToken(jwtToken)) {
                     String username = jwtTokenUtil.extractUserId(jwtToken);

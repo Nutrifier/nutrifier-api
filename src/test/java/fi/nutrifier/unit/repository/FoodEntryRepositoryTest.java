@@ -88,10 +88,10 @@ class FoodEntryRepositoryTest {
         repository.save(TestObjects.foodEntry2);
         repository.save(TestObjects.foodEntry3);
 
-        List<FoodEntry> found1 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId1);
+        List<FoodEntry> found1 = repository.findByDateAndUserId(TestObjects.date, TestObjects.id1);
         assertEquals(2, found1.size());
 
-        List<FoodEntry> found2 = repository.findByDateAndUserId(TestObjects.date, TestObjects.userId2);
+        List<FoodEntry> found2 = repository.findByDateAndUserId(TestObjects.date, TestObjects.id2);
         assertEquals(1, found2.size());
     }
 }

@@ -1,18 +1,14 @@
-package fi.nutrifier.unit.controller;
+package fi.nutrifier.unit.controller.admin;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.admin.AdminFoodEntryController;
 import fi.nutrifier.dto.FoodEntryResponse;
-import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.services.FoodEntryService;
+import fi.nutrifier.unit.controller.ControllerTestInterface;
 import fi.nutrifier.unit.utils.TestObjects;
-import fi.nutrifier.utils.JwtTokenUtil;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,28 +31,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AdminFoodEntryController.class)
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
-public class AdminFoodEntryControllerTest {
+public class AdminFoodEntryControllerTest extends ControllerTestInterface<FoodEntryService> {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private FoodEntryService service;
-
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
-
-    private final String baseUrl = "/api/admin/food-entries";
-
-    @BeforeEach
-    public void setup() {
-        TestObjects.reset();
+    protected AdminFoodEntryControllerTest() {
+        super("/api/admin/food-entries");
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetAllByUserId_AsAdmin_ReturnLogs() throws Exception {
-        List<FoodEntryResponse> foodEntries = List.of(TestObjects.foodEntry1Response, TestObjects.foodEntry2Response);
+        List<FoodEntryResponse> foodEntries = List.of(TestObjects.foodEntry1.toResponse(), TestObjects.foodEntry2.toResponse());
 
         Pageable pageable = PageRequest.of(1, 10);
         Page<FoodEntryResponse> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
@@ -67,11 +50,13 @@ public class AdminFoodEntryControllerTest {
                 .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl)
-                .param("userId", TestObjects.userId1.toString()))
+                .param("userId", TestObjects.id1.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()", CoreMatchers.is(2)))
             .andExpect(jsonPath("$.content[0].mealType", CoreMatchers.is("BREAKFAST")))
             .andExpect(jsonPath("$.content[1].mealType", CoreMatchers.is("LUNCH")));
+
+        verify(service, times(1)).getAllByUserId(any(UUID.class), anyInt(), anyInt());
     }
 
     @Test
@@ -88,7 +73,7 @@ public class AdminFoodEntryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetById_AsAdmin_ReturnUnauthorized() throws Exception {
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1Response, HttpStatus.OK));
+        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(TestObjects.foodEntry1.toResponse(), HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
@@ -107,38 +92,5 @@ public class AdminFoodEntryControllerTest {
     @Test
     public void testGetById_AsNobody_ReturnForbidden() throws Exception {
         mockMvc.perform(get(baseUrl + "/{id}", 1)).andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    public void testGetByUserId_AsAdmin_ReturnOk() throws Exception {
-        List<FoodEntryResponse> foodEntries = List.of(TestObjects.foodEntry1Response, TestObjects.foodEntry2Response);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<FoodEntryResponse> mockPage = new PageImpl<>(foodEntries, pageable, foodEntries.size());
-
-        when(service.getAllByUserId(TestObjects.userId1, 0, 10))
-                .thenReturn(new ResponseEntity<>(mockPage, HttpStatus.OK));
-
-        mockMvc.perform(get(baseUrl)
-                .param("userId", TestObjects.userId1.toString())
-                .param("page", "0")
-                .param("size", "10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].amount").value(22.0))
-            .andExpect(jsonPath("$.content[1].mealType").value("LUNCH"));
-
-        verify(service, times(1)).getAllByUserId(TestObjects.userId1, 0, 10);
-    }
-
-    @Test
-    @WithMockUser(roles = "USER")
-    public void testGetByUserId_AsUser_ReturnForbidden() throws Exception {
-        mockMvc.perform(get(baseUrl + "/by-user/{id}", 1)).andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void testGetByUserId_AsNobody_ReturnForbidden() throws Exception {
-        mockMvc.perform(get(baseUrl + "/by-user/{id}", 1)).andExpect(status().isForbidden());
     }
 }

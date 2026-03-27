@@ -40,7 +40,7 @@ public class AuditService {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<AuditLog> entityPage = repository.findAll(pageRequest);
 
-            Page<AuditResponse> dtoPage = entityPage.map(mapper::toResponse);
+            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
 
             return new ResponseEntity<>(dtoPage, HttpStatus.OK);
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public class AuditService {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<AuditLog> entityPage = repository.findAuditLogsByUserId(userId, pageRequest);
 
-            Page<AuditResponse> dtoPage = entityPage.map(mapper::toResponse);
+            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
 
             return new ResponseEntity<>(dtoPage, HttpStatus.OK);
         } catch (Exception e) {
@@ -66,7 +66,7 @@ public class AuditService {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<AuditLog> entityPage = repository.findAuditLogsByCategory(category, pageRequest);
 
-            Page<AuditResponse> dtoPage = entityPage.map(mapper::toResponse);
+            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
 
             return new ResponseEntity<>(dtoPage, HttpStatus.OK);
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public class AuditService {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<AuditLog> entityPage = repository.findAuditLogsByUserIdAndCategory(userId, category, pageRequest);
 
-            Page<AuditResponse> dtoPage = entityPage.map(mapper::toResponse);
+            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
 
             return new ResponseEntity<>(dtoPage, HttpStatus.OK);
         } catch (Exception e) {

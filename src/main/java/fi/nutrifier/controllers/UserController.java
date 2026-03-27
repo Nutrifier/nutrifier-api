@@ -27,16 +27,10 @@ public class UserController {
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
-    public ResponseEntity<User> getById(Authentication authentication) {
+    public ResponseEntity<UserResponse> getById(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.getById(userId);
     }
 
-    @Operation(summary = "Update user data")
-    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @PatchMapping
-    public ResponseEntity<User> update(Authentication authentication, @Valid @RequestBody UserResponse item) {
-        UUID userId = UUID.fromString(authentication.getName());
-        return service.update(userId, item);
-    }
+    // TODO: Implement changing email and password
 }

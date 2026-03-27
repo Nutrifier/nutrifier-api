@@ -53,7 +53,7 @@ public class FoodEntryServiceTest {
     public void testSaveLog_ReturnsLog() {
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        ResponseEntity<FoodEntryResponse> response = service.create(TestObjects.userId1, TestObjects.foodEntry1Request);
+        ResponseEntity<FoodEntryResponse> response = service.create(TestObjects.id1, TestObjects.foodEntry1.toRequest());
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(22, response.getBody().getAmount());
@@ -62,10 +62,10 @@ public class FoodEntryServiceTest {
 
     @Test
     public void testFindById_ReturnsLog() {
-        when(repository.findByIdAndUserId(TestObjects.id, TestObjects.userId1))
+        when(repository.findByIdAndUserId(TestObjects.id, TestObjects.id1))
                 .thenReturn(Optional.ofNullable(TestObjects.foodEntry1));
 
-        ResponseEntity<FoodEntryResponse> response = service.getByIdAndUserId(TestObjects.id, TestObjects.userId1);
+        ResponseEntity<FoodEntryResponse> response = service.getByIdAndUserId(TestObjects.id, TestObjects.id1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(22, response.getBody().getAmount());
@@ -89,12 +89,12 @@ public class FoodEntryServiceTest {
 
     @Test
     public void testUpdateUser_ReturnsLog() {
-        when(repository.findByIdAndUserId(TestObjects.id, TestObjects.userId1)).thenReturn(Optional.of(TestObjects.foodEntry1));
+        when(repository.findByIdAndUserId(TestObjects.id, TestObjects.id1)).thenReturn(Optional.of(TestObjects.foodEntry1));
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
         TestObjects.foodEntry1.setMealType("LUNCH");
         TestObjects.foodEntry1.setAmount(54.0);
-        ResponseEntity<FoodEntryResponse> response = service.update(TestObjects.userId1, TestObjects.id, TestObjects.foodEntry1);
+        ResponseEntity<FoodEntryResponse> response = service.update(TestObjects.id1, TestObjects.id, TestObjects.foodEntry1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -106,9 +106,9 @@ public class FoodEntryServiceTest {
     public void testDeleteUser_ReturnsNullBody() {
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<FoodEntryResponse> response = service.delete(TestObjects.userId1, TestObjects.id);
+        ResponseEntity<FoodEntryResponse> response = service.delete(TestObjects.id1, TestObjects.id);
 
-        verify(repository, times(1)).deleteByIdAndUserId(TestObjects.id, TestObjects.userId1);
+        verify(repository, times(1)).deleteByIdAndUserId(TestObjects.id, TestObjects.id1);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNull(response.getBody());
     }
