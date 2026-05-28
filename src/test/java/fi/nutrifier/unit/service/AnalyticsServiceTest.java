@@ -84,7 +84,7 @@ public class AnalyticsServiceTest {
                 .thenReturn(Optional.of(TestObjects.goals));
 
         ResponseEntity<AnalyticsSingleResponse> response = service.calculateAnalyticsByDate(
-                TestObjects.foodEntry3.getDate().minusDays(1),
+                LocalDate.parse("2026-01-01"),
                 TestObjects.id1,
                 TestObjects.dailySummary
         );
@@ -104,9 +104,9 @@ public class AnalyticsServiceTest {
                 .thenReturn(TestObjects.dailySummary);
 
         ResponseEntity<AnalyticsFullResponse> response = service.calculateAnalyticsWithinDateRange(
-                TestObjects.foodEntry3.getDate().minusDays(1),
+                LocalDate.parse("2026-01-01"),
                 TestObjects.id1,
-                AnalyticsTimePeriod.YEAR
+                AnalyticsTimePeriod.WEEK
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

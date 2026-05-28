@@ -98,7 +98,7 @@ public class TestObjects {
 
         foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
         foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
-        foodEntry3 = new FoodEntry(id3, 1500.0, date.minusDays(1), LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
+        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
 
         auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
         auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);
@@ -119,7 +119,7 @@ public class TestObjects {
 
         userFeedback = new UserFeedback(id1, id1, FeedbackType.BUG, "My feedback", "message", FeedbackStatus.PENDING, null, null, null, now);
 
-        dailySummary = new DailySummary(id1, id1, today.minusDays(1), 120.0, 50.0, 200.0, 150.0, true);
+        dailySummary = new DailySummary(id1, id1, LocalDate.parse("2026-01-01"), 120.0, 50.0, 200.0, 150.0, true);
 
         settings = new Settings();
         settings.initialize();
