@@ -1,67 +1,53 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.CreateWeighInRequest;
 import fi.nutrifier.entities.User;
 import fi.nutrifier.entities.WeightEntry;
+import fi.nutrifier.exceptions.UserNotFoundException;
+import fi.nutrifier.exceptions.WeightEntryNotFoundException;
 import fi.nutrifier.repositories.UserRepository;
-import fi.nutrifier.repositories.UserWeightRepository;
+import fi.nutrifier.repositories.WeightRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
 public class UserWeightService {
 
     private final UserRepository userRepository;
-    private final UserWeightRepository userWeightRepository;
+    private final WeightRepository weightRepository;
 
     @Autowired
-    public UserWeightService(UserRepository userRepository, UserWeightRepository userWeightRepository) {
+    public UserWeightService(UserRepository userRepository, WeightRepository weightRepository) {
         this.userRepository = userRepository;
-        this.userWeightRepository = userWeightRepository;
+        this.weightRepository = weightRepository;
     }
 
-    public ResponseEntity<List<WeightEntry>> getAllByUserId(String userId) {
-        try {
-            List<WeightEntry> entries = userWeightRepository.findByUserIdOrderByDateDesc(userId).orElse(null);
+    public ResponseEntity<Page<WeightEntry>> getByUserId(UUID userId, Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            if (entries == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Page<WeightEntry> data = weightRepository
+                .findByUserIdOrderByDateDesc(userId, pageRequest)
+                .orElseThrow(WeightEntryNotFoundException::new);
 
-            return new ResponseEntity<>(entries, HttpStatus.OK);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<WeightEntry>> create(String userId, CreateWeighInRequest request) {
-        try {
-            User user = userRepository.findById(userId).orElse(null);
+    public ResponseEntity<WeightEntry> create(UUID userId, Double weight) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
-            if (user == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        WeightEntry entry = new WeightEntry();
+        entry.setUserId(user.getId());
+        entry.setWeight(weight);
+        entry.setDate(LocalDateTime.now());
 
-            WeightEntry entry = new WeightEntry();
-            entry.setUser(user);
-            entry.setWeight(request.getWeight());
-            entry.setDate(LocalDateTime.now());
+        WeightEntry savedEntry = weightRepository.save(entry);
 
-            List<WeightEntry> weightEntries = userWeightRepository.findByUserIdOrderByDateDesc(userId).orElse(null);
-
-            if (weightEntries == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-            WeightEntry weightEntry = userWeightRepository.save(entry);
-            weightEntries.add(weightEntry);
-            user.setWeightEntries(weightEntries);
-
-            return new ResponseEntity<>(weightEntries, HttpStatus.CREATED);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
     }
 }

@@ -1,6 +1,6 @@
 package fi.nutrifier.unit.utils;
 
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.enums.Role;
 import fi.nutrifier.utils.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,14 +43,14 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testGenerateToken() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
         assertNotEquals("123456789", token);
         assertTrue(token.startsWith("eyJ"));
     }
 
     @Test
     public void testValidateToken_validToken() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
         boolean valid = jwtTokenUtil.validateToken(token);
         assertTrue(valid);
     }
@@ -62,22 +63,23 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testExtractUser() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
+        UUID uuid = UUID.randomUUID();
+        String token = jwtTokenUtil.generateToken(uuid, Role.REGULAR);
         String extractedId = jwtTokenUtil.extractUserId(token);
-        assertEquals("123456789", extractedId);
+        assertEquals(uuid.toString(), extractedId);
     }
 
     @Test
     public void testExtractRole() throws Exception {
-        String token = jwtTokenUtil.generateToken("123456789", Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
         List<String> roles = jwtTokenUtil.extractRole(token);
         assertEquals("REGULAR", roles.get(0));
 
-        String token2 = jwtTokenUtil.generateToken("123456789", Role.PREMIUM);
+        String token2 = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.PREMIUM);
         List<String> roles2 = jwtTokenUtil.extractRole(token2);
         assertEquals("PREMIUM", roles2.get(0));
 
-        String token3 = jwtTokenUtil.generateToken("123456789", Role.ADMIN);
+        String token3 = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.ADMIN);
         List<String> roles3 = jwtTokenUtil.extractRole(token3);
         assertEquals("ADMIN", roles3.get(0));
     }

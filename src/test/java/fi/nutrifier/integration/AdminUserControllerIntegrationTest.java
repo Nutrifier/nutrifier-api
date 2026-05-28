@@ -1,9 +1,10 @@
 package fi.nutrifier.integration;
 
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
+import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.enums.Role;
 import fi.nutrifier.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,21 +33,20 @@ class AdminUserControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private UserDto testUser;
-    private final String baseUrl = "/api/admin/users";
+    private UserResponse testUser;
+    private final String baseUrl = "/api/v1/admin/users";
 
     @BeforeEach
     public void setup() {
-        UserDto userDto = new UserDto();
-        userDto.initialize("test@gmail.com", Role.REGULAR);
-        testUser = userDto;
-        userRepository.deleteAll();
+        TestObjects.reset();
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetAll_asAdmin_ReturnEmptyList() throws Exception {
-        mockMvc.perform(get(baseUrl))
+        mockMvc.perform(get(baseUrl)
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())

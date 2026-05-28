@@ -1,6 +1,13 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.nutrifier.dto.SettingsUpdateRequest;
+import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.UserUpdateRequest;
+import fi.nutrifier.enums.Role;
+import fi.nutrifier.exceptions.EncryptionKeyException;
+import fi.nutrifier.exceptions.FailedCryptionException;
+import fi.nutrifier.utils.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,18 +26,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class User {
 
-    // TODO: Consider using @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    @Column(name = "id", columnDefinition = "CHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    private String id;
-
-    @PrePersist
-    public void prePersist() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID().toString();
-        }
-    }
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(columnDefinition = "CHAR(36)")
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -43,19 +43,15 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private UserSettings settings;
+    public UserResponse toResponse() {
+        return new UserResponse(
+                this.id,
+                this.email,
+                this.role
+        );
+    }
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private UserGoals goals;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<MealPlan> mealPlans;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<WeightEntry> weightEntries = new ArrayList<>();
+    public void updateEntityFromRequest(UserUpdateRequest request) throws FailedCryptionException, EncryptionKeyException {
+        this.email = SecurityUtil.encrypt(request.getEmail());
+    }
 }

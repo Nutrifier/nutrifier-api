@@ -1,15 +1,17 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
-import fi.nutrifier.dto.AuthRequest;
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.entities.Role;
-import fi.nutrifier.entities.User;
-import fi.nutrifier.entities.UserSettings;
+import fi.nutrifier.dto.RegisterRequest;
+import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.UserUpdateRequest;
+import fi.nutrifier.entities.*;
+import fi.nutrifier.enums.ActivityLevel;
+import fi.nutrifier.enums.GoalType;
+import fi.nutrifier.enums.Role;
+import fi.nutrifier.enums.Sex;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
-import fi.nutrifier.repositories.UserRepository;
-import fi.nutrifier.repositories.UserSettingsRepository;
+import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -29,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,6 +53,15 @@ public class UserServiceTest {
     @Mock
     private UserSettingsRepository userSettingsRepository;
 
+    @Mock
+    private WeightRepository weightRepository;
+
+    @Mock
+    private ProfileRepository profileRepository;
+
+    @Mock
+    private GoalsRepository goalsRepository;
+
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
@@ -60,13 +72,27 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testSaveUser_ReturnsUser() {
-        when(repository.save(any(User.class))) .thenAnswer(invocation -> invocation.getArgument(0));
-        when(userSettingsRepository.save(any(UserSettings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
+    public void testSaveUser_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
+        when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userSettingsRepository.save(any(Settings.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(weightRepository.save(any(WeightEntry.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(goalsRepository.save(any(Goals.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AuthRequest authRequest = new AuthRequest(TestObjects.user1.getEmail(), "qwerty");
+        RegisterRequest registerRequest = new RegisterRequest(
+                TestObjects.user1.getEmail(),
+                "Qwerty123!",
+                Sex.FEMALE,
+                20,
+                170,
+                ActivityLevel.SEDENTARY,
+                GoalType.MAINTAIN,
+                50.0,
+                50.0,
+                LocalDate.now().plusMonths(3)
+        );
 
-        ResponseEntity<UserDto> response = service.create(authRequest);
+        ResponseEntity<UserResponse> response = service.create(registerRequest);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("test@gmail.com", response.getBody().getEmail());
@@ -79,11 +105,10 @@ public class UserServiceTest {
 
         when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.user1.toUser()));
 
-        ResponseEntity<User> response = service.getById(TestObjects.id);
+        ResponseEntity<UserResponse> response = service.getById(TestObjects.id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
@@ -92,13 +117,13 @@ public class UserServiceTest {
         String email = SecurityUtil.encrypt("maija@gmail.com");
 
         User user1 = new User();
-        user1.setId(UUID.randomUUID().toString());
+        user1.setId(UUID.randomUUID());
         user1.setEmail(email);
         user1.setPassword("password");
         user1.setRole(Role.REGULAR);
 
         User user2 = new User();
-        user2.setId(UUID.randomUUID().toString());
+        user2.setId(UUID.randomUUID());
         user2.setEmail(email);
         user2.setPassword("password");
         user2.setRole(Role.REGULAR);
@@ -110,37 +135,37 @@ public class UserServiceTest {
 
         when(repository.findAll(pageable)).thenReturn(mockPage);
 
-        ResponseEntity<Page<User>> response = service.getAll(0, 10);
+        ResponseEntity<Page<UserResponse>> response = service.getAll(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        Page<User> page = response.getBody();
+        Page<UserResponse> page = response.getBody();
         assertNotNull(page);
         assertEquals(2, page.getTotalElements());
 
-        List<User> resUsers = page.getContent();
+        List<UserResponse> resUsers = page.getContent();
 
         assertFalse(resUsers.isEmpty());
     }
 
     @Test
-    public void testUpdateUser_ReturnsUser() {
+    public void testUpdateUser_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
         when(repository.save(any(User.class))).thenReturn(TestObjects.user1.toUser());
 
-        ResponseEntity<User> response = service.update(TestObjects.id, TestObjects.user1);
+        ResponseEntity<UserResponse> response = service.update(TestObjects.id, new UserUpdateRequest(TestObjects.user1.getEmail()));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
     public void testDeleteUser_ReturnsNullBody() {
+        when(repository.existsById(any(UUID.class))).thenReturn(true);
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<User> response = service.delete(TestObjects.id);
+        ResponseEntity<String> response = service.delete(TestObjects.id);
 
         verify(repository, times(1)).deleteById(TestObjects.id);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -148,30 +173,30 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testLoginSuccess() {
+    public void testLoginSuccess() throws FailedCryptionException, EncryptionKeyException {
         // Service expects a hashed password
         User user = TestObjects.user1.toUser();
         String hashedPassword = SecurityUtil.hashPassword("password");
         user.setPassword(hashedPassword);
         when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
 
-        ResponseEntity<User> response = service.login("test@gmail.com", "password");
+        ResponseEntity<UserResponse> response = service.login("test@gmail.com", "password");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         //assertTrue(response.getBody().getId() > 0);
         assertEquals("test@gmail.com", response.getBody().getEmail());
-        assertNull(response.getBody().getPassword());
     }
 
     @Test
     public void testLoginFail() throws Exception {
         // Service expects a hashed password
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(TestObjects.user1.toUser()));
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
 
-        ResponseEntity<User> response = service.login("test@gmail.com", "wrong_password");
+        ResponseEntity<UserResponse> response = service.login("test@gmail.com", "wrong_password");
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNull(response.getBody());
     }
 

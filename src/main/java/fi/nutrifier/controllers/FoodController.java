@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.*;
 import fi.nutrifier.services.FoodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -7,14 +8,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import fi.nutrifier.entities.Food;
+
 import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Foods")
 @RestController
-@RequestMapping("/api/foods")
+@RequestMapping("/api/v1/foods")
 public class FoodController {
 
     protected final FoodService service;
@@ -26,38 +28,91 @@ public class FoodController {
     @Operation(summary = "Create a food")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PostMapping
-    public ResponseEntity<Food> create(@Valid @RequestBody Food entity) {
-        return service.create(entity);
+    public ResponseEntity<FoodResponse> create(
+            Authentication authentication,
+            @Valid @RequestBody FoodRequest foodRequest
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.create(foodRequest, userId);
     }
 
     @Operation(summary = "Get food by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping("/{id}")
-    public ResponseEntity<Food> getById(@PathVariable("id") String id) {
-        return service.getById(id);
+    public ResponseEntity<FoodResponse> getById(@PathVariable("id") String id) {
+        return service.getById(UUID.fromString(id));
     }
 
     @Operation(summary = "Search for foods by name")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping("/query")
-    public ResponseEntity<List<Food>> getFoodsByQuery(@RequestParam String query) {
-        return service.getFoodsByQuery(query);
+    public ResponseEntity<Page<FoodResponse>> getFoodsByQuery(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam String query
+    ) {
+        return service.getFoodsByQuery(page, size, query);
     }
 
     @Operation(summary = "Search for foods by barcode")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping("/barcode")
-    public ResponseEntity<List<Food>> getFoodsByBarcode(@RequestParam String query) {
+    public ResponseEntity<List<FoodResponse>> getFoodsByBarcode(@RequestParam String query) {
         return service.getFoodsByBarcode(query);
     }
 
     @Operation(summary = "Get all foods")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
-    public ResponseEntity<Page<Food>> getAll(
+    public ResponseEntity<Page<FoodResponse>> getAll(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
+        System.out.println("FoodController get");
         return service.getAll(page, size);
+    }
+
+    @Operation(summary = "Get recently used foods")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @GetMapping("/recent")
+    public ResponseEntity<List<FoodResponse>> getRecentFoods(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.getRecentFoods(userId);
+    }
+
+    @Operation(summary = "Mark food as favourite")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @PostMapping("/{id}/favourite")
+    public ResponseEntity<String> markAsFavourite(Authentication authentication, @PathVariable("id") String id) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.markAsFavourite(UUID.fromString(id), userId);
+    }
+
+    @Operation(summary = "Remove food from favourites")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @DeleteMapping("/{id}/favourite")
+    public ResponseEntity<String> removeFavourite(Authentication authentication, @PathVariable("id") String id) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.removeFavourite(UUID.fromString(id), userId);
+    }
+
+    @Operation(summary = "Get all favourite foods")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @GetMapping("/favourites")
+    public ResponseEntity<List<FoodResponse>> getAllFavourites(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.getAllFavourites(userId);
+    }
+
+    @Operation(summary = "Report a food")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @PostMapping("/{id}/report")
+    public ResponseEntity<String> report(
+            Authentication authentication,
+            @PathVariable("id") String id,
+            @Valid @RequestBody FoodReportCreateRequest request
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.report(UUID.fromString(id), userId, request);
     }
 }

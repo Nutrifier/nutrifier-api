@@ -1,11 +1,11 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.UserDto;
-import fi.nutrifier.dto.UserGoalsUpdateRequest;
-import fi.nutrifier.dto.UserSettingsUpdateRequest;
+import fi.nutrifier.dto.ApiResponse;
+import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.entities.User;
+import fi.nutrifier.exceptions.EncryptionKeyException;
+import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.services.UserService;
-import fi.nutrifier.utils.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,9 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Tag(name = "User Profile")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService service;
@@ -28,16 +30,10 @@ public class UserController {
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
-    public ResponseEntity<User> getById(Authentication authentication) {
-        String userId = authentication.getName();
+    public ResponseEntity<UserResponse> getById(Authentication authentication) throws FailedCryptionException, EncryptionKeyException {
+        UUID userId = UUID.fromString(authentication.getName());
         return service.getById(userId);
     }
 
-    @Operation(summary = "Update user data")
-    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @PatchMapping
-    public ResponseEntity<User> update(Authentication authentication, @Valid @RequestBody UserDto item) {
-        String userId = authentication.getName();
-        return service.update(userId, item);
-    }
+    // TODO: Implement changing email and password
 }

@@ -1,6 +1,8 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
+import fi.nutrifier.dto.FoodRequest;
+import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.entities.Food;
 import fi.nutrifier.repositories.FoodRepository;
 import fi.nutrifier.services.FoodService;
@@ -19,11 +21,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,11 +51,11 @@ public class FoodServiceTest {
     }
 
     @Test
-    @WithMockUser
     public void testSaveFood_ReturnsFood() {
-        when(repository.save(any(Food.class))).thenReturn(TestObjects.food1);
+        when(repository.save(any(Food.class)))
+                .thenReturn(TestObjects.food1);
 
-        ResponseEntity<Food> response = service.create(TestObjects.food1);
+        ResponseEntity<FoodResponse> response = service.create(TestObjects.food1.toRequest(), TestObjects.id1);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Kanan rintafilee", response.getBody().getName());
@@ -63,7 +66,7 @@ public class FoodServiceTest {
     public void testFindById_ReturnsFood() {
         when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.food1));
 
-        ResponseEntity<Food> response = service.getById(TestObjects.id);
+        ResponseEntity<FoodResponse> response = service.getById(TestObjects.id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Kanan rintafilee", response.getBody().getName());
@@ -81,7 +84,7 @@ public class FoodServiceTest {
 
         when(repository.findAll(any(Pageable.class))).thenReturn(mockPage);
 
-        ResponseEntity<Page<Food>> response = service.getAll(1, 10);
+        ResponseEntity<Page<FoodResponse>> response = service.getAll(1, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().getContent().size());
@@ -89,12 +92,13 @@ public class FoodServiceTest {
 
     @Test
     public void testUpdateFood_ReturnsFood() {
+        TestObjects.food1.setName("Riisi");
+        TestObjects.food1.setCalories(245.0);
+
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.food1));
         when(repository.save(any(Food.class))).thenReturn(TestObjects.food1);
 
-        TestObjects.food1.setName("Riisi");
-        TestObjects.food1.setCalories(245.0);
-        ResponseEntity<Food> response = service.update(TestObjects.id, TestObjects.food1);
+        ResponseEntity<FoodResponse> response = service.update(TestObjects.id, TestObjects.id1, TestObjects.food1.toRequest());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -104,9 +108,10 @@ public class FoodServiceTest {
 
     @Test
     public void testDeleteFood_ReturnsNullBody() {
+        when(repository.existsById(any(UUID.class))).thenReturn(true);
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<Food> response = service.delete(TestObjects.id);
+        ResponseEntity<String> response = service.delete(TestObjects.id);
 
         verify(repository, times(1)).deleteById(TestObjects.id);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -116,15 +121,35 @@ public class FoodServiceTest {
     @Test
     public void testGetFoodsByQuery_ReturnsMultipleFoods() {
         List<Food> foods = List.of(TestObjects.food1);
+        Page<Food> foodPage = new PageImpl<>(foods);
 
-        when(repository.findFoodsByNameContainingIgnoreCase(anyString())).thenReturn(foods);
+
+        when(repository.findFoodsByNameContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(foodPage);
+        /*when(mapper.toResponse(any(Food.class))).thenAnswer(invocation -> {
+            Food f = invocation.getArgument(0);
+            return new FoodResponse(
+                    f.getId(),
+                    f.getName(),
+                    f.getBrand(),
+                    f.getCategory(),
+                    f.getBarcode(),
+                    f.getServingSize(),
+                    f.getCalories(),
+                    f.getCarbs(),
+                    f.getProtein(),
+                    f.getFat(),
+                    f.getVerified(),
+                    f.getStatus()
+            );
+        });
+        */
 
         // Act
-        ResponseEntity<List<Food>> response = service.getFoodsByQuery("ka");
+        ResponseEntity<Page<FoodResponse>> response = service.getFoodsByQuery(0, 10, "ka");
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size());
-        assertEquals("Kanan rintafilee", response.getBody().get(0).getName());
+        assertEquals(1, response.getBody().getContent().size());
+        assertEquals("Kanan rintafilee", response.getBody().getContent().get(0).getName());
     }
 }

@@ -1,0 +1,87 @@
+package fi.nutrifier.unit.controller;
+
+import fi.nutrifier.config.SecurityConfig;
+import fi.nutrifier.controllers.DailySummaryController;
+import fi.nutrifier.dto.ApiResponse;
+import fi.nutrifier.dto.DailySummaryResponse;
+import fi.nutrifier.services.DailySummaryService;
+import fi.nutrifier.unit.utils.TestObjects;
+import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(DailySummaryController.class)
+@ActiveProfiles("test")
+@Import(SecurityConfig.class)
+public class DailySummaryControllerTest extends ControllerTestInterface<DailySummaryService> {
+
+    protected DailySummaryControllerTest() {
+        super("/api/v1/daily-summary");
+    }
+
+    @Test
+    public void testCreate_AsNobody_ReturnUnauthorized() throws Exception {
+        mockMvc.perform(post(baseUrl)
+                        .with(csrf()) // MockMvc expects csrf is in use
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(TestObjects.dailySummary)))
+                .andExpect(status().isForbidden()); // TODO: Why doesn't this accept UNAUTHORIZED
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    public void testUpdate_AsNobody_ReturnUnauthorized() throws Exception {
+        mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.dailySummary.getId().toString())
+                        .with(csrf()) // MockMvc expects csrf is in use
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(TestObjects.dailySummary)))
+                .andExpect(status().isForbidden()); // TODO: Why doesn't this accept UNAUTHORIZED
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    @WithMockUser(
+            username = "550e8400-e29b-41d4-a716-446655440000",
+            roles = "USER"
+    )
+    public void testGetByDate_ReturnDailyNutritionSummaries() throws Exception {
+        when(service.getAndCalculateSummary(any(LocalDate.class), any(UUID.class)))
+                .thenReturn(ResponseEntity.ok(TestObjects.dailySummary.toResponse()));
+
+        mockMvc.perform(get(baseUrl + "/by-date")
+                        .param("date", "2026-03-26"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.calorieTarget", CoreMatchers.is(120.0)));
+
+        verify(service).getAndCalculateSummary(any(LocalDate.class), any(UUID.class));
+    }
+
+    @Test
+    public void testGetByDate_AsNobody_ReturnUnauthorized() throws Exception {
+        mockMvc.perform(get(baseUrl + "/by-date")
+                        .with(csrf()) // MockMvc expects csrf is in use
+                        .param("date", "2026-03-26"))
+                .andExpect(status().isForbidden()); // TODO: Why doesn't this accept UNAUTHORIZED
+
+        verifyNoInteractions(service);
+    }
+}
