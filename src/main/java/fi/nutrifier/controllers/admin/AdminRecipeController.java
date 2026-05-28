@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Tag(name = "Recipes (Admin)")
 @RestController
-@RequestMapping("/api/admin/recipes")
+@RequestMapping("/api/v1/admin/recipes")
 public class AdminRecipeController {
 
     private final RecipeService service;

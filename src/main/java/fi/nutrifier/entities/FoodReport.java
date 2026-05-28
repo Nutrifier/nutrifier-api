@@ -1,7 +1,7 @@
 package fi.nutrifier.entities;
 
-import fi.nutrifier.dto.FoodReportCreateRequest;
-import fi.nutrifier.dto.FoodReportResponse;
+import fi.nutrifier.dto.*;
+import fi.nutrifier.enums.FoodStatus;
 import fi.nutrifier.enums.ReportStatus;
 import fi.nutrifier.enums.ReportType;
 import jakarta.persistence.*;
@@ -94,6 +94,55 @@ public class FoodReport {
                 this.proposedFat,
                 this.proposedCarbs,
                 this.proposedProtein
+        );
+    }
+
+    public FoodReport reportCreateRequestToEntity(UUID foodId, UUID userId, FoodReportCreateRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        return new FoodReport(
+                UUID.randomUUID(),
+                foodId,
+                userId,
+                request.getType(),
+                request.getReason(),
+                ReportStatus.PENDING,
+                request.getDescription(),
+                request.getProposedName(),
+                request.getProposedCalories(),
+                request.getProposedFat(),
+                request.getProposedCarbs(),
+                request.getProposedProtein(),
+                null,
+                null,
+                null,
+                now
+        );
+    }
+
+    public void reportUpdateRequestToEntity(UUID userId, FoodReportReviewRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        this.setDecisionReasoning(request.getDecisionReasoning());
+        this.setReviewedBy(userId);
+        this.setReviewedAt(now);
+    }
+
+    public FoodReportResponse reportEntityToResponse(FoodReport report) {
+        return new FoodReportResponse(
+                report.getId(),
+                report.getFoodId(),
+                report.getUserId(),
+                report.getType(),
+                report.getReason(),
+                report.getStatus(),
+                report.getDescription(),
+                report.getProposedName(),
+                report.getProposedCalories(),
+                report.getProposedFat(),
+                report.getProposedCarbs(),
+                report.getProposedProtein(),
+                report.getDecisionReasoning(),
+                report.getReviewedBy(),
+                report.getReviewedAt()
         );
     }
 }

@@ -1,6 +1,7 @@
 package fi.nutrifier.entities;
 
 import fi.nutrifier.dto.UserFeedbackResponse;
+import fi.nutrifier.dto.UserFeedbackReviewRequest;
 import fi.nutrifier.enums.FeedbackStatus;
 import fi.nutrifier.enums.FeedbackType;
 import jakarta.persistence.*;
@@ -68,5 +69,15 @@ public class UserFeedback {
                 this.reviewedBy,
                 this.reviewedAt
         );
+    }
+
+    public void updateRequestToEntity(UUID userId, UserFeedbackReviewRequest request) {
+        this.type = request.getType();
+        this.title = request.getTitle();
+        this.message = request.getMessage();
+        this.status = request.getStatus();
+        this.decisionReasoning = request.getDecisionReasoning();
+        this.reviewedBy = userId;
+        this.reviewedAt = LocalDateTime.now();
     }
 }

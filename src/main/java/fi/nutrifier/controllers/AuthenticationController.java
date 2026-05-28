@@ -1,11 +1,10 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.LoginRequest;
-import fi.nutrifier.dto.LoginResponse;
-import fi.nutrifier.dto.RegisterRequest;
-import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.*;
 import fi.nutrifier.enums.Role;
 import fi.nutrifier.entities.User;
+import fi.nutrifier.exceptions.EncryptionKeyException;
+import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.utils.JwtTokenUtil;
 import com.nimbusds.jose.JOSEException;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Authentication")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class AuthenticationController {
 
     private final JwtTokenUtil jwtTokenUtil;
@@ -31,7 +30,7 @@ public class AuthenticationController {
 
     @Operation(summary = "Register to the application")
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest registerRequest) throws JOSEException {
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest registerRequest) throws JOSEException, FailedCryptionException, EncryptionKeyException {
         ResponseEntity<Boolean> response = userService.isEmailTaken(registerRequest.getEmail());
 
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
@@ -53,7 +52,7 @@ public class AuthenticationController {
 
     @Operation(summary = "Login to the application")
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws JOSEException {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws JOSEException, FailedCryptionException, EncryptionKeyException {
         ResponseEntity<UserResponse> response = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -63,6 +62,7 @@ public class AuthenticationController {
                 String token = jwtTokenUtil.generateToken(user.getId(), user.getRole());
 
                 LoginResponse loginResponse = new LoginResponse(token, user.getId());
+
                 return new ResponseEntity<>(loginResponse, HttpStatus.OK);
             }
         }
@@ -71,7 +71,7 @@ public class AuthenticationController {
     }
 
     @Operation(summary = "Validate authorization token")
-    @GetMapping("/validate")
+    @PostMapping("/validate")
     public ResponseEntity<String> validate(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         return jwtTokenUtil.validateToken(token)

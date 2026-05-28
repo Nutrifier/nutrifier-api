@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Tag(name = "User feedback (Admin)")
 @RestController
-@RequestMapping("/api/admin/user-feedback")
+@RequestMapping("/api/v1/admin/user-feedback")
 public class AdminUserFeedbackController {
 
     private final UserFeedbackService service;

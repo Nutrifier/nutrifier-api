@@ -1,8 +1,8 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.GoalsResponse;
 import fi.nutrifier.dto.GoalsUpdateRequest;
-import fi.nutrifier.entities.Goals;
-import fi.nutrifier.services.UserGoalsService;
+import fi.nutrifier.services.GoalsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,39 +15,39 @@ import java.util.UUID;
 
 @Tag(name = "Goals")
 @RestController
-@RequestMapping("/api/goals")
+@RequestMapping("/api/v1/goals")
 public class GoalsController {
 
-    private final UserGoalsService userGoalsService;
+    private final GoalsService goalsService;
 
-    public GoalsController(UserGoalsService userGoalsService) {
-        this.userGoalsService = userGoalsService;
+    public GoalsController(GoalsService goalsService) {
+        this.goalsService = goalsService;
     }
 
     @Operation(summary = "Get user's goals")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
-    public ResponseEntity<Goals> getGoals(Authentication authentication) {
+    public ResponseEntity<GoalsResponse> getGoals(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        return userGoalsService.getUserGoals(userId);
+        return goalsService.getUserGoals(userId);
     }
 
     @Operation(summary = "Update user goals")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PatchMapping
-    public ResponseEntity<Goals> updateGoals(
+    public ResponseEntity<GoalsResponse> updateGoals(
             Authentication authentication,
             @Valid @RequestBody GoalsUpdateRequest request
     ) {
         UUID userId = UUID.fromString(authentication.getName());
-        return userGoalsService.update(userId, request);
+        return goalsService.update(userId, request);
     }
 
-    @Operation(summary = "Calculate new meal plan")
+    @Operation(summary = "Recalculate nutrient targets")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @PostMapping("/calculate")
-    public ResponseEntity<Goals> calculate(Authentication authentication) {
+    @PostMapping("/recalculate")
+    public ResponseEntity<GoalsResponse> calculate(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        return userGoalsService.recalculateGoals(userId);
+        return goalsService.recalculateGoals(userId);
     }
 }

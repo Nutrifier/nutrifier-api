@@ -1,6 +1,8 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.nutrifier.dto.GoalsUpdateRequest;
+import fi.nutrifier.dto.SettingsUpdateRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,11 +26,8 @@ public class Settings {
     @Column(name = "user_id", columnDefinition = "CHAR(36)")
     private UUID userId;
 
-    @Column(name = "weight_unit", nullable = false, length = 5)
+    @Column(name = "weight_unit", nullable = false, length = 10)
     private String weightUnit;
-
-    @Column(name = "macro_weight_unit", nullable = false, length = 5)
-    private String macroWeightUnit;
 
     @Column(name = "energy_unit", nullable = false, length = 5)
     private String energyUnit;
@@ -65,7 +64,6 @@ public class Settings {
 
     public void initialize() {
         this.setWeightUnit("G");
-        this.setMacroWeightUnit("G");
         this.setEnergyUnit("KCAL");
         this.setNutrientDisplayMode("FULL_CIRCLE");
         this.setLanguage("EN");
@@ -77,5 +75,42 @@ public class Settings {
         this.setWeighInReminderEnabled(true);
         this.setMotivationMessagesEnabled(true);
         this.setUpdatedAt(LocalDateTime.now());
+    }
+
+    public void updateEntityFromRequest(SettingsUpdateRequest request) {
+        if (request.getWeightUnit() != null) {
+            this.weightUnit = request.getWeightUnit();
+        }
+        if (request.getEnergyUnit() != null) {
+            this.energyUnit = request.getEnergyUnit();
+        }
+        if (request.getNutrientDisplayMode() != null) {
+            this.nutrientDisplayMode = request.getNutrientDisplayMode();
+        }
+        if (request.getLanguage() != null) {
+            this.language = request.getLanguage();
+        }
+        if (request.getTimeBetweenMeals() != null) {
+            this.timeBetweenMeals = request.getTimeBetweenMeals();
+        }
+        if (request.getDiet() != null) {
+            this.diet = request.getDiet();
+        }
+        if (request.getWeekStartsOn() != null) {
+            this.weekStartsOn = request.getWeekStartsOn();
+        }
+        if (request.getProteinEfficiencyEnabled() != null) {
+            this.proteinEfficiencyEnabled = request.getProteinEfficiencyEnabled();
+        }
+        if (request.getMealReminderEnabled() != null) {
+            this.mealReminderEnabled = request.getMealReminderEnabled();
+        }
+        if (request.getWeighInReminderEnabled() != null) {
+            this.weighInReminderEnabled = request.getWeighInReminderEnabled();
+        }
+        if (request.getMotivationMessagesEnabled() != null) {
+            this.motivationMessagesEnabled = request.getMotivationMessagesEnabled();
+        }
+        this.updatedAt = LocalDateTime.now();
     }
 }

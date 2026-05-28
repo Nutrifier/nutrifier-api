@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.RecipeRequest;
 import fi.nutrifier.dto.RecipeResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -75,5 +76,17 @@ public class Recipe {
                 this.steps,
                 this.ingredientSections
         );
+    }
+
+    public void updateEntityFromRequest(RecipeRequest request) {
+        this.name = request.getName();
+        this.description = request.getDescription();
+        this.servings = request.getServings();
+        this.preparationTime = request.getPreparationTime();
+        this.isPublic = request.getIsPublic();
+        this.isForked = request.getIsForked();
+        this.updatedAt = LocalDateTime.now();
+        this.steps = request.getSteps();
+        this.ingredientSections = request.getIngredientSections();
     }
 }

@@ -1,7 +1,9 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.nutrifier.dto.MealRequest;
 import fi.nutrifier.dto.ProfileResponse;
+import fi.nutrifier.dto.ProfileUpdateRequest;
 import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.Sex;
 import jakarta.persistence.*;
@@ -46,5 +48,21 @@ public class Profile {
                 this.sex,
                 this.activityLevel
         );
+    }
+
+    public void updateEntityFromRequest(ProfileUpdateRequest request) {
+        if (request.getSex() != null) {
+            this.sex = request.getSex();
+        }
+        if (request.getAge() != null) {
+            this.age = request.getAge();
+        }
+        if (request.getHeight() != null) {
+            this.height = request.getHeight();
+        }
+        if (request.getActivityLevel() != null) {
+            this.activityLevel = request.getActivityLevel();
+        }
+        this.updatedAt = LocalDateTime.now();
     }
 }

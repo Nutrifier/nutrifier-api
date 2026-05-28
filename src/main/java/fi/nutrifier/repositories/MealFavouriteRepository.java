@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface MealFavouriteRepository extends JpaRepository<MealFavourite, UUID> {
     Optional<MealFavourite> findByUserIdAndMealId(UUID userId, UUID mealId);
-    List<MealFavourite> findByUserId(UUID userId);
+    Optional<List<MealFavourite>> findByUserId(UUID userId);
     void deleteByUserIdAndMealId(UUID userId, UUID mealId);
 }

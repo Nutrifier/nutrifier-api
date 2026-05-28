@@ -44,7 +44,9 @@ class AdminUserControllerIntegrationTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetAll_asAdmin_ReturnEmptyList() throws Exception {
-        mockMvc.perform(get(baseUrl))
+        mockMvc.perform(get(baseUrl)
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())

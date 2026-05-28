@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.SettingsUpdateRequest;
 import fi.nutrifier.entities.Settings;
 import fi.nutrifier.services.SettingsService;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Tag(name = "Settings")
 @RestController
-@RequestMapping("/api/settings")
+@RequestMapping("/api/v1/settings")
 public class SettingsController {
 
     private final SettingsService settingsService;

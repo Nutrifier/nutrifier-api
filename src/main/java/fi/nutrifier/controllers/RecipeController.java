@@ -1,9 +1,6 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.FoodReportCreateRequest;
-import fi.nutrifier.dto.RecipeReportCreateRequest;
-import fi.nutrifier.dto.RecipeRequest;
-import fi.nutrifier.dto.RecipeResponse;
+import fi.nutrifier.dto.*;
 import fi.nutrifier.services.RecipeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -18,7 +15,7 @@ import java.util.UUID;
 
 @Tag(name = "Recipes")
 @RestController
-@RequestMapping("/api/recipes")
+@RequestMapping("/api/v1/recipes")
 public class RecipeController {
 
     protected final RecipeService service;

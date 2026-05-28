@@ -15,6 +15,5 @@ public class GoalsUpdateRequest {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate targetDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate reachedDate;
+    private Boolean isReached;
 }

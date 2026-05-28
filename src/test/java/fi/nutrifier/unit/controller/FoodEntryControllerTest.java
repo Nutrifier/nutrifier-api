@@ -2,27 +2,21 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.FoodEntryController;
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.enums.MealType;
 import fi.nutrifier.services.FoodEntryService;
-import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
-import fi.nutrifier.utils.JwtTokenUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
@@ -52,7 +46,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
     @WithMockUser
     public void testCreateLog_ReturnCreated() throws Exception {
         when(service.create(any(UUID.class), any(FoodEntryRequest.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.foodEntry1.toResponse(), HttpStatus.CREATED));
+                .thenReturn(new ApiResponse<>(TestObjects.foodEntry1.toResponse(), HttpStatus.CREATED));
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -95,11 +89,11 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
     @WithMockUser
     public void testUpdateLog_ReturnFood() throws Exception {
         TestObjects.foodEntry1.setAmount(100.0);
-        TestObjects.foodEntry1.setMealType("SNACKS");
+        TestObjects.foodEntry1.setMealType(MealType.SNACKS);
 
         // Use eq(1L) to match the exact ID and any(Log.class) to allow any User instance.
         when(service.update(eq(TestObjects.id1), eq(TestObjects.id), any(FoodEntry.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.foodEntry1.toResponse(), HttpStatus.OK));
+                .thenReturn(new ApiResponse<>(TestObjects.foodEntry1.toResponse(), HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -128,7 +122,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
             roles = "USER"
     )
     public void testDeleteLog_ReturnEmpty() throws Exception {
-        when(service.delete(TestObjects.id1, TestObjects.id)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+        when(service.delete(TestObjects.id1, TestObjects.id)).thenReturn(new ApiResponse<>(HttpStatus.OK));
         MvcResult result = mockMvc.perform(delete(baseUrl + "/{id}", TestObjects.id.toString()))
                 .andExpect(status().isOk()).andReturn();
 
@@ -152,7 +146,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
         foodEntries.add(TestObjects.foodEntry2.toResponse());
 
         when(service.getLogsByDateAndUser(TestObjects.date, TestObjects.id1))
-                .thenReturn(new ResponseEntity<>(foodEntries, HttpStatus.OK));
+                .thenReturn(new ApiResponse<>(foodEntries, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/by-date")
                 .param("date", TestObjects.date.toString())

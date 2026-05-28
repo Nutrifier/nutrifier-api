@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers.admin;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.services.FoodEntryService;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Tag(name = "Food Entries (Admin)")
 @RestController
-@RequestMapping("/api/admin/food-entries")
+@RequestMapping("/api/v1/admin/food-entries")
 public class AdminFoodEntryController {
 
     private final FoodEntryService service;

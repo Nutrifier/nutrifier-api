@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
@@ -17,7 +18,7 @@ import java.util.UUID;
 
 @Tag(name = "Food Entries")
 @RestController
-@RequestMapping("/api/food-entries")
+@RequestMapping("/api/v1/food-entries")
 public class FoodEntryController {
 
     protected final FoodEntryService service;
@@ -52,7 +53,7 @@ public class FoodEntryController {
     @Operation(summary = "Delete log")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @DeleteMapping("/{id}")
-    public ResponseEntity<FoodEntryResponse> delete(Authentication authentication, @PathVariable("id") String id) {
+    public ResponseEntity<String> delete(Authentication authentication, @PathVariable("id") String id) {
         UUID userId = UUID.fromString(authentication.getName());
         return service.delete(userId, UUID.fromString(id));
     }
@@ -67,5 +68,16 @@ public class FoodEntryController {
         UUID userId = UUID.fromString(authentication.getName());
         LocalDate parsedDate = LocalDate.parse(date);
         return service.getLogsByDateAndUser(parsedDate, userId);
+    }
+
+    @Operation(summary = "Recalculate nutrient snapshots with new nutrient values")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @PostMapping("/recalculate")
+    public ResponseEntity<FoodEntryResponse> recalculateSnapshots(
+            Authentication authentication,
+            @RequestParam String id
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.recalculateSnapshots(userId, UUID.fromString(id));
     }
 }

@@ -4,7 +4,6 @@ import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.entities.Food;
-import fi.nutrifier.mappers.FoodMapper;
 import fi.nutrifier.repositories.FoodRepository;
 import fi.nutrifier.services.FoodService;
 import fi.nutrifier.unit.utils.TestObjects;

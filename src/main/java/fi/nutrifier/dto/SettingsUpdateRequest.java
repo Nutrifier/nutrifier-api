@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SettingsUpdateRequest {
     private String weightUnit;
-    private String macroWeightUnit;
     private String energyUnit;
     private String nutrientDisplayMode;
     private String language;

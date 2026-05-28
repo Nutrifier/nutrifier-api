@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Meals (Admin)")
 @RestController
-@RequestMapping("/api/admin/meals")
+@RequestMapping("/api/v1/admin/meals")
 public class AdminMealController {
 
     private final MealService service;

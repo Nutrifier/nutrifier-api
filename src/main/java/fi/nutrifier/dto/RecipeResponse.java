@@ -4,12 +4,15 @@ import fi.nutrifier.entities.RecipeIngredientSection;
 import fi.nutrifier.entities.RecipeStep;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.util.List;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
-public class RecipeResponse {
+public class RecipeResponse extends ApiResponse {
     private UUID id;
     private UUID userId;
     private String name;

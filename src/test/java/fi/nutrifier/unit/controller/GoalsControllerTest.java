@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(GoalsController.class)
 @ActiveProfiles("test")
-public class GoalsControllerTest extends ControllerTestInterface<UserGoalsService> {
+public class GoalsControllerTest extends ControllerTestInterface<GoalsService> {
 
     protected GoalsControllerTest() {
         super("/api/goals");
@@ -34,7 +34,7 @@ public class GoalsControllerTest extends ControllerTestInterface<UserGoalsServic
     @WithMockUser
     public void testGetUsersGoals_ReturnOk() throws Exception {
         when(service.getUserGoals(any(UUID.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.goals, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.goals.toResponse(), HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ public class GoalsControllerTest extends ControllerTestInterface<UserGoalsServic
         TestObjects.goals.setTargetWeight(140.0);
 
         when(service.update(any(UUID.class), any(GoalsUpdateRequest.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.goals, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.goals.toResponse(), HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +91,7 @@ public class GoalsControllerTest extends ControllerTestInterface<UserGoalsServic
     @WithMockUser
     public void testCalculate_ReturnOk() throws Exception {
         when(service.recalculateGoals(any(UUID.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.goals, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.goals.toResponse(), HttpStatus.OK));
 
         mockMvc.perform(post(baseUrl + "/calculate")
                         .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))

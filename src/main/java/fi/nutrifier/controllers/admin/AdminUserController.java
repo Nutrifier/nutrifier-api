@@ -1,6 +1,10 @@
 package fi.nutrifier.controllers.admin;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.UserUpdateRequest;
+import fi.nutrifier.exceptions.EncryptionKeyException;
+import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -15,7 +19,7 @@ import java.util.UUID;
 
 @Tag(name = "User Profile (Admin)")
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/v1/admin/users")
 public class AdminUserController {
 
     private final UserService service;
@@ -37,14 +41,14 @@ public class AdminUserController {
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getById(@PathVariable("id") String id) {
+    public ResponseEntity<UserResponse> getById(@PathVariable("id") String id) throws FailedCryptionException, EncryptionKeyException {
         return service.getById(UUID.fromString(id));
     }
 
     @Operation(summary = "Update user")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable("id") String id, @Valid @RequestBody UserResponse item) {
+    public ResponseEntity<UserResponse> update(@PathVariable("id") String id, @Valid @RequestBody UserUpdateRequest item) throws FailedCryptionException, EncryptionKeyException {
         return service.update(UUID.fromString(id), item);
     }
 

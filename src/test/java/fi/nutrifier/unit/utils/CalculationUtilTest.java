@@ -1,6 +1,7 @@
 package fi.nutrifier.unit.utils;
 
 import fi.nutrifier.enums.ActivityLevel;
+import fi.nutrifier.enums.FoodWeightUnit;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Sex;
 import fi.nutrifier.utils.CalculationUtil;
@@ -82,7 +83,7 @@ public class CalculationUtilTest {
         void dailyCalories_ShouldClampToSafetyFloor(Sex sex, double floor) {
             double tdee = 1300.0;
             LocalDate tomorrow = LocalDate.now().plusDays(1);
-            double result = CalculationUtil.calculateDailyCalories(tomorrow, 40, GoalType.LOOSE_WEIGHT, 100, tdee, sex);
+            double result = CalculationUtil.calculateDailyCalories(tomorrow, 40, GoalType.CUT, 100, tdee, sex);
             assertEquals(floor, result, DELTA);
         }
 
@@ -91,7 +92,7 @@ public class CalculationUtilTest {
             double tdee = 3000.0;
             // Target is tomorrow, 100kg loss. Normally massive deficit, but capped at 700.
             LocalDate tomorrow = LocalDate.now().plusDays(1);
-            double result = CalculationUtil.calculateDailyCalories(tomorrow, 50, GoalType.LOOSE_WEIGHT, 150, tdee, Sex.MALE);
+            double result = CalculationUtil.calculateDailyCalories(tomorrow, 50, GoalType.CUT, 150, tdee, Sex.MALE);
             assertEquals(2300.0, result, DELTA);
         }
     }
@@ -102,16 +103,16 @@ public class CalculationUtilTest {
         @Test
         void loseWeight_ShouldHaveHigherProteinThanMaintain() {
             double weight = 70.0;
-            double pLoss = CalculationUtil.calculateDailyProtein(GoalType.LOOSE_WEIGHT, weight);
-            double pMaintain = CalculationUtil.calculateDailyProtein(GoalType.MAINTAIN_WEIGHT, weight);
+            double pLoss = CalculationUtil.calculateDailyProtein(GoalType.CUT, weight);
+            double pMaintain = CalculationUtil.calculateDailyProtein(GoalType.MAINTAIN, weight);
             assertTrue(pLoss > pMaintain, "Weight loss must prioritize protein");
         }
 
         @Test
         void macrosShouldSumToCalorieGoal() {
-            assertMacrosAreValid(GoalType.LOOSE_WEIGHT, 56.0, 220.0, 154.0);
-            assertMacrosAreValid(GoalType.GAIN_MUSCLE, 56.0, 234.0, 140.0);
-            assertMacrosAreValid(GoalType.MAINTAIN_WEIGHT, 60.0, 260.0, 105.0);
+            assertMacrosAreValid(GoalType.CUT, 56.0, 220.0, 154.0);
+            assertMacrosAreValid(GoalType.BULK, 56.0, 234.0, 140.0);
+            assertMacrosAreValid(GoalType.MAINTAIN, 60.0, 260.0, 105.0);
         }
 
         private void assertMacrosAreValid(GoalType goal, double expectedFats, double expectedCarbs, double expectedProtein) {
@@ -129,6 +130,59 @@ public class CalculationUtilTest {
             assertEquals(expectedFats, dailyFats, 0.01, "Fats calculation mismatch");
             assertEquals(expectedProtein, dailyProtein, 0.01, "Protein calculation mismatch");
             assertEquals(expectedCarbs, dailyCarbs, 0.01, "Carbs calculation mismatch");
+        }
+    }
+
+    @Nested
+    @DisplayName("Amount Normalization (grams only)")
+    class NormalizationTests {
+
+        private static final double DELTA = 1e-6;
+
+        @ParameterizedTest(name = "{1}g with {0}/100g → {2}g")
+        @CsvSource({
+                "100.0, 100.0, 100.0",
+                "100.0, 50.0, 50.0",
+                "50.0, 100.0, 50.0",
+                "50.0, 50.0, 25.0",
+                "100.0, 0.0, 0.0",
+                "0.0, 100.0, 0.0",
+                "100.0, 0.001, 0.001",
+                "100.0, 10000.0, 10000.0"
+        })
+        void shouldNormalizeCorrectly(double nutritionPer100g, double grams, double expected) {
+            double result = CalculationUtil.calculateAmountFromRequest(
+                    nutritionPer100g,
+                    grams,
+                    FoodWeightUnit.GRAMS
+            );
+
+            assertEquals(expected, result, DELTA);
+        }
+    }
+
+    @Nested
+    @DisplayName("Amount Calculation Integration")
+    class IntegrationTests {
+
+        private static final double DELTA = 1e-4;
+
+        @ParameterizedTest(name = "{1} {2} with {0}/100g → {3}g")
+        @CsvSource({
+                "100.0, 100.0, GRAMS, 100.0",
+                "100.0, 0.2204623, POUNDS, 100.0",
+                "100.0, 3.5273962, OUNCES, 100.0",
+                "50.0, 0.11023115, POUNDS, 25.0",
+                "50.0, 1.7636981, OUNCES, 25.0"
+        })
+        void shouldCalculateAmountCorrectly(double nutritionPer100g, double amount, FoodWeightUnit unit, double expected) {
+            double result = CalculationUtil.calculateAmountFromRequest(
+                    nutritionPer100g,
+                    amount,
+                    unit
+            );
+
+            assertEquals(expected, result, DELTA);
         }
     }
 }

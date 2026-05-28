@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.entities.WeightEntry;
 import fi.nutrifier.services.UserWeightService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Weight")
+@Tag(name = "Weights")
 @RestController
-@RequestMapping("/api/weight")
+@RequestMapping("/api/v1/weight")
 public class WeightController {
 
     private final UserWeightService userWeightService;

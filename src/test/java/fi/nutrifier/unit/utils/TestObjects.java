@@ -3,7 +3,6 @@ package fi.nutrifier.unit.utils;
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
 import fi.nutrifier.enums.*;
-import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,7 +48,7 @@ public class TestObjects {
 
     public static UserFeedback userFeedback;
 
-    public static DailyNutritionSummary dailyNutritionSummary;
+    public static DailySummaryResponse dailySummary;
 
     public static Settings settings;
 
@@ -71,7 +70,7 @@ public class TestObjects {
                 18,
                 180,
                 ActivityLevel.SEDENTARY,
-                GoalType.GAIN_MUSCLE,
+                GoalType.BULK,
                 80.0,
                 85.0,
                 LocalDate.of(now.plusYears(1).getYear(), 1, 1)
@@ -89,9 +88,9 @@ public class TestObjects {
         foodReport1 = new FoodReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Incorrect values", ReportStatus.APPROVED, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, "decision reasoning", id2, now, now);
         foodReport2 = new FoodReport(id2, id2, id2, ReportType.REPORT, "Bad name", ReportStatus.PENDING, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, null, null, null, now);
 
-        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), "BREAKFAST", "g", 120.0, 12.0, 50.0, 24.0, null, id1, id1);
-        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), "LUNCH", "g", 120.0, 12.0, 50.0, 24.0, null, id2, id2);
-        foodEntry3 = new FoodEntry(id3, 150.0, date, LocalTime.of(13,0, 0), "LUNCH", "g", 120.0, 12.0, 50.0, 24.0, null, id3, id3);
+        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
+        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
+        foodEntry3 = new FoodEntry(id3, 150.0, date, LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
 
         auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
         auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);
@@ -112,14 +111,12 @@ public class TestObjects {
 
         userFeedback = new UserFeedback(id1, id1, FeedbackType.BUG, "My feedback", "message", FeedbackStatus.PENDING, null, null, null, now);
 
-        dailyNutritionSummary = new DailyNutritionSummary(id1, id1, today, 120.0, 50.0, 200.0, 150.0, 120.0, 50.0, 200.0, 150.0, now, now);
+        dailySummary = new DailySummaryResponse(120.0, 50.0, 200.0, 150.0);
 
         settings = new Settings();
         settings.initialize();
 
-        List<GoalPeriod> periods = new ArrayList<>();
-        periods.add(new GoalPeriod(id1, null, "period type", today, today.plusYears(1), 100.0, 20.0, 20.0, 20.0, now, now));
-        goals = new Goals(id1, id1, GoalType.JUST_FOR_FUN, today, 60.0, today.plusYears(1), 80.0, null, now, now, periods);
+        goals = new Goals(id1, id1, GoalType.MAINTAIN, today, today.plusYears(1), 60.0, 80.0, false, 2400.0, -300.0, 1500.0, 40.0, 70.0, 50.0, now, now);
 
         List<WeightEntry> newWeightEntries = new ArrayList<>();
         newWeightEntries.add(new WeightEntry(id1, id1, 70.0, LocalDateTime.now()));

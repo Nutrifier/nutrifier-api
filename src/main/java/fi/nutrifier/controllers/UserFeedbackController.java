@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.UserFeedbackCreateRequest;
 import fi.nutrifier.services.UserFeedbackService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "User feedback")
+@Tag(name = "User Feedbacks")
 @RestController
-@RequestMapping("/api/user-feedback")
+@RequestMapping("/api/v1/user-feedback")
 public class UserFeedbackController {
 
     protected final UserFeedbackService service;

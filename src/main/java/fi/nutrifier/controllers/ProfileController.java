@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.ProfileResponse;
 import fi.nutrifier.dto.ProfileUpdateRequest;
 import fi.nutrifier.services.ProfileService;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Tag(name = "Profile")
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/api/v1/profile")
 public class ProfileController {
 
     private final ProfileService service;

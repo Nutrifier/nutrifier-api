@@ -1,5 +1,6 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.MealRequest;
 import fi.nutrifier.dto.MealResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -61,5 +62,13 @@ public class Meal {
                 this.isForked,
                 this.entries
         );
+    }
+
+    public void updateEntityFromRequest(MealRequest request) {
+        this.name = request.getName();
+        this.isPublic = request.getIsPublic();
+        this.isForked = request.getIsForked();
+        this.updatedAt = LocalDateTime.now();
+        this.entries = request.getEntries();
     }
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Tag(name = "Meals")
 @RestController
-@RequestMapping("/api/meals")
+@RequestMapping("/api/v1/meals")
 public class MealController {
 
     protected final MealService service;

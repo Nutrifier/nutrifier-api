@@ -3,6 +3,7 @@ package fi.nutrifier.unit.service;
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Role;
@@ -64,7 +65,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testSaveUser_ReturnsUser() {
+    public void testSaveUser_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
         when(repository.save(any(User.class))) .thenAnswer(invocation -> invocation.getArgument(0));
         when(userSettingsRepository.save(any(Settings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -75,7 +76,7 @@ public class UserServiceTest {
                 20,
                 170,
                 ActivityLevel.SEDENTARY,
-                GoalType.JUST_FOR_FUN,
+                GoalType.MAINTAIN,
                 50.0,
                 50.0,
                 LocalDate.now()
@@ -138,11 +139,11 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testUpdateUser_ReturnsUser() {
+    public void testUpdateUser_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
         when(repository.save(any(User.class))).thenReturn(TestObjects.user1.toUser());
 
-        ResponseEntity<UserResponse> response = service.update(TestObjects.id, TestObjects.user1);
+        ResponseEntity<UserResponse> response = service.update(TestObjects.id, new UserUpdateRequest(TestObjects.user1.getEmail()));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -161,7 +162,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testLoginSuccess() {
+    public void testLoginSuccess() throws FailedCryptionException, EncryptionKeyException {
         // Service expects a hashed password
         User user = TestObjects.user1.toUser();
         String hashedPassword = SecurityUtil.hashPassword("password");

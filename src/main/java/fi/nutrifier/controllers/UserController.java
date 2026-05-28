@@ -1,7 +1,10 @@
 package fi.nutrifier.controllers;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.entities.User;
+import fi.nutrifier.exceptions.EncryptionKeyException;
+import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -15,7 +18,7 @@ import java.util.UUID;
 
 @Tag(name = "User Profile")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService service;
@@ -27,7 +30,7 @@ public class UserController {
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @GetMapping
-    public ResponseEntity<UserResponse> getById(Authentication authentication) {
+    public ResponseEntity<UserResponse> getById(Authentication authentication) throws FailedCryptionException, EncryptionKeyException {
         UUID userId = UUID.fromString(authentication.getName());
         return service.getById(userId);
     }

@@ -54,7 +54,7 @@ class UserControllerIntegrationTest {
                 20,
                 170,
                 ActivityLevel.SEDENTARY,
-                GoalType.JUST_FOR_FUN,
+                GoalType.MAINTAIN,
                 50.0,
                 50.0,
                 LocalDate.now().plusYears(1)
@@ -77,7 +77,6 @@ class UserControllerIntegrationTest {
         mockMvc.perform(get("/api/users")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(userId))
-            .andExpect(jsonPath("$.settings").exists());
+            .andExpect(jsonPath("$.id").value(userId));
     }
 }

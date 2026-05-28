@@ -1,9 +1,6 @@
 package fi.nutrifier.controllers.admin;
 
-import fi.nutrifier.dto.FoodReportResponse;
-import fi.nutrifier.dto.FoodReportReviewRequest;
-import fi.nutrifier.dto.FoodRequest;
-import fi.nutrifier.dto.FoodResponse;
+import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.Food;
 import fi.nutrifier.services.FoodService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +17,7 @@ import java.util.UUID;
 
 @Tag(name = "Foods (Admin)")
 @RestController
-@RequestMapping("/api/admin/foods")
+@RequestMapping("/api/v1/admin/foods")
 public class AdminFoodController {
 
     private final FoodService service;
@@ -44,7 +41,7 @@ public class AdminFoodController {
     @Operation(summary = "Delete food")
     @SecurityRequirement(name = "bearerAuth", scopes = { "admin" })
     @DeleteMapping("/{id}")
-    public ResponseEntity<FoodResponse> delete(@PathVariable("id") String id) {
+    public ResponseEntity<String> delete(@PathVariable("id") String id) {
         return service.delete(UUID.fromString(id));
     }
 

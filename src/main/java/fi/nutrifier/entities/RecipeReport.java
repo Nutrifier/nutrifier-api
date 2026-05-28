@@ -1,6 +1,8 @@
 package fi.nutrifier.entities;
 
+import fi.nutrifier.dto.RecipeReportCreateRequest;
 import fi.nutrifier.dto.RecipeReportResponse;
+import fi.nutrifier.dto.RecipeReportReviewRequest;
 import fi.nutrifier.enums.ReportStatus;
 import fi.nutrifier.enums.ReportType;
 import jakarta.persistence.*;
@@ -71,5 +73,11 @@ public class RecipeReport {
                 this.reviewedBy,
                 this.reviewedAt
         );
+    }
+
+    public void reportUpdateRequestToEntity(UUID userId, RecipeReportReviewRequest request) {
+        this.decisionReasoning = request.getDecisionReasoning();
+        this.reviewedBy = userId;
+        this.reviewedAt = LocalDateTime.now();
     }
 }

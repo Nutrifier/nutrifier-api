@@ -3,7 +3,6 @@ package fi.nutrifier.services;
 import fi.nutrifier.dto.AuditRequest;
 import fi.nutrifier.dto.AuditResponse;
 import fi.nutrifier.entities.AuditLog;
-import fi.nutrifier.mappers.AuditMapper;
 import fi.nutrifier.repositories.AuditRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,72 +17,50 @@ import java.util.UUID;
 public class AuditService {
 
     private final AuditRepository repository;
-    private final AuditMapper mapper;
 
     @Autowired
-    public AuditService(AuditRepository repository, AuditMapper mapper) {
+    public AuditService(AuditRepository repository) {
         this.repository = repository;
-        this.mapper = mapper;
     }
 
     public ResponseEntity<String> create(AuditRequest request, UUID userId) {
-        try {
-            AuditLog saved = repository.save(mapper.toEntity(userId, request));
-            return new ResponseEntity<>(HttpStatus.CREATED); // No need to return audit logs, just saving in the background
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        repository.save(request.toEntity(userId));
+        return new ResponseEntity<>(HttpStatus.CREATED); // No need to return audit logs, just saving in the background
     }
 
     public ResponseEntity<Page<AuditResponse>> getAll(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<AuditLog> entityPage = repository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
+        Page<AuditResponse> dtoPage = repository.findAll(pageRequest).map(AuditLog::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<Page<AuditResponse>> getAllByUserId(UUID userId, Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<AuditLog> entityPage = repository.findAuditLogsByUserId(userId, pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
+        Page<AuditResponse> dtoPage = repository.findAuditLogsByUserId(userId, pageRequest).map(AuditLog::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<Page<AuditResponse>> getAllByCategory(String category, Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<AuditLog> entityPage = repository.findAuditLogsByCategory(category, pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
+        Page<AuditResponse> dtoPage = repository
+                .findAuditLogsByCategory(category, pageRequest)
+                .map(AuditLog::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<Page<AuditResponse>> getAllByUserIdAndCategory(UUID userId, String category, Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<AuditLog> entityPage = repository.findAuditLogsByUserIdAndCategory(userId, category, pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<AuditResponse> dtoPage = entityPage.map(AuditLog::toResponse);
+        Page<AuditResponse> dtoPage = repository
+                .findAuditLogsByUserIdAndCategory(userId, category, pageRequest)
+                .map(AuditLog::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 }

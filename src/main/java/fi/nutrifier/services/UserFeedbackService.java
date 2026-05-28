@@ -2,7 +2,7 @@ package fi.nutrifier.services;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.mappers.UserFeedbackMapper;
+import fi.nutrifier.exceptions.UserFeedbackNotFoundException;
 import fi.nutrifier.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,55 +17,31 @@ import java.util.UUID;
 public class UserFeedbackService {
 
     private final UserFeedbackRepository repository;
-    private final UserFeedbackMapper mapper;
 
     @Autowired
-    public UserFeedbackService(
-            UserFeedbackRepository repository,
-            UserFeedbackMapper mapper
-    ) {
+    public UserFeedbackService(UserFeedbackRepository repository) {
         this.repository = repository;
-        this.mapper = mapper;
     }
 
     public ResponseEntity<String> createFeedback(UUID userId, UserFeedbackCreateRequest request) {
-        try {
-            UserFeedback feedback = mapper.toEntity(userId, request);
-            repository.save(feedback);
-
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        repository.save(request.toEntity(userId));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> reviewFeedback(UUID feedbackId, UUID userId, UserFeedbackReviewRequest request) {
-        try {
-            UserFeedback existing = repository.findById(feedbackId).orElse(null);
+        UserFeedback existing = repository.findById(feedbackId).orElseThrow(UserFeedbackNotFoundException::new);
 
-            if (existing != null) {
-                mapper.updateRequestToEntity(userId, request, existing);
-                repository.save(existing);
+        existing.updateRequestToEntity(userId, request);
+        repository.save(existing);
 
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<Page<UserFeedbackResponse>> getAllFeedbacks(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<UserFeedback> feedbackPage = repository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<UserFeedbackResponse> dtoPage = feedbackPage.map(mapper::toResponse);
+        Page<UserFeedbackResponse> dtoPage = repository.findAll(pageRequest).map(UserFeedback::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 }

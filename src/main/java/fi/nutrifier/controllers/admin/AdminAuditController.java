@@ -1,5 +1,6 @@
 package fi.nutrifier.controllers.admin;
 
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.AuditResponse;
 import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.dto.FoodResponse;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 @Tag(name = "Audit (Admin)")
 @RestController
-@RequestMapping("/api/admin/audit")
+@RequestMapping("/api/v1/admin/audit")
 public class AdminAuditController {
 
     private final AuditService service;

@@ -2,7 +2,7 @@ package fi.nutrifier.services;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.mappers.MealMapper;
+import fi.nutrifier.exceptions.MealNotFoundException;
 import fi.nutrifier.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,108 +20,74 @@ public class MealService {
 
     private final MealRepository repository;
     private final MealFavouriteRepository favouriteRepository;
-    private final MealMapper mapper;
 
     @Autowired
     public MealService(
             MealRepository repository,
-            MealFavouriteRepository favouriteRepository,
-            MealMapper mapper
+            MealFavouriteRepository favouriteRepository
     ) {
         this.repository = repository;
         this.favouriteRepository = favouriteRepository;
-        this.mapper = mapper;
     }
 
     public ResponseEntity<MealResponse> create(MealRequest request, UUID userId) {
-        try {
-            Meal saved = repository.save(mapper.toEntity(userId, request));
-            return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        Meal saved = repository.save(request.toEntity(userId));
+        return new ResponseEntity<>(saved.toResponse(), HttpStatus.CREATED);
     }
 
     public ResponseEntity<Page<MealResponse>> getAll(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<Meal> foodPage = repository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<MealResponse> dtoPage = foodPage.map(mapper::toResponse);
+        Page<MealResponse> dtoPage = repository.findAll(pageRequest).map(Meal::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<MealResponse> getById(UUID id) {
-        try {
-            Meal data = repository.findById(id).orElse(null);
-            if (data == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(mapper.toResponse(data), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        Meal data = repository.findById(id).orElseThrow(MealNotFoundException::new);
+        return new ResponseEntity<>(data.toResponse(), HttpStatus.OK);
     }
 
     // TODO: Let only owner update the meal, otherwise create a private copy
     public ResponseEntity<MealResponse> update(UUID id, UUID userId, MealRequest request) {
-        try {
-            Meal existing = repository.findById(id).orElse(null);
+        Meal existing = repository.findById(id).orElseThrow(MealNotFoundException::new);
 
-            if (existing != null) {
-                mapper.updateEntityFromRequest(request, existing);
+        existing.updateEntityFromRequest(request);
+        Meal saved = repository.save(existing);
 
-                Meal saved = repository.save(existing);
-                return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(saved.toResponse(), HttpStatus.OK);
     }
 
     public ResponseEntity<MealResponse> delete(UUID id) {
-        try {
-            repository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!repository.existsById(id)) {
+            throw new MealNotFoundException();
         }
+
+        repository.deleteById(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> markAsFavourite(UUID mealId, UUID userId) {
-        try {
-            MealFavourite favourite = new MealFavourite(userId, mealId, LocalDateTime.now());
-            favouriteRepository.save(favourite);
+        MealFavourite favourite = new MealFavourite(userId, mealId, LocalDateTime.now());
 
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        favouriteRepository.save(favourite);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> removeFavourite(UUID mealId, UUID userId) {
-        try {
-            favouriteRepository.deleteByUserIdAndMealId(userId, mealId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        favouriteRepository.deleteByUserIdAndMealId(userId, mealId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<List<MealResponse>> getAllFavourites(UUID userId) {
-        try {
-            List<MealFavourite> favourites = favouriteRepository.findByUserId(userId);
-            List<Meal> foods = repository.findAllById(favourites.stream().map(MealFavourite::getMealId).toList());
-            List<MealResponse> mapped = foods.stream().map(mapper::toResponse).toList();
+        List<UUID> favouriteIds = favouriteRepository.findByUserId(userId)
+                .orElseThrow(() -> new MealNotFoundException("Favourite meal not found"))
+                .stream().map(MealFavourite::getMealId).toList();
 
-            return new ResponseEntity<>(mapped, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        List<MealResponse> mapped = repository.findAllById(favouriteIds).stream().map(Meal::toResponse).toList();
+
+        return new ResponseEntity<>(mapped, HttpStatus.OK);
     }
 }

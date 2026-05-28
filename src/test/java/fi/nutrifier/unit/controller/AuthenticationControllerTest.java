@@ -2,6 +2,7 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.AuthenticationController;
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.LoginRequest;
 import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.enums.Role;
@@ -38,8 +39,8 @@ public class AuthenticationControllerTest extends ControllerTestInterface<UserSe
         UUID id = UUID.randomUUID();
         TestObjects.user1.setId(id); // Mock id generation
 
-        when(service.isEmailTaken(anyString())).thenReturn(new ResponseEntity<>(false, HttpStatus.NOT_FOUND));
-        when(service.create(any(RegisterRequest.class))).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.CREATED));
+        when(service.isEmailTaken(anyString())).thenReturn(new ApiResponse<>(false, HttpStatus.NOT_FOUND));
+        when(service.create(any(RegisterRequest.class))).thenReturn(new ApiResponse<>(TestObjects.user1, HttpStatus.CREATED));
         when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post(baseUrl + "/register")
@@ -55,7 +56,7 @@ public class AuthenticationControllerTest extends ControllerTestInterface<UserSe
         UUID id = UUID.randomUUID();
         TestObjects.user1.setId(id); // Mock id generation
 
-        when(service.login(anyString(), anyString())).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
+        when(service.login(anyString(), anyString())).thenReturn(new ApiResponse<>(TestObjects.user1, HttpStatus.OK));
         when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post(baseUrl + "/login")

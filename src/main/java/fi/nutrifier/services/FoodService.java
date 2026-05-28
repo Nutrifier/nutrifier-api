@@ -5,11 +5,13 @@ import fi.nutrifier.entities.Food;
 import fi.nutrifier.entities.FoodFavourite;
 import fi.nutrifier.entities.FoodReport;
 import fi.nutrifier.entities.FoodUsage;
-import fi.nutrifier.mappers.FoodMapper;
+import fi.nutrifier.enums.ResponseCode;
+import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.repositories.FoodFavouriteRepository;
 import fi.nutrifier.repositories.FoodReportRepository;
 import fi.nutrifier.repositories.FoodRepository;
 import fi.nutrifier.repositories.FoodUsageRepository;
+import fi.nutrifier.utils.CalculationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,204 +31,162 @@ public class FoodService {
     private final FoodFavouriteRepository favouriteRepository;
     private final FoodReportRepository reportRepository;
     private final FoodUsageRepository usageRepository;
-    private final FoodMapper mapper;
 
     @Autowired
     public FoodService(
             FoodRepository repository,
             FoodFavouriteRepository favouriteRepository,
             FoodReportRepository reportRepository,
-            FoodUsageRepository usageRepository,
-            FoodMapper mapper
+            FoodUsageRepository usageRepository
     ) {
         this.repository = repository;
         this.favouriteRepository = favouriteRepository;
         this.reportRepository = reportRepository;
         this.usageRepository = usageRepository;
-        this.mapper = mapper;
     }
 
     public ResponseEntity<FoodResponse> create(FoodRequest foodRequest, UUID userId) {
-        try {
-            Food saved = repository.save(mapper.toEntity(userId, foodRequest));
-            return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        double calculatedCalories = CalculationUtil.calculateCaloriesFromMacros(
+                foodRequest.getFat(),
+                foodRequest.getCarbs(),
+                foodRequest.getProtein()
+        );
+
+        double calorieSpreadMax = calculatedCalories + 100;
+        double calorieSpreadMin = calculatedCalories - 100;
+
+        Food saved = repository.save(foodRequest.toEntity(userId));
+        FoodResponse response = saved.toResponse();
+        response.setMessage(ResponseCode.MACRO_TO_CALORIE_CALCULATION_DIFFERED_FROM_INPUTTED_CALORIES.name());
+
+        if (saved.getCalories() > calorieSpreadMax || saved.getCalories() < calorieSpreadMin) {
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Page<FoodResponse>> getAll(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<Food> foodPage = repository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<FoodResponse> dtoPage = foodPage.map(mapper::toResponse);
+        Page<FoodResponse> dtoPage = repository.findAll(pageRequest).map(Food::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<FoodResponse> getById(UUID id) {
-        try {
-            Food data = repository.findById(id).orElse(null);
-            if (data == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(mapper.toResponse(data), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        Food data = repository.findById(id).orElseThrow(FoodNotFoundException::new);
+
+        return new ResponseEntity<>(data.toResponse(), HttpStatus.OK);
     }
 
     public ResponseEntity<FoodResponse> update(UUID id, UUID userId, FoodRequest foodRequest) {
-        try {
-            Food existing = repository.findById(id).orElse(null);
+        Food existing = repository.findById(id).orElseThrow(FoodNotFoundException::new);
 
-            if (existing != null) {
-                mapper.updateEntityFromRequest(foodRequest, existing);
-                existing.setUpdatedBy(userId);
+        existing.updateEntityFromRequest(foodRequest);
+        existing.setUpdatedBy(userId);
 
-                Food saved = repository.save(existing);
-                return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            System.out.println("service error: " + e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        Food saved = repository.save(existing);
+
+        return new ResponseEntity<>(saved.toResponse(), HttpStatus.OK);
     }
 
-    public ResponseEntity<FoodResponse> delete(UUID id) {
-        try {
-            repository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> delete(UUID id) {
+        if (!repository.existsById(id)) {
+            throw new FoodNotFoundException();
         }
+
+        repository.deleteById(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<Page<FoodResponse>> getFoodsByQuery(Integer page, Integer size, String query) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<Food> foodPage = repository.findFoodsByNameContainingIgnoreCase(query, pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<FoodResponse> dtoPage = foodPage.map(mapper::toResponse);
+        Page<FoodResponse> dtoPage = repository
+                .findFoodsByNameContainingIgnoreCase(query, pageRequest)
+                .map(Food::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<List<FoodResponse>> getFoodsByBarcode(String query) {
-        try {
-            List<Food> foods = repository.findFoodsByBarcodeContainingIgnoreCase(query);
-            List<FoodResponse> mapped = foods.stream().map(mapper::toResponse).toList();
+        List<FoodResponse> mapped = repository
+                .findFoodsByBarcodeContainingIgnoreCase(query)
+                .stream()
+                .map(Food::toResponse)
+                .toList();
 
-            return new ResponseEntity<>(mapped, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(mapped, HttpStatus.OK);
     }
 
     public ResponseEntity<List<FoodResponse>> getRecentFoods(UUID userId) {
-        try {
-            LocalDateTime date = LocalDateTime.now().minusDays(7); // Ignoring usage logs if they are past 7 days
-            List<FoodUsage> foodUsageList = usageRepository.findTop5ByUserIdAndLastUsedAtAfterOrderByLastUsedAtDesc(userId, date);
+        LocalDateTime date = LocalDateTime.now().minusDays(7); // Ignoring usage logs if they are past 7 days
+        List<FoodUsage> usages = usageRepository.findTop5ByUserIdAndLastUsedAtAfterOrderByLastUsedAtDesc(userId, date);
 
-            List<UUID> foodIds = foodUsageList.stream().map(FoodUsage::getFoodId).toList();
+        List<UUID> foodIds = usages.stream().map(FoodUsage::getFoodId).toList();
 
-            List<Food> foods = repository.findAllById(foodIds);
+        List<Food> foods = repository.findAllById(foodIds);
 
-            List<FoodResponse> dtoList = foods.stream().map(mapper::toResponse).toList();
+        List<FoodResponse> dtoList = foods.stream().map(Food::toResponse).toList();
 
-            return new ResponseEntity<>(dtoList, HttpStatus.OK);
-        } catch (Exception e) {
-            System.out.println(e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
     public ResponseEntity<String> markAsFavourite(UUID foodId, UUID userId) {
-        try {
-            FoodFavourite favourite = new FoodFavourite();
-            favourite.setUserId(userId);
-            favourite.setFoodId(foodId);
+        FoodFavourite favourite = new FoodFavourite();
+        favourite.setUserId(userId);
+        favourite.setFoodId(foodId);
 
-            // No need to return anything
-            favouriteRepository.save(favourite);
+        // No need to return anything
+        favouriteRepository.save(favourite);
 
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> removeFavourite(UUID foodId, UUID userId) {
-        try {
-            favouriteRepository.deleteByUserIdAndFoodId(userId, foodId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        favouriteRepository.deleteByUserIdAndFoodId(userId, foodId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<List<FoodResponse>> getAllFavourites(UUID userId) {
-        try {
-            List<FoodFavourite> favourites = favouriteRepository.findByUserId(userId);
-            List<Food> foods = repository.findAllById(favourites.stream().map(FoodFavourite::getFoodId).toList());
-            List<FoodResponse> mapped = foods.stream().map(mapper::toResponse).toList();
+        List<UUID> favouriteIds = favouriteRepository
+                .findByUserId(userId)
+                .stream()
+                .map(FoodFavourite::getFoodId)
+                .toList();
 
-            return new ResponseEntity<>(mapped, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        List<FoodResponse> mapped = repository.findAllById(favouriteIds).stream().map(Food::toResponse).toList();
+
+        return new ResponseEntity<>(mapped, HttpStatus.OK);
     }
 
     public ResponseEntity<String> report(UUID foodId, UUID userId, FoodReportCreateRequest request) {
-        try {
-            FoodReport report = mapper.reportCreateRequestToEntity(foodId, userId, request);
+        FoodReport report = request.toEntity(foodId, userId);
 
-            // No need to return anything
-            reportRepository.save(report);
+        // No need to return anything
+        reportRepository.save(report);
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     public ResponseEntity<String> reviewReport(UUID reportId, UUID userId, FoodReportReviewRequest request) {
-        try {
-            FoodReport existing = reportRepository.findById(reportId).orElse(null);
+        FoodReport existing = reportRepository.findById(reportId)
+                .orElseThrow(() -> new FoodNotFoundException("Food report not found"));
 
-            if (existing != null) {
-                mapper.reportUpdateRequestToEntity(userId, request, existing);
+        existing.reportUpdateRequestToEntity(userId, request);
+        reportRepository.save(existing);
 
-                // No need to return anything
-                reportRepository.save(existing);
-
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<Page<FoodReportResponse>> getAllReports(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<FoodReport> foodReportPage = reportRepository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<FoodReportResponse> dtoPage = foodReportPage.map(mapper::reportEntityToResponse);
+        Page<FoodReportResponse> dtoPage = reportRepository.findAll(pageRequest).map(FoodReport::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 }

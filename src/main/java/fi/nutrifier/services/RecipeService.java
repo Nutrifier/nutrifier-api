@@ -2,7 +2,7 @@ package fi.nutrifier.services;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.mappers.RecipeMapper;
+import fi.nutrifier.exceptions.RecipeNotFoundException;
 import fi.nutrifier.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,153 +21,101 @@ public class RecipeService {
     private final RecipeRepository repository;
     private final RecipesFavouriteRepository favouriteRepository;
     private final RecipeReportRepository reportRepository;
-    private final RecipeMapper mapper;
 
     @Autowired
     public RecipeService(
             RecipeRepository repository,
             RecipesFavouriteRepository favouriteRepository,
-            RecipeReportRepository reportRepository,
-            RecipeMapper mapper
+            RecipeReportRepository reportRepository
     ) {
         this.repository = repository;
         this.favouriteRepository = favouriteRepository;
         this.reportRepository = reportRepository;
-        this.mapper = mapper;
     }
 
     public ResponseEntity<RecipeResponse> create(RecipeRequest request, UUID userId) {
-        try {
-            Recipe saved = repository.save(mapper.toEntity(userId, request));
-            return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        Recipe saved = repository.save(request.toEntity(userId));
+        return new ResponseEntity<>(saved.toResponse(), HttpStatus.CREATED);
     }
 
     public ResponseEntity<Page<RecipeResponse>> getAll(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<Recipe> foodPage = repository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<RecipeResponse> dtoPage = foodPage.map(mapper::toResponse);
+        Page<RecipeResponse> dtoPage = repository.findAll(pageRequest).map(Recipe::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
     public ResponseEntity<RecipeResponse> getById(UUID id) {
-        try {
-            Recipe data = repository.findById(id).orElse(null);
-            if (data == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(mapper.toResponse(data), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        Recipe data = repository.findById(id).orElseThrow(RecipeNotFoundException::new);
+        return new ResponseEntity<>(data.toResponse(), HttpStatus.OK);
     }
 
     public ResponseEntity<RecipeResponse> update(UUID id, UUID userId, RecipeRequest request) {
-        try {
-            Recipe existing = repository.findById(id).orElse(null);
+        Recipe existing = repository.findById(id).orElseThrow(RecipeNotFoundException::new);
 
-            if (existing != null) {
-                mapper.updateEntityFromRequest(request, existing);
+        existing.updateEntityFromRequest(request);
+        Recipe saved = repository.save(existing);
 
-                Recipe saved = repository.save(existing);
-                return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            System.out.println("service error: " + e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(saved.toResponse(), HttpStatus.OK);
     }
 
     public ResponseEntity<RecipeResponse> delete(UUID id) {
-        try {
-            repository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!repository.existsById(id)) {
+            throw new RecipeNotFoundException();
         }
+
+        repository.deleteById(id);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> markAsFavourite(UUID recipeId, UUID userId) {
-        try {
-            RecipeFavourite favourite = new RecipeFavourite(userId, recipeId, LocalDateTime.now());
-            favouriteRepository.save(favourite);
+        RecipeFavourite favourite = new RecipeFavourite(userId, recipeId, LocalDateTime.now());
 
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        favouriteRepository.save(favourite);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> removeFavourite(UUID recipeId, UUID userId) {
-        try {
-            favouriteRepository.deleteByUserIdAndRecipeId(userId, recipeId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        favouriteRepository.deleteByUserIdAndRecipeId(userId, recipeId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<List<RecipeResponse>> getAllFavourites(UUID userId) {
-        try {
-            List<RecipeFavourite> favourites = favouriteRepository.findByUserId(userId);
-            List<Recipe> foods = repository.findAllById(favourites.stream().map(RecipeFavourite::getRecipeId).toList());
-            List<RecipeResponse> mapped = foods.stream().map(mapper::toResponse).toList();
+        List<UUID> favouriteIds = favouriteRepository.findByUserId(userId)
+                .orElseThrow(() -> new RecipeNotFoundException("Favourite recipes not found"))
+                .stream().map(RecipeFavourite::getRecipeId).toList();
 
-            return new ResponseEntity<>(mapped, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        List<RecipeResponse> mapped = repository.findAllById(favouriteIds).stream().map(Recipe::toResponse).toList();
+
+        return new ResponseEntity<>(mapped, HttpStatus.OK);
     }
 
     public ResponseEntity<String> report(UUID foodId, UUID userId, RecipeReportCreateRequest request) {
-        try {
-            RecipeReport report = mapper.reportCreateRequestToEntity(foodId, userId, request);
-            reportRepository.save(report);
+        RecipeReport report = request.toEntity(foodId, userId);
 
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        reportRepository.save(report);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<String> reviewReport(UUID reportId, UUID userId, RecipeReportReviewRequest request) {
-        try {
-            RecipeReport existing = reportRepository.findById(reportId).orElse(null);
+        RecipeReport existing = reportRepository.findById(reportId)
+                .orElseThrow(() -> new RecipeNotFoundException("Recipe report not found"));
 
-            if (existing != null) {
-                mapper.reportUpdateRequestToEntity(userId, request, existing);
+        existing.reportUpdateRequestToEntity(userId, request);
+        reportRepository.save(existing); // No need to return anything
 
-                // No need to return anything
-                reportRepository.save(existing);
-
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<Page<RecipeReportResponse>> getAllReports(Integer page, Integer size) {
-        try {
-            PageRequest pageRequest = PageRequest.of(page, size);
-            Page<RecipeReport> recipeReportPage = reportRepository.findAll(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            Page<RecipeReportResponse> dtoPage = recipeReportPage.map(mapper::reportEntityToResponse);
+        Page<RecipeReportResponse> dtoPage = reportRepository.findAll(pageRequest).map(RecipeReport::toResponse);
 
-            return new ResponseEntity<>(dtoPage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 }

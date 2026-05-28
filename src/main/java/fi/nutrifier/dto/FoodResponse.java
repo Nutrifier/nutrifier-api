@@ -3,12 +3,14 @@ package fi.nutrifier.dto;
 import fi.nutrifier.enums.FoodStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
-public class FoodResponse {
+public class FoodResponse extends ApiResponse {
     private UUID id;
     private String name;
     private String brand;

@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface FoodEntryRepository extends JpaRepository<FoodEntry, UUID> {
     List<FoodEntry> findByDateAndUserId(LocalDate date, UUID userId);
+    List<FoodEntry> findByDateBetweenAndUserId(LocalDate startDate, LocalDate endDate, UUID userId);
     Page<FoodEntry> findByUserId(UUID id, Pageable pageable);
     Optional<FoodEntry> findByIdAndUserId(UUID id, UUID userId);
     void deleteByIdAndUserId(UUID id, UUID userId);

@@ -1,8 +1,13 @@
 package fi.nutrifier.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.nutrifier.dto.SettingsUpdateRequest;
 import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.enums.Role;
+import fi.nutrifier.exceptions.EncryptionKeyException;
+import fi.nutrifier.exceptions.FailedCryptionException;
+import fi.nutrifier.utils.SecurityUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,5 +49,9 @@ public class User {
                 this.email,
                 this.role
         );
+    }
+
+    public void updateEntityFromRequest(UserUpdateRequest request) throws FailedCryptionException, EncryptionKeyException {
+        this.email = SecurityUtil.encrypt(request.getEmail());
     }
 }

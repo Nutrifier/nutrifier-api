@@ -1,8 +1,10 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
+import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.enums.MealType;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.unit.utils.TestObjects;
@@ -19,7 +21,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -53,11 +54,11 @@ public class FoodEntryServiceTest {
     public void testSaveLog_ReturnsLog() {
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        ResponseEntity<FoodEntryResponse> response = service.create(TestObjects.id1, TestObjects.foodEntry1.toRequest());
+        ApiResponse<FoodEntryResponse> response = service.create(TestObjects.id1, TestObjects.foodEntry1.toRequest());
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(22, response.getBody().getAmount());
-        assertEquals("BREAKFAST", response.getBody().getMealType());
+        assertEquals(HttpStatus.CREATED, response.getStatus());
+        assertEquals(22, response.getData().getAmount());
+        assertEquals("BREAKFAST", response.getData().getMealType());
     }
 
     @Test
@@ -65,11 +66,11 @@ public class FoodEntryServiceTest {
         when(repository.findByIdAndUserId(TestObjects.id, TestObjects.id1))
                 .thenReturn(Optional.ofNullable(TestObjects.foodEntry1));
 
-        ResponseEntity<FoodEntryResponse> response = service.getByIdAndUserId(TestObjects.id, TestObjects.id1);
+        ApiResponse<FoodEntryResponse> response = service.getByIdAndUserId(TestObjects.id, TestObjects.id1);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(22, response.getBody().getAmount());
-        assertEquals("BREAKFAST", response.getBody().getMealType());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals(22, response.getData().getAmount());
+        assertEquals("BREAKFAST", response.getData().getMealType());
     }
 
     @Test
@@ -81,10 +82,10 @@ public class FoodEntryServiceTest {
 
         when(repository.findAll(pageable)).thenReturn(mockPage);
 
-        ResponseEntity<Page<FoodEntryResponse>> response = service.getAll(0, 10);
+        ApiResponse<Page<FoodEntryResponse>> response = service.getAll(0, 10);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().getContent().size());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals(2, response.getData().getContent().size());
     }
 
     @Test
@@ -92,25 +93,25 @@ public class FoodEntryServiceTest {
         when(repository.findByIdAndUserId(TestObjects.id, TestObjects.id1)).thenReturn(Optional.of(TestObjects.foodEntry1));
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        TestObjects.foodEntry1.setMealType("LUNCH");
+        TestObjects.foodEntry1.setMealType(MealType.LUNCH);
         TestObjects.foodEntry1.setAmount(54.0);
-        ResponseEntity<FoodEntryResponse> response = service.update(TestObjects.id1, TestObjects.id, TestObjects.foodEntry1);
+        ApiResponse<FoodEntryResponse> response = service.update(TestObjects.id1, TestObjects.id, TestObjects.foodEntry1);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("LUNCH", response.getBody().getMealType());
-        assertEquals(54, response.getBody().getAmount());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertNotNull(response.getData());
+        assertEquals("LUNCH", response.getData().getMealType());
+        assertEquals(54, response.getData().getAmount());
     }
 
     @Test
     public void testDeleteUser_ReturnsNullBody() {
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<FoodEntryResponse> response = service.delete(TestObjects.id1, TestObjects.id);
+        ApiResponse<FoodEntryResponse> response = service.delete(TestObjects.id1, TestObjects.id);
 
         verify(repository, times(1)).deleteByIdAndUserId(TestObjects.id, TestObjects.id1);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertNull(response.getData());
     }
 
     @Test
@@ -121,9 +122,9 @@ public class FoodEntryServiceTest {
 
         when(repository.findByDateAndUserId(TestObjects.date, TestObjects.id)).thenReturn(foodEntries);
 
-        ResponseEntity<List<FoodEntryResponse>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
+        ApiResponse<List<FoodEntryResponse>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().size());
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals(2, response.getData().size());
     }
 }

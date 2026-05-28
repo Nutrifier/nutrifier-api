@@ -108,4 +108,15 @@ public class Food {
                 this.status
         );
     }
+
+    public void updateEntityFromRequest(FoodRequest request) {
+        this.setName(request.getName());
+        this.setBarcode(request.getBarcode());
+        this.setServingSize(request.getServingSize());
+        this.setCalories(request.getCalories());
+        this.setCarbs(request.getCarbs());
+        this.setProtein(request.getProtein());
+        this.setFat(request.getFat());
+        this.setUpdatedAt(LocalDateTime.now());
+    }
 }
