@@ -4,16 +4,14 @@ import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.dto.UserUpdateRequest;
+import fi.nutrifier.entities.*;
 import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Role;
-import fi.nutrifier.entities.User;
-import fi.nutrifier.entities.Settings;
 import fi.nutrifier.enums.Sex;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
-import fi.nutrifier.repositories.UserRepository;
-import fi.nutrifier.repositories.UserSettingsRepository;
+import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -55,6 +53,15 @@ public class UserServiceTest {
     @Mock
     private UserSettingsRepository userSettingsRepository;
 
+    @Mock
+    private WeightRepository weightRepository;
+
+    @Mock
+    private ProfileRepository profileRepository;
+
+    @Mock
+    private GoalsRepository goalsRepository;
+
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
@@ -66,12 +73,15 @@ public class UserServiceTest {
 
     @Test
     public void testSaveUser_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
-        when(repository.save(any(User.class))) .thenAnswer(invocation -> invocation.getArgument(0));
-        when(userSettingsRepository.save(any(Settings.class))) .thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userSettingsRepository.save(any(Settings.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(weightRepository.save(any(WeightEntry.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(goalsRepository.save(any(Goals.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RegisterRequest registerRequest = new RegisterRequest(
                 TestObjects.user1.getEmail(),
-                "qwerty",
+                "Qwerty123!",
                 Sex.FEMALE,
                 20,
                 170,
@@ -79,7 +89,7 @@ public class UserServiceTest {
                 GoalType.MAINTAIN,
                 50.0,
                 50.0,
-                LocalDate.now()
+                LocalDate.now().plusMonths(3)
         );
 
         ResponseEntity<UserResponse> response = service.create(registerRequest);
@@ -152,6 +162,7 @@ public class UserServiceTest {
 
     @Test
     public void testDeleteUser_ReturnsNullBody() {
+        when(repository.existsById(any(UUID.class))).thenReturn(true);
         doNothing().when(repository).deleteById(TestObjects.id);
 
         ResponseEntity<String> response = service.delete(TestObjects.id);
@@ -180,11 +191,12 @@ public class UserServiceTest {
     @Test
     public void testLoginFail() throws Exception {
         // Service expects a hashed password
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(TestObjects.user1.toUser()));
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
 
         ResponseEntity<UserResponse> response = service.login("test@gmail.com", "wrong_password");
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNull(response.getBody());
     }
 

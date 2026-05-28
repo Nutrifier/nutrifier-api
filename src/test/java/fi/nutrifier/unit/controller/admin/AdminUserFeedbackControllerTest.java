@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdminUserFeedbackControllerTest extends ControllerTestInterface<UserFeedbackService> {
 
     protected AdminUserFeedbackControllerTest() {
-        super("/api/admin/user-feedback");
+        super("/api/v1/admin/user-feedback");
     }
 
     private Page<UserFeedbackResponse> mockPage() {

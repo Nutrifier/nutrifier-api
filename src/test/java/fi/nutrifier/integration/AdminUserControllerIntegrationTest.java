@@ -34,7 +34,7 @@ class AdminUserControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     private UserResponse testUser;
-    private final String baseUrl = "/api/admin/users";
+    private final String baseUrl = "/api/v1/admin/users";
 
     @BeforeEach
     public void setup() {

@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserFeedbackControllerTest extends ControllerTestInterface<UserFeedbackService> {
 
     protected UserFeedbackControllerTest() {
-        super("/api/user-feedback");
+        super("/api/v1/user-feedback");
     }
 
     @Test

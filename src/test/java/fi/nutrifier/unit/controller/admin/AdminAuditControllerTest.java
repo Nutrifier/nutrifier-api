@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdminAuditControllerTest extends ControllerTestInterface<AuditService> {
 
     protected AdminAuditControllerTest() {
-        super("/api/admin/audit");
+        super("/api/v1/admin/audit");
     }
 
     private Page<AuditResponse> mockPage() {

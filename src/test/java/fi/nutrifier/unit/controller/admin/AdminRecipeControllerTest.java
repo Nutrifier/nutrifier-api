@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdminRecipeControllerTest extends ControllerTestInterface<RecipeService> {
 
     protected AdminRecipeControllerTest() {
-        super("/api/admin/recipes");
+        super("/api/v1/admin/recipes");
     }
 
     private Page<RecipeResponse> mockPage() {

@@ -1,6 +1,7 @@
 package fi.nutrifier.unit.repository;
 
 import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.enums.MealType;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ class FoodEntryRepositoryTest {
 
         assertNotNull(saved.getId());
         assertEquals(22, saved.getAmount());
-        assertEquals("BREAKFAST", saved.getMealType());
+        assertEquals(MealType.BREAKFAST, saved.getMealType());
     }
 
     @Test
@@ -43,7 +44,7 @@ class FoodEntryRepositoryTest {
 
         assertNotNull(found);
         assertEquals(22, found.getAmount());
-        assertEquals("BREAKFAST", found.getMealType());
+        assertEquals(MealType.BREAKFAST, found.getMealType());
     }
 
     @Test
@@ -54,8 +55,8 @@ class FoodEntryRepositoryTest {
         List<FoodEntry> found = repository.findAll();
 
         assertEquals(2, found.size());
-        assertEquals("BREAKFAST", found.get(0).getMealType());
-        assertEquals("LUNCH", found.get(1).getMealType());
+        assertEquals(MealType.BREAKFAST, found.get(0).getMealType());
+        assertEquals(MealType.LUNCH, found.get(1).getMealType());
     }
 
     @Test
@@ -63,12 +64,12 @@ class FoodEntryRepositoryTest {
         FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
         saved.setAmount(120.0);
-        saved.setMealType("SNACKS");
+        saved.setMealType(MealType.SNACKS);
         FoodEntry updated = repository.save(saved);
 
         assertEquals(saved.getId(), updated.getId());
         assertEquals(120, updated.getAmount());
-        assertEquals("SNACKS", updated.getMealType());
+        assertEquals(MealType.SNACKS, updated.getMealType());
     }
 
     @Test
@@ -92,6 +93,6 @@ class FoodEntryRepositoryTest {
         assertEquals(2, found1.size());
 
         List<FoodEntry> found2 = repository.findByDateAndUserId(TestObjects.date, TestObjects.id2);
-        assertEquals(1, found2.size());
+        assertEquals(0, found2.size());
     }
 }

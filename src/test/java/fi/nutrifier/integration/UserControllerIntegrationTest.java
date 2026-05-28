@@ -49,7 +49,7 @@ class UserControllerIntegrationTest {
     void registrationCreatesDefaultUserSettings() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest(
                 "test@gmail.com",
-                "qwerty",
+                "Qwerty123!",
                 Sex.FEMALE,
                 20,
                 170,
@@ -61,7 +61,7 @@ class UserControllerIntegrationTest {
         );
 
         // Register user
-        String responseJson = mockMvc.perform(post("/api/register")
+        String responseJson = mockMvc.perform(post("/api/v1/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(registerRequest)))
             .andExpect(status().isCreated())
@@ -74,7 +74,7 @@ class UserControllerIntegrationTest {
         String userId = json.get("userId").asText();
 
         // Fetch user data
-        mockMvc.perform(get("/api/users")
+        mockMvc.perform(get("/api/v1/users")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(userId));

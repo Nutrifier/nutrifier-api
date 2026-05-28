@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthenticationControllerTest extends ControllerTestInterface<UserService> {
 
     protected AuthenticationControllerTest() {
-        super("/api");
+        super("/api/v1");
     }
 
     @Test
@@ -39,8 +39,8 @@ public class AuthenticationControllerTest extends ControllerTestInterface<UserSe
         UUID id = UUID.randomUUID();
         TestObjects.user1.setId(id); // Mock id generation
 
-        when(service.isEmailTaken(anyString())).thenReturn(new ApiResponse<>(false, HttpStatus.NOT_FOUND));
-        when(service.create(any(RegisterRequest.class))).thenReturn(new ApiResponse<>(TestObjects.user1, HttpStatus.CREATED));
+        when(service.isEmailTaken(anyString())).thenReturn(new ResponseEntity<>(false, HttpStatus.NOT_FOUND));
+        when(service.create(any(RegisterRequest.class))).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.CREATED));
         when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post(baseUrl + "/register")
@@ -56,12 +56,12 @@ public class AuthenticationControllerTest extends ControllerTestInterface<UserSe
         UUID id = UUID.randomUUID();
         TestObjects.user1.setId(id); // Mock id generation
 
-        when(service.login(anyString(), anyString())).thenReturn(new ApiResponse<>(TestObjects.user1, HttpStatus.OK));
+        when(service.login(anyString(), anyString())).thenReturn(ResponseEntity.ok(TestObjects.user1));
         when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post(baseUrl + "/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new LoginRequest("test@gmail.com", "password"))))
+                .content(objectMapper.writeValueAsString(new LoginRequest("test@gmail.com", "Qwerty123!"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", CoreMatchers.is("mock-jwt-token")))
                 .andExpect(jsonPath("$.userId", CoreMatchers.is(id.toString())));

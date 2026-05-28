@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RecipeControllerTest extends ControllerTestInterface<RecipeService> {
 
     protected RecipeControllerTest() {
-        super("/api/recipes");
+        super("/api/v1/recipes");
     }
 
     @Test

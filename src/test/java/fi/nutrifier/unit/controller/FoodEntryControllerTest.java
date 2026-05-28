@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
@@ -39,22 +40,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntryService> {
 
     protected FoodEntryControllerTest() {
-        super("/api/food-entries");
+        super("/api/v1/food-entries");
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(
+            username = "550e8400-e29b-41d4-a716-446655440000",
+            roles = "USER"
+    )
     public void testCreateLog_ReturnCreated() throws Exception {
         when(service.create(any(UUID.class), any(FoodEntryRequest.class)))
-                .thenReturn(new ApiResponse<>(TestObjects.foodEntry1.toResponse(), HttpStatus.CREATED));
+                .thenReturn(ResponseEntity.ok(TestObjects.foodEntry1.toResponse()));
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(TestObjects.foodEntry1))
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
-            .andExpect(status().isCreated())
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
-            .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType())));
+            .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType().toString())));
 
         verify(service).create(any(UUID.class), any(FoodEntryRequest.class));
     }
@@ -93,7 +97,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
 
         // Use eq(1L) to match the exact ID and any(Log.class) to allow any User instance.
         when(service.update(eq(TestObjects.id1), eq(TestObjects.id), any(FoodEntry.class)))
-                .thenReturn(new ApiResponse<>(TestObjects.foodEntry1.toResponse(), HttpStatus.OK));
+                .thenReturn(ResponseEntity.ok(TestObjects.foodEntry1.toResponse()));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +126,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
             roles = "USER"
     )
     public void testDeleteLog_ReturnEmpty() throws Exception {
-        when(service.delete(TestObjects.id1, TestObjects.id)).thenReturn(new ApiResponse<>(HttpStatus.OK));
+        when(service.delete(TestObjects.id1, TestObjects.id)).thenReturn(ResponseEntity.ok(""));
         MvcResult result = mockMvc.perform(delete(baseUrl + "/{id}", TestObjects.id.toString()))
                 .andExpect(status().isOk()).andReturn();
 
@@ -146,7 +150,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
         foodEntries.add(TestObjects.foodEntry2.toResponse());
 
         when(service.getLogsByDateAndUser(TestObjects.date, TestObjects.id1))
-                .thenReturn(new ApiResponse<>(foodEntries, HttpStatus.OK));
+                .thenReturn(ResponseEntity.ok(foodEntries));
 
         mockMvc.perform(get(baseUrl + "/by-date")
                 .param("date", TestObjects.date.toString())

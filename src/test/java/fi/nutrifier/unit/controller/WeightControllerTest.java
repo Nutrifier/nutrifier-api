@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class WeightControllerTest extends ControllerTestInterface<UserWeightService> {
 
     protected WeightControllerTest() {
-        super("/api/weight");
+        super("/api/v1/weight");
     }
 
     @Test

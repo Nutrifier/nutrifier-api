@@ -41,9 +41,6 @@ public class FoodServiceTest {
     @Mock
     private FoodRepository repository;
 
-    @Mock
-    private FoodMapper mapper;
-
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
 
@@ -55,10 +52,6 @@ public class FoodServiceTest {
 
     @Test
     public void testSaveFood_ReturnsFood() {
-        when(mapper.toEntity(any(UUID.class), any(FoodRequest.class)))
-                .thenReturn(TestObjects.food1);
-        when(mapper.toResponse(any(Food.class)))
-                .thenReturn(TestObjects.food1.toResponse());
         when(repository.save(any(Food.class)))
                 .thenReturn(TestObjects.food1);
 
@@ -72,7 +65,6 @@ public class FoodServiceTest {
     @Test
     public void testFindById_ReturnsFood() {
         when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.food1));
-        when(mapper.toResponse(any(Food.class))).thenReturn(TestObjects.food1.toResponse());
 
         ResponseEntity<FoodResponse> response = service.getById(TestObjects.id);
 
@@ -103,7 +95,6 @@ public class FoodServiceTest {
         TestObjects.food1.setName("Riisi");
         TestObjects.food1.setCalories(245.0);
 
-        when(mapper.toResponse(any(Food.class))).thenReturn(TestObjects.food1.toResponse());
         when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.food1));
         when(repository.save(any(Food.class))).thenReturn(TestObjects.food1);
 
@@ -117,9 +108,10 @@ public class FoodServiceTest {
 
     @Test
     public void testDeleteFood_ReturnsNullBody() {
+        when(repository.existsById(any(UUID.class))).thenReturn(true);
         doNothing().when(repository).deleteById(TestObjects.id);
 
-        ResponseEntity<FoodResponse> response = service.delete(TestObjects.id);
+        ResponseEntity<String> response = service.delete(TestObjects.id);
 
         verify(repository, times(1)).deleteById(TestObjects.id);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -133,7 +125,7 @@ public class FoodServiceTest {
 
 
         when(repository.findFoodsByNameContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(foodPage);
-        when(mapper.toResponse(any(Food.class))).thenAnswer(invocation -> {
+        /*when(mapper.toResponse(any(Food.class))).thenAnswer(invocation -> {
             Food f = invocation.getArgument(0);
             return new FoodResponse(
                     f.getId(),
@@ -150,6 +142,7 @@ public class FoodServiceTest {
                     f.getStatus()
             );
         });
+        */
 
         // Act
         ResponseEntity<Page<FoodResponse>> response = service.getFoodsByQuery(0, 10, "ka");

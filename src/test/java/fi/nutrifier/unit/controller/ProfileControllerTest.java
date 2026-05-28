@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProfileControllerTest extends ControllerTestInterface<ProfileService> {
 
     protected ProfileControllerTest() {
-        super("/api/profile");
+        super("/api/v1/profile");
     }
 
     @Test

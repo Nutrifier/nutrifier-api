@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class MealControllerTest extends ControllerTestInterface<MealService> {
 
     protected MealControllerTest() {
-        super("/api/meals");
+        super("/api/v1/meals");
     }
 
     @Test

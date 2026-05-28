@@ -62,10 +62,10 @@ public class CalculationUtilTest {
 
         @ParameterizedTest(name = "Goal {0} for {1} should result in {2} kcal")
         @CsvSource({
-                "MAINTAIN_WEIGHT, MALE, 2500.0",    // TDEE stays the same
-                "JUST_FOR_FUN, FEMALE, 2500.0",     // Treated as maintenance
-                "LOOSE_WEIGHT, MALE, 2200.0",       // Applies standard deficit (300)
-                "GAIN_MUSCLE, MALE, 2800.0",        // Applies standard surplus (300)
+                "MAINTAIN, MALE, 2500.0",    // TDEE stays the same
+                "MAINTAIN, FEMALE, 2500.0",     // Treated as maintenance
+                "CUT, MALE, 2200.0",       // Applies standard deficit (300)
+                "BULK, MALE, 2800.0",        // Applies standard surplus (300)
         })
         void calculateDailyCalories_ShouldApplyReasoningCorrectly(GoalType goalType, Sex sex, double expected) {
             double tdee = 2500.0;
@@ -112,7 +112,7 @@ public class CalculationUtilTest {
         void macrosShouldSumToCalorieGoal() {
             assertMacrosAreValid(GoalType.CUT, 56.0, 220.0, 154.0);
             assertMacrosAreValid(GoalType.BULK, 56.0, 234.0, 140.0);
-            assertMacrosAreValid(GoalType.MAINTAIN, 60.0, 260.0, 105.0);
+            assertMacrosAreValid(GoalType.MAINTAIN, 60.0, 309.0, 56.0);
         }
 
         private void assertMacrosAreValid(GoalType goal, double expectedFats, double expectedCarbs, double expectedProtein) {

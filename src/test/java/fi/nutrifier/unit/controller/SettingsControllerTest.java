@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SettingsControllerTest extends ControllerTestInterface<SettingsService> {
 
     protected SettingsControllerTest() {
-        super("/api/settings");
+        super("/api/v1/settings");
     }
 
     @Test

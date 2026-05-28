@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerTest extends ControllerTestInterface<UserService> {
 
     protected UserControllerTest() {
-        super("/api/users");
+        super("/api/v1/users");
     }
 
     @Test

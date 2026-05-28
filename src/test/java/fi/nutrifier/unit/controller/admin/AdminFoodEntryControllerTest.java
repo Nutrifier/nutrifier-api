@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdminFoodEntryControllerTest extends ControllerTestInterface<FoodEntryService> {
 
     protected AdminFoodEntryControllerTest() {
-        super("/api/admin/food-entries");
+        super("/api/v1/admin/food-entries");
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AdminFoodEntryControllerTest extends ControllerTestInterface<FoodEn
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
-                .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType())));
+                .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType().toString())));
 
         verify(service, times(1)).getById(TestObjects.id);
     }

@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdminFoodControllerTest extends ControllerTestInterface<FoodService> {
 
     protected AdminFoodControllerTest() {
-        super("/api/admin/foods");
+        super("/api/v1/admin/foods");
     }
 
     @Test

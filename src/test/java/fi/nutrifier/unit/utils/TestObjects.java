@@ -7,8 +7,10 @@ import fi.nutrifier.enums.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class TestObjects {
@@ -34,6 +36,8 @@ public class TestObjects {
     public static Food food2;
     public static Food food3;
 
+    public static FoodUsage foodUsage;
+
     public static FoodReport foodReport1;
     public static FoodReport foodReport2;
 
@@ -48,7 +52,7 @@ public class TestObjects {
 
     public static UserFeedback userFeedback;
 
-    public static DailySummaryResponse dailySummary;
+    public static DailySummary dailySummary;
 
     public static Settings settings;
 
@@ -57,6 +61,8 @@ public class TestObjects {
     public static List<WeightEntry> weightEntries;
 
     public static Profile profile;
+
+    public static AnalyticsFull analyticsFull;
 
 
     public static void reset() {
@@ -85,12 +91,14 @@ public class TestObjects {
         food2 = new Food(id2, "Riisi (keitetty)", "brand", "category", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);
         food3 = new Food(id3, "Kalkkunaleike", "brand", "category", "", 100, 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id3, id3, now, now);
 
+        foodUsage = new FoodUsage(id1, id1, 20, now);
+
         foodReport1 = new FoodReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Incorrect values", ReportStatus.APPROVED, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, "decision reasoning", id2, now, now);
         foodReport2 = new FoodReport(id2, id2, id2, ReportType.REPORT, "Bad name", ReportStatus.PENDING, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, null, null, null, now);
 
         foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
         foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
-        foodEntry3 = new FoodEntry(id3, 150.0, date, LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
+        foodEntry3 = new FoodEntry(id3, 1500.0, date.minusDays(1), LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
 
         auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
         auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);
@@ -111,17 +119,32 @@ public class TestObjects {
 
         userFeedback = new UserFeedback(id1, id1, FeedbackType.BUG, "My feedback", "message", FeedbackStatus.PENDING, null, null, null, now);
 
-        dailySummary = new DailySummaryResponse(120.0, 50.0, 200.0, 150.0);
+        dailySummary = new DailySummary(id1, id1, today.minusDays(1), 120.0, 50.0, 200.0, 150.0, true);
 
         settings = new Settings();
         settings.initialize();
 
-        goals = new Goals(id1, id1, GoalType.MAINTAIN, today, today.plusYears(1), 60.0, 80.0, false, 2400.0, -300.0, 1500.0, 40.0, 70.0, 50.0, now, now);
+        goals = new Goals(id1, id1, GoalType.MAINTAIN, today, today.plusYears(1), 80.0, 60.0, false, 2400.0, -300.0, 1500.0, 40.0, 70.0, 50.0, now, now);
 
         List<WeightEntry> newWeightEntries = new ArrayList<>();
         newWeightEntries.add(new WeightEntry(id1, id1, 70.0, LocalDateTime.now()));
         weightEntries = newWeightEntries;
 
         profile = new Profile(id1, 180, 18, Sex.FEMALE, ActivityLevel.SEDENTARY, now);
+
+        analyticsFull = new AnalyticsFull(
+                today.minusDays(7),
+                today,
+                1,
+                2,
+                3,
+                5000.0,
+                4800.0,
+                -200.0,
+                -150.0,
+                Map.of(today.minusDays(7), DayGoalResult.SUCCESS),
+                Map.of(Month.APRIL, new AnalyticsData(3000, 3500)),
+                Map.of(Month.APRIL, DayGoalResult.SUCCESS)
+        );
     }
 }

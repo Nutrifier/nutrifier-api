@@ -3,6 +3,7 @@ package fi.nutrifier.unit.controller.admin;
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.admin.AdminUserController;
 import fi.nutrifier.dto.UserResponse;
+import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.controller.ControllerTestInterface;
 import fi.nutrifier.unit.utils.TestObjects;
@@ -38,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdminUserControllerTest extends ControllerTestInterface<UserService> {
 
     protected AdminUserControllerTest() {
-        super("/api/admin/users");
+        super("/api/v1/admin/users");
     }
 
     @Test
@@ -104,7 +105,7 @@ public class AdminUserControllerTest extends ControllerTestInterface<UserService
         TestObjects.user1.setEmail("again@gmail.com");
 
         // Use eq(1L) to match the exact ID and any(User.class) to allow any User instance.
-        when(service.update(eq(TestObjects.id), any(UserResponse.class)))
+        when(service.update(eq(TestObjects.id), any(UserUpdateRequest.class)))
                 .thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)

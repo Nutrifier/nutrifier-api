@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GoalsControllerTest extends ControllerTestInterface<GoalsService> {
 
     protected GoalsControllerTest() {
-        super("/api/goals");
+        super("/api/v1/goals");
     }
 
     @Test
@@ -40,9 +40,9 @@ public class GoalsControllerTest extends ControllerTestInterface<GoalsService> {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.goalType").value("JUST_FOR_FUN"))
+            .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
             .andExpect(jsonPath("$.targetWeight").value(60.0))
-            .andExpect(jsonPath("$.reachedDate").isEmpty());
+            .andExpect(jsonPath("$.isReached").value(false));
 
         verify(service).getUserGoals(any(UUID.class));
     }
@@ -69,9 +69,9 @@ public class GoalsControllerTest extends ControllerTestInterface<GoalsService> {
                         .content(objectMapper.writeValueAsString(TestObjects.goals))
                         .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.goalType").value("JUST_FOR_FUN"))
+                .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
                 .andExpect(jsonPath("$.targetWeight").value(140.0))
-                .andExpect(jsonPath("$.reachedDate").isEmpty());
+                .andExpect(jsonPath("$.isReached").value(false));
 
         verify(service).update(any(UUID.class), any(GoalsUpdateRequest.class));
     }
@@ -93,19 +93,19 @@ public class GoalsControllerTest extends ControllerTestInterface<GoalsService> {
         when(service.recalculateGoals(any(UUID.class)))
                 .thenReturn(new ResponseEntity<>(TestObjects.goals.toResponse(), HttpStatus.OK));
 
-        mockMvc.perform(post(baseUrl + "/calculate")
+        mockMvc.perform(post(baseUrl + "/recalculate")
                         .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.goalType").value("JUST_FOR_FUN"))
+                .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
                 .andExpect(jsonPath("$.targetWeight").value(60.0))
-                .andExpect(jsonPath("$.reachedDate").isEmpty());
+                .andExpect(jsonPath("$.isReached").value(false));
 
         verify(service).recalculateGoals(any(UUID.class));
     }
 
     @Test
     public void testCalculate_WithoutAuth_ReturnOk() throws Exception {
-        mockMvc.perform(post(baseUrl + "/calculate")
+        mockMvc.perform(post(baseUrl + "/recalculate")
                         .with(csrf()) // MockMvc expects csrf is in use
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(TestObjects.goals)))

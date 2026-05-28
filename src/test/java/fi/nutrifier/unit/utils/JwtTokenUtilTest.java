@@ -63,9 +63,10 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testExtractUser() throws Exception {
-        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
+        UUID uuid = UUID.randomUUID();
+        String token = jwtTokenUtil.generateToken(uuid, Role.REGULAR);
         String extractedId = jwtTokenUtil.extractUserId(token);
-        assertEquals("123456789", extractedId);
+        assertEquals(uuid.toString(), extractedId);
     }
 
     @Test
