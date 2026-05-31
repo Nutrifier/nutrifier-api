@@ -1,6 +1,5 @@
 package fi.nutrifier.controllers;
 
-import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;

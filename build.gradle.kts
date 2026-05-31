@@ -5,7 +5,11 @@ plugins {
 }
 
 group = "fi.nutrifier"
-version = "1.0.0"
+version = "1.1.2-beta"
+
+springBoot {
+	buildInfo()
+}
 
 java {
 	toolchain {
@@ -23,6 +27,7 @@ dependencies {
 	implementation("com.google.guava:guava:32.1.3-jre")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")

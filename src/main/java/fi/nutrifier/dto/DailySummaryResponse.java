@@ -76,8 +76,6 @@ public class DailySummaryResponse {
         DailyMealSummary dailyMealSummary = this.mealSummaries.get(entry.getMealType());
         dailyMealSummary.appendNutritionFromEntry(entry);
 
-        System.out.println("dailyMealSummary: " + dailyMealSummary);
-
         this.mealSummaries.put(entry.getMealType(), dailyMealSummary);
     }
 
