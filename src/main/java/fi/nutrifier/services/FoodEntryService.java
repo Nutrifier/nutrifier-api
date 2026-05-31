@@ -49,13 +49,14 @@ public class FoodEntryService {
     public ResponseEntity<FoodEntryResponse> create(UUID userId, FoodEntryRequest request) {
         Food food = foodRepository.findById(request.getFoodId()).orElseThrow(FoodNotFoundException::new);
 
-        double calories = CalculationUtil.calculateAmountFromRequest(food.getCalories(), request.getAmount(), request.getUnit());
-        double fat = CalculationUtil.calculateAmountFromRequest(food.getFat(), request.getAmount(), request.getUnit());
-        double carbs = CalculationUtil.calculateAmountFromRequest(food.getCarbs(), request.getAmount(), request.getUnit());
-        double protein = CalculationUtil.calculateAmountFromRequest(food.getProtein(), request.getAmount(), request.getUnit());
-
         // Saving snapshot values inside toEntity conversion method
-        FoodEntry savableEntry = request.toEntity(userId, calories, fat, carbs, protein);
+        FoodEntry savableEntry = request.toEntity(
+                userId,
+                food.getCalories(),
+                food.getFat(),
+                food.getCarbs(),
+                food.getProtein()
+        );
 
         FoodEntry savedEntry = repository.save(savableEntry);
         foodUsageService.track(userId, savedEntry);
