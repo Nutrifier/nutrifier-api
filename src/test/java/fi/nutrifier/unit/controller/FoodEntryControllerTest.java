@@ -2,7 +2,6 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.FoodEntryController;
-import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
@@ -13,7 +12,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -149,16 +147,17 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
         foodEntries.add(TestObjects.foodEntry1.toResponse());
         foodEntries.add(TestObjects.foodEntry2.toResponse());
 
-        when(service.getLogsByDateAndUser(TestObjects.date, TestObjects.id1))
+        when(service.getLogsByDateAndMealTypeAndUserId(any(LocalDate.class), any(MealType.class), any(UUID.class)))
                 .thenReturn(ResponseEntity.ok(foodEntries));
 
-        mockMvc.perform(get(baseUrl + "/by-date")
+        mockMvc.perform(get(baseUrl)
                 .param("date", TestObjects.date.toString())
+                .param("mealType", TestObjects.foodEntry1.getMealType().toString())
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.size()", CoreMatchers.is(2)));
 
-        verify(service).getLogsByDateAndUser(any(LocalDate.class), any(UUID.class));
+        verify(service).getLogsByDateAndMealTypeAndUserId(any(LocalDate.class), any(MealType.class), any(UUID.class));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package fi.nutrifier.repositories;
 import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.enums.MealType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 public interface FoodEntryRepository extends JpaRepository<FoodEntry, UUID> {
     List<FoodEntry> findByDateAndUserId(LocalDate date, UUID userId);
+    List<FoodEntry> findByDateAndMealTypeAndUserId(LocalDate date, MealType mealType, UUID userId);
     List<FoodEntry> findByDateBetweenAndUserId(LocalDate startDate, LocalDate endDate, UUID userId);
     Page<FoodEntry> findByUserId(UUID id, Pageable pageable);
     Optional<FoodEntry> findByIdAndUserId(UUID id, UUID userId);
