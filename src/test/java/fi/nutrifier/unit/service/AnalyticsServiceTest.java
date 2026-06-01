@@ -50,9 +50,6 @@ public class AnalyticsServiceTest {
     private FoodUsageService foodUsageService;
 
     @Mock
-    private FoodEntryRepository repository;
-
-    @Mock
     private FoodRepository foodRepository;
 
     @Mock
@@ -73,7 +70,7 @@ public class AnalyticsServiceTest {
     @BeforeEach
     public void setup() {
         TestObjects.reset();
-        repository.deleteAll();
+        foodEntryRepository.deleteAll();
     }
 
     @Test

@@ -6,6 +6,7 @@ import fi.nutrifier.entities.FoodFavourite;
 import fi.nutrifier.entities.FoodReport;
 import fi.nutrifier.entities.FoodUsage;
 import fi.nutrifier.enums.ResponseCode;
+import fi.nutrifier.exceptions.BarcodeAlreadyExistsException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.repositories.FoodFavouriteRepository;
 import fi.nutrifier.repositories.FoodReportRepository;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,6 +66,21 @@ public class FoodService {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    public ResponseEntity<FoodResponse> addBarcode(String newBarcode, UUID foodId, UUID userId) {
+        Food found = repository.findById(foodId).orElseThrow(() -> new FoodNotFoundException(foodId.toString()));
+
+        if (found.getBarcode() != null && !found.getBarcode().isEmpty()) {
+            throw new BarcodeAlreadyExistsException();
+        }
+
+        found.setBarcode(newBarcode);
+        found.setUpdatedAt(LocalDateTime.now());
+        found.setUpdatedBy(userId);
+        Food updated = repository.save(found);
+
+        return new ResponseEntity<>(updated.toResponse(), HttpStatus.OK);
+    }
+
     public ResponseEntity<Page<FoodResponse>> getAll(Integer page, Integer size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -74,10 +89,14 @@ public class FoodService {
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
 
-    public ResponseEntity<FoodResponse> getById(UUID id) {
-        Food data = repository.findById(id).orElseThrow(FoodNotFoundException::new);
+    public ResponseEntity<List<FoodResponse>> getByIds(List<UUID> ids) {
+        List<Food> data = repository.findAllById(ids);
 
-        return new ResponseEntity<>(data.toResponse(), HttpStatus.OK);
+        if (data.isEmpty()) {
+            throw new FoodNotFoundException();
+        }
+
+        return new ResponseEntity<>(data.stream().map(Food::toResponse).toList(), HttpStatus.OK);
     }
 
     public ResponseEntity<FoodResponse> update(UUID id, UUID userId, FoodRequest foodRequest) {

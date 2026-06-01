@@ -1,10 +1,8 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
-import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.entities.FoodUsage;
 import fi.nutrifier.enums.MealType;
 import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.FoodEntryService;
@@ -26,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -149,7 +146,11 @@ public class FoodEntryServiceTest {
 
         when(repository.findByDateAndUserId(TestObjects.date, TestObjects.id)).thenReturn(foodEntries);
 
-        ResponseEntity<List<FoodEntryResponse>> response = service.getLogsByDateAndUser(TestObjects.date, TestObjects.id);
+        ResponseEntity<List<FoodEntryResponse>> response = service.getLogsByDateAndMealTypeAndUserId(
+                TestObjects.date,
+                null,
+                TestObjects.id
+        );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());

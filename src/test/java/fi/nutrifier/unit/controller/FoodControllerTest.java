@@ -7,17 +7,11 @@ import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.services.FoodService;
 import fi.nutrifier.unit.utils.TestObjects;
-import fi.nutrifier.utils.JwtTokenUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JOSEException;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -114,22 +107,22 @@ class FoodControllerTest extends ControllerTestInterface<FoodService> {
     @Test
     @WithMockUser
     void testGetById_ReturnOk() throws Exception {
-        when(service.getById(TestObjects.id))
-                .thenReturn(new ResponseEntity<>(TestObjects.food1.toResponse(), HttpStatus.OK));
+        when(service.getByIds(List.of(TestObjects.id)))
+                .thenReturn(new ResponseEntity<>(List.of(TestObjects.food1.toResponse()), HttpStatus.OK));
 
-        mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
+        mockMvc.perform(get(baseUrl + "/by-ids?ids={ids}", TestObjects.id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", CoreMatchers.is(TestObjects.food1.getName())))
-                .andExpect(jsonPath("$.calories", CoreMatchers.is(TestObjects.food1.getCalories())));
+                .andExpect(jsonPath("$[0].name", CoreMatchers.is(TestObjects.food1.getName())))
+                .andExpect(jsonPath("$[0].calories", CoreMatchers.is(TestObjects.food1.getCalories())));
 
-        verify(service).getById(any(UUID.class));
+        verify(service).getByIds(anyList());
     }
 
     @Test
     @WithMockUser
     void testGetById_ReturnNotFound() throws Exception {
-        when(service.getById(TestObjects.id)).thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-        mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id)).andExpect(status().isNotFound());
+        when(service.getByIds(List.of(TestObjects.id))).thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        mockMvc.perform(get(baseUrl + "/by-ids?ids={ids}", TestObjects.id)).andExpect(status().isNotFound());
     }
 
     @Test

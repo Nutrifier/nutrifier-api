@@ -66,8 +66,8 @@ class AdminFoodControllerTest extends ControllerTestInterface<FoodService> {
         TestObjects.food1.setFat(45.0);
 
         // Use eq(1L) to match the exact ID and any(Food.class) to allow any User instance.
-        when(service.getById(TestObjects.id))
-                .thenReturn(new ResponseEntity<>(TestObjects.food1.toResponse(), HttpStatus.OK));
+        when(service.getByIds(List.of(TestObjects.id)))
+                .thenReturn(new ResponseEntity<>(List.of(TestObjects.food1.toResponse()), HttpStatus.OK));
         when(service.update(eq(TestObjects.id), any(UUID.class), any(FoodRequest.class))).
                 thenReturn(new ResponseEntity<>(TestObjects.food1.toResponse(), HttpStatus.OK));
 

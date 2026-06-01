@@ -36,11 +36,24 @@ public class FoodController {
         return service.create(foodRequest, userId);
     }
 
+    @Operation(summary = "Create a food")
+    @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
+    @PutMapping("/{foodId}/barcode")
+    public ResponseEntity<FoodResponse> addBarcode(
+            Authentication authentication,
+            @PathVariable String foodId,
+            @Valid @RequestBody FoodBarcodeRequest request
+    ) {
+        UUID parsedFoodId = UUID.fromString(foodId);
+        UUID userId = UUID.fromString(authentication.getName());
+        return service.addBarcode(request.getBarcode(), parsedFoodId, userId);
+    }
+
     @Operation(summary = "Get food by id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @GetMapping("/{id}")
-    public ResponseEntity<FoodResponse> getById(@PathVariable("id") String id) {
-        return service.getById(UUID.fromString(id));
+    @GetMapping("/by-ids")
+    public ResponseEntity<List<FoodResponse>> getById(@RequestParam List<String> ids) {
+        return service.getByIds(ids.stream().map(UUID::fromString).toList());
     }
 
     @Operation(summary = "Search for foods by name")

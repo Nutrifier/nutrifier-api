@@ -1,7 +1,6 @@
 package fi.nutrifier.unit.service;
 
 import fi.nutrifier.config.SecurityConfig;
-import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.entities.Food;
 import fi.nutrifier.repositories.FoodRepository;
@@ -64,13 +63,13 @@ public class FoodServiceTest {
 
     @Test
     public void testFindById_ReturnsFood() {
-        when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.food1));
+        when(repository.findAllById(anyList())).thenReturn(List.of(TestObjects.food1));
 
-        ResponseEntity<FoodResponse> response = service.getById(TestObjects.id);
+        ResponseEntity<List<FoodResponse>> response = service.getByIds(List.of(TestObjects.id1));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Kanan rintafilee", response.getBody().getName());
-        assertEquals(250.0, response.getBody().getCalories());
+        assertEquals("Kanan rintafilee", response.getBody().getFirst().getName());
+        assertEquals(250.0, response.getBody().getFirst().getCalories());
     }
 
     @Test

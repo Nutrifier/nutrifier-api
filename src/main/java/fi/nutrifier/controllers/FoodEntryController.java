@@ -3,6 +3,7 @@ package fi.nutrifier.controllers;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
+import fi.nutrifier.enums.MealType;
 import fi.nutrifier.services.FoodEntryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -59,14 +60,16 @@ public class FoodEntryController {
 
     @Operation(summary = "Get logs by date and user id")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
-    @GetMapping("/by-date")
+    @GetMapping
     public ResponseEntity<List<FoodEntryResponse>> getLogsByDateAndUser(
             Authentication authentication,
-            @RequestParam String date
+            @RequestParam String date,
+            @RequestParam(required = false) String mealType
     ) {
+        MealType parsedMealType = mealType != null ? MealType.valueOf(mealType) : null;
         UUID userId = UUID.fromString(authentication.getName());
         LocalDate parsedDate = LocalDate.parse(date);
-        return service.getLogsByDateAndUser(parsedDate, userId);
+        return service.getLogsByDateAndMealTypeAndUserId(parsedDate, parsedMealType, userId);
     }
 
     @Operation(summary = "Recalculate nutrient snapshots with new nutrient values")

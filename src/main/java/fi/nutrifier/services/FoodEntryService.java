@@ -1,14 +1,13 @@
 package fi.nutrifier.services;
 
-import fi.nutrifier.dto.DailySummaryResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.*;
+import fi.nutrifier.enums.MealType;
 import fi.nutrifier.exceptions.FoodEntryNotFoundException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.exceptions.GoalsNotFoundException;
 import fi.nutrifier.repositories.*;
-import fi.nutrifier.utils.CalculationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,11 +124,16 @@ public class FoodEntryService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public ResponseEntity<List<FoodEntryResponse>> getLogsByDateAndUser(LocalDate date, UUID userId) {
-        List<FoodEntryResponse> mapped = repository
-                .findByDateAndUserId(date, userId)
-                .stream()
-                .map(FoodEntry::toResponse).toList();
+    public ResponseEntity<List<FoodEntryResponse>> getLogsByDateAndMealTypeAndUserId(LocalDate date, MealType mealType, UUID userId) {
+        List<FoodEntry> found;
+
+        if (mealType != null) {
+            found = repository.findByDateAndMealTypeAndUserId(date, mealType, userId);
+        } else {
+            found = repository.findByDateAndUserId(date, userId);
+        }
+
+        List<FoodEntryResponse> mapped = found.stream().map(FoodEntry::toResponse).toList();
 
         return new ResponseEntity<>(mapped, HttpStatus.OK);
     }
