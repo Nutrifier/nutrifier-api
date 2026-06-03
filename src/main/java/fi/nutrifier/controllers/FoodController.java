@@ -25,6 +25,8 @@ public class FoodController {
         this.service = service;
     }
 
+    // TODO: Implement fetching foods from Fineli API
+
     @Operation(summary = "Create a food")
     @SecurityRequirement(name = "bearerAuth", scopes = { "user" })
     @PostMapping
