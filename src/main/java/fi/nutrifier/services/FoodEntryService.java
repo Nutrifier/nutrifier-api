@@ -1,8 +1,10 @@
 package fi.nutrifier.services;
 
+import fi.nutrifier.dto.FineliFoodResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.*;
+import fi.nutrifier.enums.FoodStatus;
 import fi.nutrifier.enums.MealType;
 import fi.nutrifier.exceptions.FoodEntryNotFoundException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +28,7 @@ public class FoodEntryService {
 
     private final FoodEntryRepository repository;
     private final FoodUsageService foodUsageService;
+    private final FineliService fineliService;
 
     private final FoodRepository foodRepository;
     private final DailySummaryRepository dailySummaryRepository;
@@ -34,12 +38,14 @@ public class FoodEntryService {
     public FoodEntryService(
             FoodEntryRepository repository,
             FoodUsageService foodUsageService,
+            FineliService fineliService,
             FoodRepository foodRepository,
             DailySummaryRepository dailySummaryRepository,
             GoalsRepository goalsRepository
     ) {
         this.repository = repository;
         this.foodUsageService = foodUsageService;
+        this.fineliService = fineliService;
         this.foodRepository = foodRepository;
         this.dailySummaryRepository = dailySummaryRepository;
         this.goalsRepository = goalsRepository;
@@ -47,7 +53,20 @@ public class FoodEntryService {
 
     @Transactional
     public ResponseEntity<FoodEntryResponse> create(UUID userId, FoodEntryRequest request) {
-        Food food = foodRepository.findById(request.getFoodId()).orElseThrow(FoodNotFoundException::new);
+        Food food;
+
+        // TODO: Refactor this logic! In the case of Fineli food, no need to create Food object when we want to return the FoodEntry
+        if (request.getFoodId() != null) {
+            food = foodRepository.findById(request.getFoodId()).orElseThrow(FoodNotFoundException::new);
+        } else if (request.getFineliId() != null) {
+            FineliFoodResponse fineliFood = fineliService.getFoodById(request.getFineliId());
+            if (fineliFood == null) {
+                throw new FoodNotFoundException("Failed to fetch Fineli food with ID: " + request.getFineliId());
+            }
+            food = fineliFood.toDatabaseFood();
+        } else {
+            throw new FoodNotFoundException("Neither foodId or fineliId was not found");
+        }
 
         // Saving snapshot values inside toEntity conversion method
         FoodEntry savableEntry = request.toEntity(
