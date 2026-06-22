@@ -1,6 +1,7 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.Food;
+import fi.nutrifier.entities.FoodServing;
 import fi.nutrifier.enums.FoodStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -22,9 +24,6 @@ public class FoodRequest {
     private String brand;
     private String category;
     private String barcode;
-
-    @Min(1)
-    private Integer servingSize;
 
     @NotNull
     @Min(0)
@@ -42,6 +41,8 @@ public class FoodRequest {
     @Min(0)
     private Double fat;
 
+    private List<FoodServing> servings;
+
     public Food toEntity(UUID userId) {
         LocalDateTime now = LocalDateTime.now();
         return new Food(
@@ -50,7 +51,6 @@ public class FoodRequest {
                 this.brand,
                 this.category,
                 this.barcode,
-                this.servingSize,
                 this.calories,
                 this.carbs,
                 this.protein,

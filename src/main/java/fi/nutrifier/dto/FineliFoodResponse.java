@@ -34,7 +34,6 @@ public class FineliFoodResponse {
                 "Fineli",
                 null, // TODO: Check if Fineli returns a category and use that
                 null, // No barcodes
-                100,
                 this.energyKcal,
                 this.carbohydrate,
                 this.protein,
