@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "fi.nutrifier"
-version = "1.1.4-beta"
+version = "1.1.5-beta"
 
 springBoot {
 	buildInfo()

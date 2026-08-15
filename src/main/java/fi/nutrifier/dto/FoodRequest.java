@@ -23,9 +23,6 @@ public class FoodRequest {
     private String category;
     private String barcode;
 
-    @Min(1)
-    private Integer servingSize;
-
     @NotNull
     @Min(0)
     private Double calories;
@@ -42,6 +39,8 @@ public class FoodRequest {
     @Min(0)
     private Double fat;
 
+    private Map<ServingType, Double> servings;
+
     public Food toEntity(UUID userId) {
         LocalDateTime now = LocalDateTime.now();
         return new Food(
@@ -50,7 +49,6 @@ public class FoodRequest {
                 this.brand,
                 this.category,
                 this.barcode,
-                this.servingSize,
                 this.calories,
                 this.carbs,
                 this.protein,

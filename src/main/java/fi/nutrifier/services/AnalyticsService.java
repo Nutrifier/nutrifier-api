@@ -50,7 +50,7 @@ public class AnalyticsService {
 
         double dailyCalories = 0.0;
         for (FoodEntry e : entries) {
-            dailyCalories += e.getCaloriesSnapshot() * (e.getAmount() / 100);
+            dailyCalories += e.getCaloriesSnapshot() * (e.getServingAmount() / 100);
         }
 
         // Getting dailySummary for the iterating day, so that can be used for the success/fail calculations
@@ -113,7 +113,7 @@ public class AnalyticsService {
 
             double dailyCalories = 0.0;
             for (FoodEntry e : dailyEntries) {
-                dailyCalories += e.getCaloriesSnapshot() * (e.getAmount() / 100);
+                dailyCalories += e.getCaloriesSnapshot() * (e.getServingAmount() / 100);
             }
 
             // Ignoring if calorieTarget is not set

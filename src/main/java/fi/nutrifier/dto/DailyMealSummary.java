@@ -13,9 +13,9 @@ public class DailyMealSummary {
     private double proteinConsumed;
 
     public void appendNutritionFromEntry(FoodEntry entry) {
-        this.caloriesConsumed += entry.getCaloriesSnapshot() * (entry.getAmount() / 100);
-        this.fatConsumed += entry.getFatSnapshot() * (entry.getAmount() / 100);
-        this.carbsConsumed += entry.getCarbsSnapshot() * (entry.getAmount() / 100);
-        this.proteinConsumed += entry.getProteinSnapshot() * (entry.getAmount() / 100);
+        this.caloriesConsumed += entry.getCaloriesSnapshot() * (entry.getServingAmount() / 100);
+        this.fatConsumed += entry.getFatSnapshot() * (entry.getServingAmount() / 100);
+        this.carbsConsumed += entry.getCarbsSnapshot() * (entry.getServingAmount() / 100);
+        this.proteinConsumed += entry.getProteinSnapshot() * (entry.getServingAmount() / 100);
     }
 }

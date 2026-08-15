@@ -32,7 +32,7 @@ class FoodEntryRepositoryTest {
         FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
         assertNotNull(saved.getId());
-        assertEquals(22, saved.getAmount());
+        assertEquals(22, saved.getServingAmount());
         assertEquals(MealType.BREAKFAST, saved.getMealType());
     }
 
@@ -43,7 +43,7 @@ class FoodEntryRepositoryTest {
         FoodEntry found = repository.findById(saved.getId()).get();
 
         assertNotNull(found);
-        assertEquals(22, found.getAmount());
+        assertEquals(22, found.getServingAmount());
         assertEquals(MealType.BREAKFAST, found.getMealType());
     }
 
@@ -63,12 +63,12 @@ class FoodEntryRepositoryTest {
     public void testUpdateUser_ReturnsLog() {
         FoodEntry saved = repository.save(TestObjects.foodEntry1);
 
-        saved.setAmount(120.0);
+        saved.setServingAmount(120.0);
         saved.setMealType(MealType.SNACKS);
         FoodEntry updated = repository.save(saved);
 
         assertEquals(saved.getId(), updated.getId());
-        assertEquals(120, updated.getAmount());
+        assertEquals(120, updated.getServingAmount());
         assertEquals(MealType.SNACKS, updated.getMealType());
     }
 

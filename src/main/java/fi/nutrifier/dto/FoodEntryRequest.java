@@ -18,7 +18,7 @@ import java.util.UUID;
 public class FoodEntryRequest {
 
     @Min(0)
-    private Double amount;
+    private Double servingAmount;
     private LocalDate date;
     private LocalTime time;
 
@@ -34,7 +34,7 @@ public class FoodEntryRequest {
     public FoodEntry toEntity(UUID userId, Double calories, Double fat, Double carbs, Double protein) {
         return new FoodEntry(
                 null,
-                this.amount,
+                this.servingAmount,
                 this.date,
                 this.time,
                 this.mealType,

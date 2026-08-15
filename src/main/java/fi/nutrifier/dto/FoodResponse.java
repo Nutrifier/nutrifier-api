@@ -23,4 +23,5 @@ public class FoodResponse extends ApiResponse {
     private Double fat;
     private Boolean verified;
     private FoodStatus status;
+    private Map<ServingType, Double> servings;
 }
