@@ -16,11 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ActivityLevel {
 
-    // Reference constants for ease of use
-    public static final ActivityLevel SEDENTARY =
-            new ActivityLevel(UUID.fromString("00040001-0000-0000-0000-000000000000"), "SEDENTARY", 1.2, "Mostly sitting, minimal walking");
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @JdbcTypeCode(SqlTypes.CHAR)

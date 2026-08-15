@@ -16,17 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MealType {
 
-    // TODO: Move away from the entity
-    // Reference constants for ease of use
-    public static final MealType BREAKFAST =
-            new MealType(UUID.fromString("00020001-0000-0000-0000-000000000000"), "BREAKFAST");
-    public static final MealType LUNCH =
-            new MealType(UUID.fromString("00020002-0000-0000-0000-000000000000"), "LUNCH");
-    public static final MealType DINNER =
-            new MealType(UUID.fromString("00020003-0000-0000-0000-000000000000"), "DINNER");
-    public static final MealType SNACKS =
-            new MealType(UUID.fromString("00020004-0000-0000-0000-000000000000"), "SNACKS");
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @JdbcTypeCode(SqlTypes.CHAR)

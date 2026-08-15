@@ -6,6 +6,7 @@ import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.entities.*;
 import fi.nutrifier.exceptions.*;
 import fi.nutrifier.repositories.*;
+import fi.nutrifier.services.reference.DietService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +28,7 @@ public class UserService {
     private final ProfileRepository profileRepository;
     private final GoalsRepository goalsRepository;
     private final WeightRepository weightRepository;
-    private final GoalsService goalsService;
+    private final DietService dietService;
 
     @Autowired
     public UserService(
@@ -36,14 +37,14 @@ public class UserService {
             ProfileRepository profileRepository,
             GoalsRepository goalsRepository,
             WeightRepository weightRepository,
-            GoalsService goalsService
+            DietService dietService
     ) {
         this.repository = repository;
         this.userSettingsRepository = userSettingsRepository;
         this.profileRepository = profileRepository;
         this.goalsRepository = goalsRepository;
         this.weightRepository = weightRepository;
-        this.goalsService = goalsService;
+        this.dietService = dietService;
     }
 
     @Transactional
@@ -68,7 +69,7 @@ public class UserService {
                 "FULL_CIRCLE",
                 "EN",
                 3,
-                Diet.STANDARD,
+                dietService.of("STANDARD"),
                 1,
                 true,
                 true,

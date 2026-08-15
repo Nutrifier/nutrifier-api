@@ -91,7 +91,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
     @WithMockUser
     public void testUpdateLog_ReturnFood() throws Exception {
         TestObjects.foodEntry1.setServingAmount(100.0);
-        TestObjects.foodEntry1.setMealType(MealType.SNACKS);
+        TestObjects.foodEntry1.setMealType(TestObjects.MEAL_TYPE_SNACKS);
 
         // Use eq(1L) to match the exact ID and any(Log.class) to allow any User instance.
         when(service.update(eq(TestObjects.id1), eq(TestObjects.id), any(FoodEntry.class)))

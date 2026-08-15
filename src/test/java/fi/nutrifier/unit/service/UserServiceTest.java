@@ -84,7 +84,7 @@ public class UserServiceTest {
                 Sex.FEMALE,
                 20,
                 170,
-                ActivityLevel.SEDENTARY,
+                TestObjects.ACTIVITY_LEVEL_SEDENTARY,
                 GoalType.MAINTAIN,
                 50.0,
                 50.0,

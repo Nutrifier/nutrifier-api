@@ -81,7 +81,7 @@ public class FoodEntryServiceTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(22, response.getBody().getServingAmount());
-        assertEquals(MealType.BREAKFAST, response.getBody().getMealType());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, response.getBody().getMealType());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class FoodEntryServiceTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(22, response.getBody().getServingAmount());
-        assertEquals(MealType.BREAKFAST, response.getBody().getMealType());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, response.getBody().getMealType());
     }
 
     @Test
@@ -116,13 +116,13 @@ public class FoodEntryServiceTest {
         when(repository.findByIdAndUserId(TestObjects.id, TestObjects.id1)).thenReturn(Optional.of(TestObjects.foodEntry1));
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        TestObjects.foodEntry1.setMealType(MealType.LUNCH);
+        TestObjects.foodEntry1.setMealType(TestObjects.MEAL_TYPE_LUNCH);
         TestObjects.foodEntry1.setServingAmount(54.0);
         ResponseEntity<FoodEntryResponse> response = service.update(TestObjects.id1, TestObjects.id, TestObjects.foodEntry1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(MealType.LUNCH, response.getBody().getMealType());
+        assertEquals(TestObjects.MEAL_TYPE_LUNCH, response.getBody().getMealType());
         assertEquals(54, response.getBody().getServingAmount());
     }
 

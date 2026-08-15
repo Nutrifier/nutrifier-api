@@ -16,10 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ServingType {
 
-    // Reference constants for ease of use
-    public static final ServingType GRAMS =
-            new ServingType(UUID.fromString("00030009-0000-0000-0000-000000000000"),  "GRAMS");
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @JdbcTypeCode(SqlTypes.CHAR)

@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Role {
 
-    // Reference constants for ease of use
+    // Reference constants for ease of use (ok to be hardcoded, because these shouldn't change)
     public static final Role REGULAR =
             new Role(UUID.fromString("00010003-0000-0000-0000-000000000000"), "REGULAR");
     public static final Role ADMIN =

@@ -16,10 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Diet {
 
-    // Reference constants for ease of use
-    public static final Diet STANDARD =
-            new Diet(UUID.fromString("00050001-0000-0000-0000-000000000000"), "Standard");
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @JdbcTypeCode(SqlTypes.CHAR)

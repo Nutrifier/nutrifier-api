@@ -1,6 +1,5 @@
 package fi.nutrifier.entities;
 
-import fi.nutrifier.utils.Constants;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,10 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FoodBrand {
-
-    // Reference constants for ease of use
-    public static final FoodBrand FINELI =
-            new FoodBrand(Constants.FINELI_UUID, "Fineli", true);
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

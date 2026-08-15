@@ -2,10 +2,13 @@ package fi.nutrifier.services;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
+import fi.nutrifier.enums.FoodStatus;
 import fi.nutrifier.enums.ResponseCode;
 import fi.nutrifier.exceptions.BarcodeAlreadyExistsException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.repositories.*;
+import fi.nutrifier.repositories.FoodServingRepository;
+import fi.nutrifier.services.reference.FoodBrandService;
 import fi.nutrifier.utils.CalculationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,7 @@ public class FoodService {
     private final FoodReportRepository reportRepository;
     private final FoodUsageRepository usageRepository;
     private final FoodServingRepository servingRepository;
+    private final FoodBrandService foodBrandService;
 
     @Autowired
     public FoodService(
@@ -33,13 +37,15 @@ public class FoodService {
             FoodFavouriteRepository favouriteRepository,
             FoodReportRepository reportRepository,
             FoodUsageRepository usageRepository,
-            FoodServingRepository servingRepository
+            FoodServingRepository servingRepository,
+            FoodBrandService foodBrandService
     ) {
         this.repository = repository;
         this.favouriteRepository = favouriteRepository;
         this.reportRepository = reportRepository;
         this.usageRepository = usageRepository;
         this.servingRepository = servingRepository;
+        this.foodBrandService = foodBrandService;
     }
 
     public ResponseEntity<FoodResponse> create(FoodRequest foodRequest, UUID userId) {
@@ -241,5 +247,26 @@ public class FoodService {
         Page<FoodReportResponse> dtoPage = reportRepository.findAll(pageRequest).map(FoodReport::toResponse);
 
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
+    }
+
+    public Food mergeFineliFoodIntoDatabaseFood(FineliFoodResponse fineliFood) {
+        LocalDateTime now = LocalDateTime.now();
+        return new Food(
+                null,
+                fineliFood.getName().getFi(), // TODO: Localize
+                foodBrandService.of("FINELI"),
+                null, // TODO: Check if Fineli returns a category and use that
+                null, // No barcodes
+                fineliFood.getEnergyKcal(),
+                fineliFood.getCarbohydrate(),
+                fineliFood.getProtein(),
+                fineliFood.getFat(),
+                true,
+                FoodStatus.ACTIVE,
+                foodBrandService.idOf("FINELI"),
+                foodBrandService.idOf("FINELI"),
+                now,
+                now
+        );
     }
 }

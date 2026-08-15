@@ -5,7 +5,7 @@ import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.entities.MealType;
 import fi.nutrifier.services.FoodEntryService;
-import fi.nutrifier.services.MealTypeService;
+import fi.nutrifier.services.reference.MealTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

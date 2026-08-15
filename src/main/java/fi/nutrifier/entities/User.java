@@ -36,7 +36,7 @@ public class User {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
-    private Role role = Role.REGULAR;
+    private Role role;
 
     public UserResponse toResponse() {
         return new UserResponse(

@@ -67,6 +67,21 @@ public class TestObjects {
 
     public static AnalyticsFull analyticsFull;
 
+    // Reference constants for ease of use
+    public static final ServingType SERVING_TYPE_GRAMS = new ServingType(UUID.randomUUID(),  "GRAMS");
+    public static final ActivityLevel ACTIVITY_LEVEL_SEDENTARY =
+            new ActivityLevel(UUID.randomUUID(), "SEDENTARY", 1.2, "Mostly sitting, minimal walking");
+    public static final MealType MEAL_TYPE_BREAKFAST =
+            new MealType(UUID.randomUUID(), "BREAKFAST");
+    public static final MealType MEAL_TYPE_LUNCH =
+            new MealType(UUID.randomUUID(), "LUNCH");
+    public static final MealType MEAL_TYPE_DINNER =
+            new MealType(UUID.randomUUID(), "DINNER");
+    public static final MealType MEAL_TYPE_SNACKS =
+            new MealType(UUID.randomUUID(), "SNACKS");
+
+
+
 
     public static void reset() {
         LocalDateTime now = LocalDateTime.now();
@@ -78,7 +93,7 @@ public class TestObjects {
                 Sex.FEMALE,
                 18,
                 180,
-                ActivityLevel.SEDENTARY,
+                TestObjects.ACTIVITY_LEVEL_SEDENTARY,
                 GoalType.BULK,
                 80.0,
                 85.0,
@@ -99,9 +114,9 @@ public class TestObjects {
         foodReport1 = new FoodReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Incorrect values", ReportStatus.APPROVED, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, "decision reasoning", id2, now, now);
         foodReport2 = new FoodReport(id2, id2, id2, ReportType.REPORT, "Bad name", ReportStatus.PENDING, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, null, null, null, now);
 
-        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, ServingType.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
-        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, ServingType.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
-        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MealType.LUNCH, ServingType.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
+        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MEAL_TYPE_BREAKFAST, SERVING_TYPE_GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
+        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MEAL_TYPE_LUNCH, SERVING_TYPE_GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
+        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MEAL_TYPE_LUNCH, SERVING_TYPE_GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
 
         auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
         auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);
@@ -133,7 +148,7 @@ public class TestObjects {
         newWeightEntries.add(new WeightEntry(id1, id1, 70.0, LocalDateTime.now()));
         weightEntries = newWeightEntries;
 
-        profile = new Profile(id1, 180, 18, Sex.FEMALE, ActivityLevel.SEDENTARY, now);
+        profile = new Profile(id1, 180, 18, Sex.FEMALE, TestObjects.ACTIVITY_LEVEL_SEDENTARY, now);
 
         analyticsFull = new AnalyticsFull(
                 today.minusDays(7),

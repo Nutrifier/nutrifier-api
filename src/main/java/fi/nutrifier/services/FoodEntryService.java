@@ -29,6 +29,7 @@ public class FoodEntryService {
     private final FineliService fineliService;
 
     private final FoodRepository foodRepository;
+    private final FoodService foodService;
     private final DailySummaryRepository dailySummaryRepository;
     private final GoalsRepository goalsRepository;
 
@@ -38,6 +39,7 @@ public class FoodEntryService {
             FoodUsageService foodUsageService,
             FineliService fineliService,
             FoodRepository foodRepository,
+            FoodService foodService,
             DailySummaryRepository dailySummaryRepository,
             GoalsRepository goalsRepository
     ) {
@@ -45,6 +47,7 @@ public class FoodEntryService {
         this.foodUsageService = foodUsageService;
         this.fineliService = fineliService;
         this.foodRepository = foodRepository;
+        this.foodService = foodService;
         this.dailySummaryRepository = dailySummaryRepository;
         this.goalsRepository = goalsRepository;
     }
@@ -61,7 +64,7 @@ public class FoodEntryService {
             if (fineliFood == null) {
                 throw new FoodNotFoundException("Failed to fetch Fineli food with ID: " + request.getFineliId());
             }
-            food = fineliFood.toDatabaseFood();
+            food = foodService.mergeFineliFoodIntoDatabaseFood(fineliFood);
         } else {
             throw new FoodNotFoundException("Neither foodId or fineliId was not found");
         }
