@@ -3,7 +3,6 @@ package fi.nutrifier.entities;
 import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.enums.FoodStatus;
-import fi.nutrifier.enums.ServingType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -92,20 +91,6 @@ public class Food {
                 this.protein,
                 this.fat,
                 new HashMap<>()
-        );
-    }
-
-    public FoodRequest toRequest(Map<fi.nutrifier.entities.ServingType, Double> servings) {
-        return new FoodRequest(
-                this.name,
-                this.brand,
-                this.category,
-                this.barcode,
-                this.calories,
-                this.carbs,
-                this.protein,
-                this.fat,
-                servings
         );
     }
 

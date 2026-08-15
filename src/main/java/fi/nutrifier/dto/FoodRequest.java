@@ -5,7 +5,6 @@ import fi.nutrifier.entities.FoodBrand;
 import fi.nutrifier.entities.FoodCategory;
 import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.enums.FoodStatus;
-import fi.nutrifier.enums.ServingType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -3,8 +3,9 @@ package fi.nutrifier.controllers;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
 import fi.nutrifier.services.FoodEntryService;
+import fi.nutrifier.services.MealTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,9 +23,14 @@ import java.util.UUID;
 public class FoodEntryController {
 
     protected final FoodEntryService service;
+    protected final MealTypeService mealTypeService;
 
-    public FoodEntryController(FoodEntryService service) {
+    public FoodEntryController(
+            FoodEntryService service,
+            MealTypeService mealTypeService
+    ) {
         this.service = service;
+        this.mealTypeService = mealTypeService;
     }
 
     @Operation(summary = "Create a log")
@@ -66,7 +72,8 @@ public class FoodEntryController {
             @RequestParam String date,
             @RequestParam(required = false) String mealType
     ) {
-        MealType parsedMealType = mealType != null ? MealType.valueOf(mealType) : null;
+
+        MealType parsedMealType = mealTypeService.of(mealType);
         UUID userId = UUID.fromString(authentication.getName());
         LocalDate parsedDate = LocalDate.parse(date);
         return service.getLogsByDateAndMealTypeAndUserId(parsedDate, parsedMealType, userId);

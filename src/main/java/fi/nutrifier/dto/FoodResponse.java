@@ -4,7 +4,6 @@ import fi.nutrifier.entities.FoodBrand;
 import fi.nutrifier.entities.FoodCategory;
 import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.enums.FoodStatus;
-import fi.nutrifier.enums.ServingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import java.util.Map;
 import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 public class FoodResponse extends ApiResponse {

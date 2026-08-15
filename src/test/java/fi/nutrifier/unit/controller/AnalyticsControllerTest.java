@@ -2,33 +2,21 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.AnalyticsController;
-import fi.nutrifier.controllers.FoodEntryController;
-import fi.nutrifier.dto.FoodEntryRequest;
-import fi.nutrifier.dto.FoodEntryResponse;
-import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.enums.AnalyticsTimePeriod;
-import fi.nutrifier.enums.MealType;
 import fi.nutrifier.services.AnalyticsService;
-import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;

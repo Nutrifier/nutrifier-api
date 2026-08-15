@@ -16,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MealType {
 
+    // TODO: Move away from the entity
     // Reference constants for ease of use
     public static final MealType BREAKFAST =
             new MealType(UUID.fromString("00020001-0000-0000-0000-000000000000"), "BREAKFAST");
