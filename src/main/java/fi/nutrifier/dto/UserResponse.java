@@ -1,7 +1,6 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.*;
-import fi.nutrifier.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

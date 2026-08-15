@@ -1,5 +1,6 @@
 package fi.nutrifier.dto;
 
+import fi.nutrifier.entities.Diet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ public class SettingsUpdateRequest {
     private String nutrientDisplayMode;
     private String language;
     private Integer timeBetweenMeals;
-    private String diet;
+    private Diet diet;
     private Integer weekStartsOn;
     private Boolean proteinEfficiencyEnabled;
     private Boolean mealReminderEnabled;

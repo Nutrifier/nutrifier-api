@@ -5,7 +5,7 @@ import fi.nutrifier.controllers.AuthenticationController;
 import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.LoginRequest;
 import fi.nutrifier.dto.RegisterRequest;
-import fi.nutrifier.enums.Role;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.hamcrest.CoreMatchers;

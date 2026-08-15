@@ -64,9 +64,9 @@ public class FoodService {
 
             System.out.println(type + " -> " + amount);
 
-            FoodServing fs = new FoodServing(new FoodServingId(saved.getId(), type), type, amount);
+            FoodServing fs = new FoodServing(new FoodServingId(saved.getId(), type.getId()), type, amount);
 
-            System.out.println("fs: " + fs.getId().getServingType() + " , " + fs.getAmount());
+            System.out.println("fs: " + fs.getId().getServingTypeId() + " , " + fs.getAmount());
 
 
             if (amount > 0.0) {

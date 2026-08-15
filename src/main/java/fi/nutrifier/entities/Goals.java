@@ -91,7 +91,7 @@ public class Goals {
         // TODO: Take into account users diet (regular, high protein, vegan...)
 
         double bmr = CalculationUtil.calculateMifflinStJeorBMR(profile.getSex(), weight, profile.getHeight(), profile.getAge());
-        double tdee = CalculationUtil.calculateTDEE(bmr, profile.getActivityLevel());
+        double tdee = CalculationUtil.calculateTDEE(bmr, profile.getActivityLevel().getMultiplier());
 
         // Saving calculated TDEE in order to use it to calculate realized deficits
         this.setDailyTDEE(tdee);

@@ -1,7 +1,7 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.enums.FoodWeightUnit;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.ServingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,7 +19,7 @@ public class FoodEntryResponse extends ApiResponse {
     private LocalDate date;
     private LocalTime time;
     private MealType mealType;
-    private FoodWeightUnit unit;
+    private ServingType servingType;
     private Double caloriesSnapshot;
     private Double fatSnapshot;
     private Double carbsSnapshot;

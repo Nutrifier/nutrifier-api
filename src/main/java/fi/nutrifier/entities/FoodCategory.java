@@ -7,20 +7,21 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.io.Serializable;
 import java.util.UUID;
 
-@Embeddable
+@Entity
 @Data
+@Table(name = "food_categories")
 @NoArgsConstructor
 @AllArgsConstructor
-public class FoodServingId implements Serializable {
+public class FoodCategory {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "food_id", columnDefinition = "CHAR(36)")
-    private UUID foodId;
+    @Column(columnDefinition = "CHAR(36)")
+    private UUID id;
 
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "serving_type_id", columnDefinition = "CHAR(36)")
-    private UUID servingTypeId;
+    @Column(nullable = false, unique = true)
+    private String name;
 }

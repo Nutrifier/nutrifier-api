@@ -1,6 +1,5 @@
 package fi.nutrifier.unit.utils;
 
-import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.FoodWeightUnit;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Sex;
@@ -48,9 +47,9 @@ public class CalculationUtilTest {
     @DisplayName("TDEE should scale linearly with activity level")
     void calculateTDEE_ShouldIncreaseWithActivity() {
         double bmr = 1500.0;
-        double sedentaryTDEE = CalculationUtil.calculateTDEE(bmr, ActivityLevel.SEDENTARY);
-        double moderateTDEE = CalculationUtil.calculateTDEE(bmr, ActivityLevel.MODERATE);
-        double veryActiveTDEE = CalculationUtil.calculateTDEE(bmr, ActivityLevel.VERY_ACTIVE);
+        double sedentaryTDEE = CalculationUtil.calculateTDEE(bmr, 0.5);
+        double moderateTDEE = CalculationUtil.calculateTDEE(bmr, 1);
+        double veryActiveTDEE = CalculationUtil.calculateTDEE(bmr, 1.5);
 
         assertTrue(veryActiveTDEE > moderateTDEE);
         assertTrue(moderateTDEE > sedentaryTDEE);

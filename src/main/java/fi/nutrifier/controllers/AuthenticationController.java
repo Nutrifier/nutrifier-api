@@ -1,8 +1,7 @@
 package fi.nutrifier.controllers;
 
 import fi.nutrifier.dto.*;
-import fi.nutrifier.enums.Role;
-import fi.nutrifier.entities.User;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.services.UserService;

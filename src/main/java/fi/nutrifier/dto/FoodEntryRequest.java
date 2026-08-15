@@ -1,8 +1,8 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.FoodWeightUnit;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.ServingType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
@@ -26,7 +26,7 @@ public class FoodEntryRequest {
     private MealType mealType;
 
     @Enumerated(EnumType.STRING)
-    private FoodWeightUnit unit;
+    private ServingType servingType;
 
     private Integer fineliId;
     private UUID foodId;
@@ -38,7 +38,7 @@ public class FoodEntryRequest {
                 this.date,
                 this.time,
                 this.mealType,
-                this.unit,
+                this.servingType,
                 calories,
                 fat,
                 carbs,

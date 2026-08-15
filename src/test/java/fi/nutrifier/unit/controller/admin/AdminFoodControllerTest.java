@@ -60,7 +60,6 @@ class AdminFoodControllerTest extends ControllerTestInterface<FoodService> {
         TestObjects.food1.setName("New name");
         TestObjects.food1.setCalories(150.0);
         TestObjects.food1.setBarcode("1536473434");
-        TestObjects.food1.setServingSize(400);
         TestObjects.food1.setCarbs(128.0);
         TestObjects.food1.setProtein(24.0);
         TestObjects.food1.setFat(45.0);

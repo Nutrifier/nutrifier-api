@@ -1,6 +1,9 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.Food;
+import fi.nutrifier.entities.FoodBrand;
+import fi.nutrifier.entities.FoodCategory;
+import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.enums.FoodStatus;
 import fi.nutrifier.enums.ServingType;
 import jakarta.validation.constraints.Min;
@@ -21,8 +24,8 @@ public class FoodRequest {
     @NotNull
     private String name;
 
-    private String brand;
-    private String category;
+    private FoodBrand brand;
+    private FoodCategory category;
     private String barcode;
 
     @NotNull

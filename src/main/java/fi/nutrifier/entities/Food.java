@@ -36,8 +36,14 @@ public class Food {
     @NotBlank
     private String name;
 
-    private String brand;
-    private String category; // TODO: Enumerate
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private FoodBrand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private FoodCategory category;
+
     private String barcode;
 
     @Column(nullable = false)
@@ -89,7 +95,7 @@ public class Food {
         );
     }
 
-    public FoodRequest toRequest(Map<ServingType, Double> servings) {
+    public FoodRequest toRequest(Map<fi.nutrifier.entities.ServingType, Double> servings) {
         return new FoodRequest(
                 this.name,
                 this.brand,

@@ -1,5 +1,8 @@
 package fi.nutrifier.dto;
 
+import fi.nutrifier.entities.FoodBrand;
+import fi.nutrifier.entities.FoodCategory;
+import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.enums.FoodStatus;
 import fi.nutrifier.enums.ServingType;
 import lombok.AllArgsConstructor;
@@ -15,8 +18,8 @@ import java.util.UUID;
 public class FoodResponse extends ApiResponse {
     private UUID id;
     private String name;
-    private String brand;
-    private String category;
+    private FoodBrand brand;
+    private FoodCategory category;
     private String barcode;
     private Double calories;
     private Double carbs;

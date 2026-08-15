@@ -1,6 +1,5 @@
 package fi.nutrifier.entities;
 
-import fi.nutrifier.enums.ServingType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +17,9 @@ public class FoodServing {
     @EmbeddedId
     private FoodServingId id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId("servingTypeId")
+    @JoinColumn(name = "serving_type_id", nullable = false)
     private ServingType servingType;
 
     @Column(nullable = false)
