@@ -1,6 +1,7 @@
 package fi.nutrifier.repositories;
+
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

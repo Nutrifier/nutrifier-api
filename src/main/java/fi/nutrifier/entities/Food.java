@@ -35,8 +35,14 @@ public class Food {
     @NotBlank
     private String name;
 
-    private String brand;
-    private String category; // TODO: Enumerate
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private FoodBrand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private FoodCategory category;
+
     private String barcode;
 
     @Column(nullable = false)

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import fi.nutrifier.dto.MealRequest;
 import fi.nutrifier.dto.ProfileResponse;
 import fi.nutrifier.dto.ProfileUpdateRequest;
-import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.Sex;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,7 +34,8 @@ public class Profile {
     @Enumerated(EnumType.STRING)
     private Sex sex;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "activity_level_id")
     private ActivityLevel activityLevel;
 
     @Column(nullable = false)

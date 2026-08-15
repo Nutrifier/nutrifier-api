@@ -4,8 +4,6 @@ import fi.nutrifier.dto.FineliFoodResponse;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.enums.FoodStatus;
-import fi.nutrifier.enums.MealType;
 import fi.nutrifier.exceptions.FoodEntryNotFoundException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.exceptions.GoalsNotFoundException;

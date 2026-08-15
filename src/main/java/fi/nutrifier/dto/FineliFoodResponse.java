@@ -1,7 +1,9 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.Food;
+import fi.nutrifier.entities.FoodBrand;
 import fi.nutrifier.enums.FoodStatus;
+import fi.nutrifier.utils.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -31,7 +33,7 @@ public class FineliFoodResponse {
         return new Food(
                 null,
                 this.name.getFi(), // TODO: Localize
-                "Fineli",
+                FoodBrand.FINELI,
                 null, // TODO: Check if Fineli returns a category and use that
                 null, // No barcodes
                 this.energyKcal,
@@ -40,8 +42,8 @@ public class FineliFoodResponse {
                 this.fat,
                 true,
                 FoodStatus.ACTIVE,
-                UUID.fromString ("79fbbe73-6a12-498e-a051-8490122cb99c"), // FINELI_UUID
-                UUID.fromString ("79fbbe73-6a12-498e-a051-8490122cb99c"),
+                Constants.FINELI_UUID, // FINELI_UUID
+                Constants.FINELI_UUID,
                 now,
                 now
         );

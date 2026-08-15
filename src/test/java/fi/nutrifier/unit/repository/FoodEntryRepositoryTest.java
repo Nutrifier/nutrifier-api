@@ -1,7 +1,7 @@
 package fi.nutrifier.unit.repository;
 
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
 import fi.nutrifier.repositories.FoodEntryRepository;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;

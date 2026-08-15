@@ -4,7 +4,6 @@ import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.enums.Role;
 import fi.nutrifier.exceptions.*;
 import fi.nutrifier.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,7 @@ public class UserService {
                 "FULL_CIRCLE",
                 "EN",
                 3,
-                "STANDARD",
+                Diet.STANDARD,
                 1,
                 true,
                 true,

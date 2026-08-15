@@ -2,6 +2,9 @@ package fi.nutrifier.unit.utils;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
+import fi.nutrifier.entities.ActivityLevel;
+import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.enums.*;
 
 import java.time.LocalDate;
@@ -87,18 +90,18 @@ public class TestObjects {
         user1 = new UserResponse(id1, "test@gmail.com", Role.REGULAR);
         user2 = new UserResponse(id2, "test2@gmail.com", Role.REGULAR);
 
-        food1 = new Food(id1, "Kanan rintafilee", "brand", "category", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id1, id1, now, now);
-        food2 = new Food(id2, "Riisi (keitetty)", "brand", "category", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);
-        food3 = new Food(id3, "Kalkkunaleike", "brand", "category", "", 100, 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id3, id3, now, now);
+        food1 = new Food(id1, "Kanan rintafilee", null, null, "1234567890", 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id1, id1, now, now);
+        food2 = new Food(id2, "Riisi (keitetty)", null, null, "1234567890", 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);
+        food3 = new Food(id3, "Kalkkunaleike", null, null, "", 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id3, id3, now, now);
 
         foodUsage = new FoodUsage(id1, id1, 20, now);
 
         foodReport1 = new FoodReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Incorrect values", ReportStatus.APPROVED, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, "decision reasoning", id2, now, now);
         foodReport2 = new FoodReport(id2, id2, id2, ReportType.REPORT, "Bad name", ReportStatus.PENDING, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, null, null, null, now);
 
-        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
-        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
-        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
+        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, ServingType.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
+        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, ServingType.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
+        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MealType.LUNCH, ServingType.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
 
         auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
         auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);

@@ -1,10 +1,14 @@
 package fi.nutrifier.dto;
 
+import fi.nutrifier.entities.FoodBrand;
+import fi.nutrifier.entities.FoodCategory;
+import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.enums.FoodStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Map;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -13,10 +17,9 @@ import java.util.UUID;
 public class FoodResponse extends ApiResponse {
     private UUID id;
     private String name;
-    private String brand;
-    private String category;
+    private FoodBrand brand;
+    private FoodCategory category;
     private String barcode;
-    private Integer servingSize;
     private Double calories;
     private Double carbs;
     private Double protein;

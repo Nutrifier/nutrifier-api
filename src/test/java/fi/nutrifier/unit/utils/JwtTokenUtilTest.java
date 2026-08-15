@@ -1,6 +1,6 @@
 package fi.nutrifier.unit.utils;
 
-import fi.nutrifier.enums.Role;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.utils.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,9 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.Food;
+import fi.nutrifier.entities.FoodBrand;
+import fi.nutrifier.entities.FoodCategory;
+import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.enums.FoodStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -19,8 +23,8 @@ public class FoodRequest {
     @NotNull
     private String name;
 
-    private String brand;
-    private String category;
+    private FoodBrand brand;
+    private FoodCategory category;
     private String barcode;
 
     @NotNull

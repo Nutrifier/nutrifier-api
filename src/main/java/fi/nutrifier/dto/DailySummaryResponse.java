@@ -1,8 +1,7 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
-import lombok.AllArgsConstructor;
+import fi.nutrifier.entities.MealType;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -79,9 +78,12 @@ public class DailySummaryResponse {
     }
 
     private void initializeMealSummaries() {
+        /* TODO: Check how to initialize meal summaries
         this.mealSummaries.put(MealType.BREAKFAST, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
         this.mealSummaries.put(MealType.LUNCH, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
         this.mealSummaries.put(MealType.DINNER, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
         this.mealSummaries.put(MealType.SNACKS, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
+
+         */
     }
 }

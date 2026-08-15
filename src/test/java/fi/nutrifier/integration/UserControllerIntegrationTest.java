@@ -3,7 +3,7 @@ package fi.nutrifier.integration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nutrifier.dto.RegisterRequest;
-import fi.nutrifier.enums.ActivityLevel;
+import fi.nutrifier.entities.ActivityLevel;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Sex;
 import fi.nutrifier.repositories.UserRepository;

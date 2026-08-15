@@ -6,8 +6,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
-import fi.nutrifier.enums.FoodWeightUnit;
-import fi.nutrifier.enums.MealType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -45,14 +43,13 @@ public class FoodEntry {
     @NotNull
     private LocalTime time;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meal_type_id")
     private MealType mealType;
 
-    @Column(length = 10)
-    @Enumerated(EnumType.STRING)
-    private FoodWeightUnit unit;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "serving_type_id")
+    private ServingType servingType;
 
     @Column(nullable = false) private Double caloriesSnapshot;
     @Column(nullable = false) private Double fatSnapshot;
@@ -75,7 +72,7 @@ public class FoodEntry {
                 this.date,
                 this.time,
                 this.mealType,
-                this.unit,
+                this.servingType,
                 this.fineliId,
                 this.foodId
         );
@@ -88,7 +85,7 @@ public class FoodEntry {
                 this.date,
                 this.time,
                 this.mealType,
-                this.unit,
+                this.servingType,
                 this.caloriesSnapshot,
                 this.fatSnapshot,
                 this.carbsSnapshot,
@@ -104,7 +101,7 @@ public class FoodEntry {
         this.date = request.getDate();
         this.time = request.getTime();
         this.mealType = request.getMealType();
-        this.unit = request.getUnit();
+        this.servingType = request.getServingType();
         this.caloriesSnapshot = request.getCaloriesSnapshot();
         this.fatSnapshot = request.getFatSnapshot();
         this.carbsSnapshot = request.getCarbsSnapshot();
