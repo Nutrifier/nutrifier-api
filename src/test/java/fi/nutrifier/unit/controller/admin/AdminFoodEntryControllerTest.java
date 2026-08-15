@@ -77,7 +77,7 @@ public class AdminFoodEntryControllerTest extends ControllerTestInterface<FoodEn
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
+                .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getServingAmount())))
                 .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType().toString())));
 
         verify(service, times(1)).getById(TestObjects.id);
