@@ -61,8 +61,6 @@ public class UserService {
         user.setRole(Role.REGULAR); // Default to regular user
         User savedUser = repository.save(user);
 
-        System.out.println("User service 1");
-
         // Initialize user settings
         Settings settings = new Settings(
                 savedUser.getId(),
@@ -81,16 +79,12 @@ public class UserService {
         );
         userSettingsRepository.save(settings);
 
-        System.out.println("User service 2");
-
         // Initialize weight
         WeightEntry firstWeightEntry = new WeightEntry();
         firstWeightEntry.setUserId(savedUser.getId());
         firstWeightEntry.setDate(now);
         firstWeightEntry.setWeight(registerRequest.getCurrentWeight());
         WeightEntry savedWeightEntry = weightRepository.save(firstWeightEntry);
-
-        System.out.println("User service 3");
 
         // Initialize profile
         Profile profile = new Profile();
@@ -101,8 +95,6 @@ public class UserService {
         profile.setActivityLevel(registerRequest.getActivityLevel());
         profile.setUpdatedAt(now);
         Profile savedProfile = profileRepository.save(profile);
-
-        System.out.println("User service 4");
 
         // Initialize user goals
         Goals goals = new Goals();
@@ -117,15 +109,11 @@ public class UserService {
         goals.calculateNutrientTargets(savedProfile, savedWeightEntry.getWeight());
         goalsRepository.save(goals);
 
-        System.out.println("User service 5");
-
         UserResponse userResponse = new UserResponse();
         String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
         userResponse.setId(savedUser.getId());
         userResponse.setEmail(decryptedEmail);
         userResponse.setRole(savedUser.getRole());
-
-        System.out.println("User service 6");
 
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
@@ -156,7 +144,7 @@ public class UserService {
     }
 
     public ResponseEntity<UserResponse> getById(UUID id) throws FailedCryptionException, EncryptionKeyException {
-        User user = repository.findById(id).orElseThrow(UserNotFoundException::new);
+        User user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
         user.setEmail(SecurityUtil.decrypt(user.getEmail()));
         user.setPassword(null);
@@ -165,7 +153,7 @@ public class UserService {
     }
 
     public ResponseEntity<UserResponse> update(UUID id, UserUpdateRequest request) throws FailedCryptionException, EncryptionKeyException {
-        User existing = repository.findById(id).orElseThrow(UserNotFoundException::new);
+        User existing = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
         existing.updateEntityFromRequest(request);
         User data = repository.save(existing);
@@ -188,7 +176,7 @@ public class UserService {
 
     public ResponseEntity<String> delete(UUID id) {
         if (!repository.existsById(id)) {
-            throw new UserNotFoundException();
+            throw new UserNotFoundException(id);
         }
 
         repository.deleteById(id);

@@ -33,7 +33,7 @@ public class FoodEntry {
     @Column(nullable = false)
     @NotNull
     @Min(value = 0)
-    private Double amount;
+    private Double servingAmount;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(nullable = false)
@@ -71,7 +71,7 @@ public class FoodEntry {
 
     public FoodEntryRequest toRequest() {
         return new FoodEntryRequest(
-                this.amount,
+                this.servingAmount,
                 this.date,
                 this.time,
                 this.mealType,
@@ -84,7 +84,7 @@ public class FoodEntry {
     public FoodEntryResponse toResponse() {
         return new FoodEntryResponse(
                 this.id,
-                this.amount,
+                this.servingAmount,
                 this.date,
                 this.time,
                 this.mealType,
@@ -100,7 +100,7 @@ public class FoodEntry {
     }
 
     public void updateEntityFromRequest(FoodEntry request) {
-        this.amount = request.getAmount();
+        this.servingAmount = request.getServingAmount();
         this.date = request.getDate();
         this.time = request.getTime();
         this.mealType = request.getMealType();

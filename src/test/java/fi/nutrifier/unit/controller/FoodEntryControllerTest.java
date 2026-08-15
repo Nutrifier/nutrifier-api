@@ -5,7 +5,7 @@ import fi.nutrifier.controllers.FoodEntryController;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
 import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.hamcrest.CoreMatchers;
@@ -55,7 +55,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
                 .content(objectMapper.writeValueAsString(TestObjects.foodEntry1))
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
+            .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getServingAmount())))
             .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType().toString())));
 
         verify(service).create(any(UUID.class), any(FoodEntryRequest.class));
@@ -67,7 +67,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
             roles = "USER"
     )
     public void testCreateLog_InvalidAmount_ReturnBadRequest() throws Exception {
-        TestObjects.foodEntry1.setAmount(-1.0);
+        TestObjects.foodEntry1.setServingAmount(-1.0);
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
     @Test
     @WithMockUser
     public void testUpdateLog_ReturnFood() throws Exception {
-        TestObjects.foodEntry1.setAmount(100.0);
+        TestObjects.foodEntry1.setServingAmount(100.0);
         TestObjects.foodEntry1.setMealType(MealType.SNACKS);
 
         // Use eq(1L) to match the exact ID and any(Log.class) to allow any User instance.

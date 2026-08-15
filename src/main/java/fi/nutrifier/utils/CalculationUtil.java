@@ -114,7 +114,7 @@ public class CalculationUtil {
                 // 1 kg of fat is approximately 7700 kcal
                 double dailyDelta = (deltaKg * 7700) / days;
                 // TODO: Notify the user that the goal is ambitious
-                dailyDelta = Math.clamp(dailyDelta, -700, -300); // Restricting too big of a caloric deficit
+                dailyDelta = Math.max(-700, Math.min(dailyDelta, -300)); // Restricting too big of a caloric deficit
                 calorieGoal = tdee + dailyDelta;
             }
             case BULK -> {

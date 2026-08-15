@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FoodEntryResponse extends ApiResponse {
     private UUID id;
-    private Double amount;
+    private Double servingAmount;
     private LocalDate date;
     private LocalTime time;
     private MealType mealType;
