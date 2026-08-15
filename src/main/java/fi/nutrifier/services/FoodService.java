@@ -3,6 +3,7 @@ package fi.nutrifier.services;
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
 import fi.nutrifier.enums.ResponseCode;
+import fi.nutrifier.enums.ServingType;
 import fi.nutrifier.exceptions.BarcodeAlreadyExistsException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.repositories.*;

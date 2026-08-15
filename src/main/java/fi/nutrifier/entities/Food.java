@@ -3,6 +3,7 @@ package fi.nutrifier.entities;
 import fi.nutrifier.dto.FoodRequest;
 import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.enums.FoodStatus;
+import fi.nutrifier.enums.ServingType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
