@@ -1,9 +1,6 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.entities.Food;
-import fi.nutrifier.entities.FoodBrand;
-import fi.nutrifier.entities.FoodCategory;
-import fi.nutrifier.entities.ServingType;
+import fi.nutrifier.entities.*;
 import fi.nutrifier.enums.FoodStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,8 +21,9 @@ public class FoodRequest {
     @NotNull
     private String name;
 
-    private FoodBrand brand;
-    private FoodCategory category;
+    private UUID brandId;
+    private UUID categoryId;
+
     private String barcode;
 
     @NotNull
@@ -43,15 +42,15 @@ public class FoodRequest {
     @Min(0)
     private Double fat;
 
-    private Map<ServingType, Double> servings;
+    private List<FoodServing> servings;
 
-    public Food toEntity(UUID userId) {
+    public Food toEntity(UUID userId, FoodBrand brand, FoodCategory category) {
         LocalDateTime now = LocalDateTime.now();
         return new Food(
                 UUID.randomUUID(),
                 this.name,
-                this.brand,
-                this.category,
+                brand,
+                category,
                 this.barcode,
                 this.calories,
                 this.carbs,

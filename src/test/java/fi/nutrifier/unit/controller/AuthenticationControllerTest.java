@@ -2,10 +2,8 @@ package fi.nutrifier.unit.controller;
 
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.controllers.AuthenticationController;
-import fi.nutrifier.dto.ApiResponse;
 import fi.nutrifier.dto.LoginRequest;
 import fi.nutrifier.dto.RegisterRequest;
-import fi.nutrifier.entities.Role;
 import fi.nutrifier.services.UserService;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.hamcrest.CoreMatchers;
@@ -37,11 +35,11 @@ public class AuthenticationControllerTest extends ControllerTestInterface<UserSe
     @Test
     public void testRegister_ReturnCreated() throws Exception {
         UUID id = UUID.randomUUID();
-        TestObjects.user1.setId(id); // Mock id generation
+        TestObjects.userResponse1.setId(id); // Mock id generation
 
         when(service.isEmailTaken(anyString())).thenReturn(new ResponseEntity<>(false, HttpStatus.NOT_FOUND));
-        when(service.create(any(RegisterRequest.class))).thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.CREATED));
-        when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
+        when(service.create(any(RegisterRequest.class))).thenReturn(new ResponseEntity<>(TestObjects.userResponse1, HttpStatus.CREATED));
+        when(jwtTokenUtil.generateToken(any(UUID.class), any(String.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post(baseUrl + "/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -54,10 +52,10 @@ public class AuthenticationControllerTest extends ControllerTestInterface<UserSe
     @Test
     public void testLogin_ReturnOk() throws Exception {
         UUID id = UUID.randomUUID();
-        TestObjects.user1.setId(id); // Mock id generation
+        TestObjects.userResponse1.setId(id); // Mock id generation
 
-        when(service.login(anyString(), anyString())).thenReturn(ResponseEntity.ok(TestObjects.user1));
-        when(jwtTokenUtil.generateToken(any(UUID.class), any(Role.class))).thenReturn("mock-jwt-token");
+        when(service.login(anyString(), anyString())).thenReturn(ResponseEntity.ok(TestObjects.userResponse1));
+        when(jwtTokenUtil.generateToken(any(UUID.class), any(String.class))).thenReturn("mock-jwt-token");
 
         mockMvc.perform(post(baseUrl + "/login")
                 .contentType(MediaType.APPLICATION_JSON)

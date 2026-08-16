@@ -94,7 +94,7 @@ class FoodRepositoryTest {
         Page<Food> found = repository.findFoodsByNameContainingIgnoreCase("kA", pageable);
 
         assertEquals(2, found.getContent().size());
-        assertEquals("Kanan rintafilee", found.getContent().getFirst().getName());
+        assertEquals("Kanan rintafilee", found.getContent().get(0).getName());
         assertEquals("Kalkkunaleike", found.getContent().get(1).getName());
     }
 

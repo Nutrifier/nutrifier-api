@@ -17,6 +17,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -83,14 +84,14 @@ public class Food {
     public FoodRequest toRequest() {
         return new FoodRequest(
                 this.name,
-                this.brand,
-                this.category,
+                this.brand != null ? this.brand.getId() : null,
+                this.category != null ? this.category.getId() : null,
                 this.barcode,
                 this.calories,
                 this.carbs,
                 this.protein,
                 this.fat,
-                new HashMap<>()
+                Collections.emptyList()
         );
     }
 
@@ -98,8 +99,8 @@ public class Food {
         return new FoodResponse(
                 this.id,
                 this.name,
-                this.brand,
-                this.category,
+                this.brand != null ? this.brand.getId() : null,
+                this.category != null ? this.category.getId() : null,
                 this.barcode,
                 this.calories,
                 this.carbs,
@@ -118,8 +119,8 @@ public class Food {
         return new FoodResponse(
                 this.id,
                 this.name,
-                this.brand,
-                this.category,
+                this.brand != null ? this.brand.getId() : null,
+                this.category != null ? this.category.getId() : null,
                 this.barcode,
                 this.calories,
                 this.carbs,

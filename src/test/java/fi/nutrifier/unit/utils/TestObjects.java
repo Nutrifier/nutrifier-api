@@ -28,8 +28,8 @@ public class TestObjects {
 
     public static RegisterRequest registerRequest;
 
-    public static UserResponse user1;
-    public static UserResponse user2;
+    public static UserResponse userResponse1;
+    public static UserResponse userResponse2;
 
     public static FoodEntry foodEntry1;
     public static FoodEntry foodEntry2;
@@ -79,8 +79,24 @@ public class TestObjects {
             new MealType(UUID.randomUUID(), "DINNER");
     public static final MealType MEAL_TYPE_SNACKS =
             new MealType(UUID.randomUUID(), "SNACKS");
+    public static final Diet DIET_STANDARD =
+            new Diet(UUID.randomUUID(), "STANDARD");
+    public static final Role ROLE_REGULAR =
+            new Role(UUID.randomUUID(), "REGULAR");
+    public static final Role ROLE_ADMIN =
+            new Role(UUID.randomUUID(), "ADMIN");
+    public static final Role ROLE_PREMIUM =
+            new Role(UUID.randomUUID(), "PREMIUM");
 
 
+    public static User toUser(UserResponse userResponse, Role role) {
+        return new User(
+                userResponse.getId(),
+                userResponse.getEmail(),
+                null,
+                role
+        );
+    }
 
 
     public static void reset() {
@@ -102,8 +118,8 @@ public class TestObjects {
 
         date = LocalDate.of(2025, 1, 15);
 
-        user1 = new UserResponse(id1, "test@gmail.com", Role.REGULAR);
-        user2 = new UserResponse(id2, "test2@gmail.com", Role.REGULAR);
+        userResponse1 = new UserResponse(id1, "test@gmail.com", ROLE_REGULAR.getName());
+        userResponse2 = new UserResponse(id2, "test2@gmail.com", ROLE_REGULAR.getName());
 
         food1 = new Food(id1, "Kanan rintafilee", null, null, "1234567890", 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id1, id1, now, now);
         food2 = new Food(id2, "Riisi (keitetty)", null, null, "1234567890", 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);

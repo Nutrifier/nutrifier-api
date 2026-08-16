@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.entities.ActivityLevel;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Sex;
 import fi.nutrifier.repositories.UserRepository;
+import fi.nutrifier.repositories.reference.ActivityLevelRepository;
+import fi.nutrifier.repositories.reference.DietRepository;
+import fi.nutrifier.repositories.reference.RoleRepository;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,6 +42,15 @@ class UserControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private DietRepository dietRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private ActivityLevelRepository activityLevelRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -45,15 +59,18 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void registrationCreatesDefaultUserSettings() throws Exception {
+        roleRepository.save(TestObjects.ROLE_REGULAR);
+        dietRepository.save(TestObjects.DIET_STANDARD);
+        ActivityLevel savedActivityLevel = activityLevelRepository.save(TestObjects.ACTIVITY_LEVEL_SEDENTARY);
+
         RegisterRequest registerRequest = new RegisterRequest(
                 "test@gmail.com",
                 "Qwerty123!",
                 Sex.FEMALE,
                 20,
                 170,
-                TestObjects.ACTIVITY_LEVEL_SEDENTARY,
+                savedActivityLevel,
                 GoalType.MAINTAIN,
                 50.0,
                 50.0,
@@ -74,7 +91,7 @@ class UserControllerIntegrationTest {
         String userId = json.get("userId").asText();
 
         // Fetch user data
-        mockMvc.perform(get("/api/v1/users")
+        mockMvc.perform(get("/api/v1/users/me")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(userId));

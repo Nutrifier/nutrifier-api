@@ -16,14 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Role {
 
-    // Reference constants for ease of use (ok to be hardcoded, because these shouldn't change)
-    public static final Role REGULAR =
-            new Role(UUID.fromString("00010003-0000-0000-0000-000000000000"), "REGULAR");
-    public static final Role ADMIN =
-            new Role(UUID.fromString("00010001-0000-0000-0000-000000000000"), "ADMIN");
-    public static final Role PREMIUM =
-            new Role(UUID.fromString("00010002-0000-0000-0000-000000000000"), "PREMIUM");
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @JdbcTypeCode(SqlTypes.CHAR)

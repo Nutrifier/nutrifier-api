@@ -43,14 +43,14 @@ public class JwtTokenUtilTest {
 
     @Test
     public void testGenerateToken() throws Exception {
-        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), TestObjects.ROLE_REGULAR.getName());
         assertNotEquals("123456789", token);
         assertTrue(token.startsWith("eyJ"));
     }
 
     @Test
     public void testValidateToken_validToken() throws Exception {
-        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), TestObjects.ROLE_REGULAR.getName());
         boolean valid = jwtTokenUtil.validateToken(token);
         assertTrue(valid);
     }
@@ -64,22 +64,22 @@ public class JwtTokenUtilTest {
     @Test
     public void testExtractUser() throws Exception {
         UUID uuid = UUID.randomUUID();
-        String token = jwtTokenUtil.generateToken(uuid, Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(uuid, TestObjects.ROLE_REGULAR.getName());
         String extractedId = jwtTokenUtil.extractUserId(token);
         assertEquals(uuid.toString(), extractedId);
     }
 
     @Test
     public void testExtractRole() throws Exception {
-        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.REGULAR);
+        String token = jwtTokenUtil.generateToken(UUID.randomUUID(), TestObjects.ROLE_REGULAR.getName());
         List<String> roles = jwtTokenUtil.extractRole(token);
         assertEquals("REGULAR", roles.get(0));
 
-        String token2 = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.PREMIUM);
+        String token2 = jwtTokenUtil.generateToken(UUID.randomUUID(), TestObjects.ROLE_PREMIUM.getName());
         List<String> roles2 = jwtTokenUtil.extractRole(token2);
         assertEquals("PREMIUM", roles2.get(0));
 
-        String token3 = jwtTokenUtil.generateToken(UUID.randomUUID(), Role.ADMIN);
+        String token3 = jwtTokenUtil.generateToken(UUID.randomUUID(), TestObjects.ROLE_ADMIN.getName());
         List<String> roles3 = jwtTokenUtil.extractRole(token3);
         assertEquals("ADMIN", roles3.get(0));
     }

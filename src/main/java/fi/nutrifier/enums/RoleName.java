@@ -1,6 +1,6 @@
 package fi.nutrifier.enums;
 
-public enum Role {
+public enum RoleName {
     ADMIN,
     PREMIUM,
     REGULAR,

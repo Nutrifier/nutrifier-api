@@ -7,6 +7,7 @@ import fi.nutrifier.entities.*;
 import fi.nutrifier.exceptions.*;
 import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.reference.DietService;
+import fi.nutrifier.services.reference.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +30,7 @@ public class UserService {
     private final GoalsRepository goalsRepository;
     private final WeightRepository weightRepository;
     private final DietService dietService;
+    private final RoleService roleService;
 
     @Autowired
     public UserService(
@@ -37,7 +39,8 @@ public class UserService {
             ProfileRepository profileRepository,
             GoalsRepository goalsRepository,
             WeightRepository weightRepository,
-            DietService dietService
+            DietService dietService,
+            RoleService roleService
     ) {
         this.repository = repository;
         this.userSettingsRepository = userSettingsRepository;
@@ -45,6 +48,7 @@ public class UserService {
         this.goalsRepository = goalsRepository;
         this.weightRepository = weightRepository;
         this.dietService = dietService;
+        this.roleService = roleService;
     }
 
     @Transactional
@@ -58,7 +62,7 @@ public class UserService {
         User user = new User();
         user.setEmail(encryptedEmail);
         user.setPassword(hashedPassword);
-        user.setRole(Role.REGULAR); // Default to regular user
+        user.setRole(roleService.of("REGULAR")); // Default to regular user
         User savedUser = repository.save(user);
 
         // Initialize user settings
@@ -113,7 +117,7 @@ public class UserService {
         String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
         userResponse.setId(savedUser.getId());
         userResponse.setEmail(decryptedEmail);
-        userResponse.setRole(savedUser.getRole());
+        userResponse.setRole(savedUser.getRole().getName());
 
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
@@ -133,7 +137,7 @@ public class UserService {
                 return new UserResponse(
                         user.getId(),
                         user.getEmail(),
-                        user.getRole()
+                        user.getRole().getName()
                 );
             } catch (FailedCryptionException | EncryptionKeyException e) {
                 return null;

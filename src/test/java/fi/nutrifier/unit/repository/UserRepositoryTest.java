@@ -1,7 +1,9 @@
 package fi.nutrifier.unit.repository;
 
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.entities.User;
 import fi.nutrifier.repositories.UserRepository;
+import fi.nutrifier.repositories.reference.RoleRepository;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Optional;
+
+import static fi.nutrifier.unit.utils.TestObjects.ROLE_REGULAR;
+import static fi.nutrifier.unit.utils.TestObjects.toUser;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -19,15 +24,22 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @BeforeEach
     public void setup() {
         TestObjects.reset();
         repository.deleteAll();
+
+        Role savedRole = roleRepository.save(TestObjects.ROLE_REGULAR);
+        TestObjects.userResponse1.setRole(savedRole.getName());
+        TestObjects.userResponse2.setRole(savedRole.getName());
     }
 
     @Test
     public void testSaveUser_ReturnsSavedUser() {
-        User user = TestObjects.user1.toUser();
+        User user = toUser(TestObjects.userResponse1, ROLE_REGULAR);
         user.setPassword("qwerty");
         User saved = repository.save(user);
 
@@ -38,7 +50,7 @@ class UserRepositoryTest {
 
     @Test
     public void testFindById_ReturnsUser() {
-        User user = TestObjects.user1.toUser();
+        User user = toUser(TestObjects.userResponse1, ROLE_REGULAR);
         user.setPassword("qwerty");
         User saved = repository.save(user);
 
@@ -51,11 +63,12 @@ class UserRepositoryTest {
 
     @Test
     public void testFindAll_ReturnsMultipleUsers() {
-        User user1 = TestObjects.user1.toUser();
+        Optional<Role> savedRole = roleRepository.findByNameIgnoreCase("REGULAR");
+        User user1 = toUser(TestObjects.userResponse1, savedRole.get());
         user1.setPassword("qwerty");
         repository.save(user1);
 
-        User user2 = TestObjects.user2.toUser();
+        User user2 = toUser(TestObjects.userResponse2, savedRole.get());
         user2.setPassword("qwerty");
         repository.save(user2);
 
@@ -68,7 +81,7 @@ class UserRepositoryTest {
 
     @Test
     public void testUpdateUser_ReturnsFood() {
-        User saved = repository.save(TestObjects.user1.toUser());
+        User saved = repository.save(toUser(TestObjects.userResponse1, ROLE_REGULAR));
 
         saved.setEmail("changed@gmail.com");
         saved.setPassword("1234");
@@ -81,7 +94,8 @@ class UserRepositoryTest {
 
     @Test
     public void testDeleteUser_ReturnsEmptyList() {
-        User user = TestObjects.user1.toUser();
+        Optional<Role> savedRole = roleRepository.findByNameIgnoreCase("REGULAR");
+        User user = toUser(TestObjects.userResponse1, savedRole.get());
         user.setPassword("qwerty");
         User saved = repository.save(user);
 
@@ -94,7 +108,8 @@ class UserRepositoryTest {
 
     @Test
     public void testFindByEmail_ReturnsUser() {
-        User user = TestObjects.user1.toUser();
+        Optional<Role> savedRole = roleRepository.findByNameIgnoreCase("REGULAR");
+        User user = toUser(TestObjects.userResponse1, savedRole.get());
         user.setPassword("password");
         User saved = repository.save(user);
 

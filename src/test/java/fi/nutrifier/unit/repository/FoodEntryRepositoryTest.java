@@ -2,7 +2,10 @@ package fi.nutrifier.unit.repository;
 
 import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.ServingType;
 import fi.nutrifier.repositories.FoodEntryRepository;
+import fi.nutrifier.repositories.reference.MealTypeRepository;
+import fi.nutrifier.repositories.reference.ServingTypeRepository;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +24,27 @@ class FoodEntryRepositoryTest {
     @Autowired
     private FoodEntryRepository repository;
 
+    @Autowired
+    private MealTypeRepository mealTypeRepository;
+
+    @Autowired
+    private ServingTypeRepository servingTypeRepository;
+
     @BeforeEach
     public void setup() {
         TestObjects.reset();
         repository.deleteAll();
+
+        MealType savedMealTypeBreakfast = mealTypeRepository.save(TestObjects.MEAL_TYPE_BREAKFAST);
+        MealType savedMealTypeLunch = mealTypeRepository.save(TestObjects.MEAL_TYPE_LUNCH);
+        TestObjects.foodEntry1.setMealType(savedMealTypeBreakfast);
+        TestObjects.foodEntry2.setMealType(savedMealTypeLunch);
+        TestObjects.foodEntry3.setMealType(savedMealTypeBreakfast);
+
+        ServingType savedServingType = servingTypeRepository.save(TestObjects.SERVING_TYPE_GRAMS);
+        TestObjects.foodEntry1.setServingType(savedServingType);
+        TestObjects.foodEntry2.setServingType(savedServingType);
+        TestObjects.foodEntry3.setServingType(savedServingType);
     }
 
     @Test
@@ -33,18 +53,17 @@ class FoodEntryRepositoryTest {
 
         assertNotNull(saved.getId());
         assertEquals(22, saved.getServingAmount());
-        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, saved.getMealType());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST.getName(), saved.getMealType().getName());
     }
 
     @Test
     public void testFindById_ReturnsLog() {
         FoodEntry saved = repository.save(TestObjects.foodEntry1);
-
         FoodEntry found = repository.findById(saved.getId()).get();
 
         assertNotNull(found);
         assertEquals(22, found.getServingAmount());
-        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, found.getMealType());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST.getName(), found.getMealType().getName());
     }
 
     @Test
@@ -55,8 +74,8 @@ class FoodEntryRepositoryTest {
         List<FoodEntry> found = repository.findAll();
 
         assertEquals(2, found.size());
-        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, found.get(0).getMealType());
-        assertEquals(TestObjects.MEAL_TYPE_LUNCH, found.get(1).getMealType());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST.getName(), found.get(0).getMealType().getName());
+        assertEquals(TestObjects.MEAL_TYPE_LUNCH.getName(), found.get(1).getMealType().getName());
     }
 
     @Test

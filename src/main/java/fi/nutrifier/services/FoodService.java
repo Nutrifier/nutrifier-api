@@ -9,6 +9,7 @@ import fi.nutrifier.exceptions.FoodNotFoundException;
 import fi.nutrifier.repositories.*;
 import fi.nutrifier.repositories.FoodServingRepository;
 import fi.nutrifier.services.reference.FoodBrandService;
+import fi.nutrifier.services.reference.FoodCategoryService;
 import fi.nutrifier.utils.CalculationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ public class FoodService {
     private final FoodUsageRepository usageRepository;
     private final FoodServingRepository servingRepository;
     private final FoodBrandService foodBrandService;
+    private final FoodCategoryService foodCategoryService;
 
     @Autowired
     public FoodService(
@@ -38,7 +40,8 @@ public class FoodService {
             FoodReportRepository reportRepository,
             FoodUsageRepository usageRepository,
             FoodServingRepository servingRepository,
-            FoodBrandService foodBrandService
+            FoodBrandService foodBrandService,
+            FoodCategoryService foodCategoryService
     ) {
         this.repository = repository;
         this.favouriteRepository = favouriteRepository;
@@ -46,6 +49,7 @@ public class FoodService {
         this.usageRepository = usageRepository;
         this.servingRepository = servingRepository;
         this.foodBrandService = foodBrandService;
+        this.foodCategoryService = foodCategoryService;
     }
 
     public ResponseEntity<FoodResponse> create(FoodRequest foodRequest, UUID userId) {
@@ -58,24 +62,18 @@ public class FoodService {
         double calorieSpreadMax = calculatedCalories + 100;
         double calorieSpreadMin = calculatedCalories - 100;
 
-        Food saved = repository.save(foodRequest.toEntity(userId));
+        FoodBrand brand = foodRequest.getBrandId() == null ? null : foodBrandService.getById(foodRequest.getBrandId());
+        FoodCategory category = foodRequest.getCategoryId() == null ? null : foodCategoryService.getById(foodRequest.getBrandId());
+
+        Food saved = repository.save(foodRequest.toEntity(userId, brand, category));
         FoodResponse response = saved.toResponse();
         response.setMessage(ResponseCode.MACRO_TO_CALORIE_CALCULATION_DIFFERED_FROM_INPUTTED_CALORIES.name());
 
         //System.out.println("Create food servings: " + foodRequest.getServings().);
 
-        for (ServingType type : foodRequest.getServings().keySet()) {
-            double amount = foodRequest.getServings().get(type);
-
-            System.out.println(type + " -> " + amount);
-
-            FoodServing fs = new FoodServing(new FoodServingId(saved.getId(), type.getId()), type, amount);
-
-            System.out.println("fs: " + fs.getId().getServingTypeId() + " , " + fs.getAmount());
-
-
-            if (amount > 0.0) {
-                servingRepository.save(fs);
+        for (FoodServing serving : foodRequest.getServings()) {
+            if (serving.getAmount() > 0.0) {
+                servingRepository.save(serving);
             }
         }
 

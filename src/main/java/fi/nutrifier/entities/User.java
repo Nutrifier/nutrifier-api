@@ -3,6 +3,7 @@ package fi.nutrifier.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.dto.UserUpdateRequest;
+import fi.nutrifier.enums.RoleName;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.utils.SecurityUtil;
@@ -42,7 +43,7 @@ public class User {
         return new UserResponse(
                 this.id,
                 this.email,
-                this.role
+                this.role.getName()
         );
     }
 

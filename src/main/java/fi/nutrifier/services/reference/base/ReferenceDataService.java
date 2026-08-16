@@ -1,6 +1,7 @@
 package fi.nutrifier.services.reference.base;
 
 import fi.nutrifier.exceptions.NoSuchReferenceDataException;
+import fi.nutrifier.exceptions.ReferenceDataNotFoundException;
 import fi.nutrifier.repositories.reference.base.ReferenceDataRepository;
 
 import java.util.UUID;
@@ -32,5 +33,10 @@ public abstract class ReferenceDataService<T> {
 
         return repository.findIdByNameIgnoreCase(str)
                 .orElseThrow(() -> new NoSuchReferenceDataException(entityName, str));
+    }
+
+    public T getById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ReferenceDataNotFoundException(entityName, id));
     }
 }

@@ -4,6 +4,7 @@ import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.dto.FoodResponse;
 import fi.nutrifier.entities.Food;
 import fi.nutrifier.repositories.FoodRepository;
+import fi.nutrifier.repositories.FoodServingRepository;
 import fi.nutrifier.services.FoodService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -21,10 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -39,6 +38,9 @@ public class FoodServiceTest {
 
     @Mock
     private FoodRepository repository;
+
+    @Mock
+    private FoodServingRepository foodServingRepository;
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
@@ -63,6 +65,7 @@ public class FoodServiceTest {
 
     @Test
     public void testFindById_ReturnsFood() {
+        when(foodServingRepository.findAllById_FoodId(any(UUID.class))).thenReturn(Collections.emptyList());
         when(repository.findAllById(anyList())).thenReturn(List.of(TestObjects.food1));
 
         ResponseEntity<List<FoodResponse>> response = service.getByIds(List.of(TestObjects.id1));
@@ -81,6 +84,7 @@ public class FoodServiceTest {
         Pageable pageable = PageRequest.of(1, 10);
         Page<Food> mockPage = new PageImpl<>(foods, pageable, foods.size());
 
+        when(foodServingRepository.findAllById_FoodId(any(UUID.class))).thenReturn(Collections.emptyList());
         when(repository.findAll(any(Pageable.class))).thenReturn(mockPage);
 
         ResponseEntity<Page<FoodResponse>> response = service.getAll(1, 10);
@@ -122,7 +126,7 @@ public class FoodServiceTest {
         List<Food> foods = List.of(TestObjects.food1);
         Page<Food> foodPage = new PageImpl<>(foods);
 
-
+        when(foodServingRepository.findAllById_FoodId(any(UUID.class))).thenReturn(Collections.emptyList());
         when(repository.findFoodsByNameContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(foodPage);
         /*when(mapper.toResponse(any(Food.class))).thenAnswer(invocation -> {
             Food f = invocation.getArgument(0);
