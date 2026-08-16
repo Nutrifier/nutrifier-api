@@ -3,7 +3,6 @@ package fi.nutrifier.unit.controller;
 import fi.nutrifier.controllers.UserController;
 import fi.nutrifier.services.*;
 import fi.nutrifier.unit.utils.TestObjects;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerTest extends ControllerTestInterface<UserService> {
 
     protected UserControllerTest() {
-        super("/api/v1/users");
+        super("/api/v1/users/me");
     }
 
     @Test
     public void testGetUser_ReturnOk() throws Exception {
         when(service.getById(eq(TestObjects.id1)))
-                .thenReturn(ResponseEntity.ok(TestObjects.user1));
+                .thenReturn(ResponseEntity.ok(TestObjects.userResponse1));
 
         mockMvc.perform(get(baseUrl)
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))

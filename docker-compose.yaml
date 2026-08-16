@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: myapp
+      MYSQL_USER: myapp
+      MYSQL_PASSWORD: myapp
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "myapp", "-pmyapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/myapp
+      DB_USERNAME: myapp
+      DB_PASSWORD: myapp
+      RSA_PRIVATE_KEY: ${RSA_PRIVATE_KEY}
+      RSA_PUBLIC_KEY: ${RSA_PUBLIC_KEY}
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:

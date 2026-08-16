@@ -1,6 +1,5 @@
 package fi.nutrifier.entities;
 
-import fi.nutrifier.enums.MealType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +26,8 @@ public class DailySummaryMeal {
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private UUID dailySummaryId;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meal_type_id")
     private MealType mealType;
 
     private double calories;

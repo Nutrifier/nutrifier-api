@@ -1,7 +1,6 @@
 package fi.nutrifier.integration;
 
 import fi.nutrifier.dto.UserResponse;
-import fi.nutrifier.enums.Role;
 import fi.nutrifier.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.nutrifier.unit.utils.TestObjects;

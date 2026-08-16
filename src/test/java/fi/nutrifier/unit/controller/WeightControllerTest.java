@@ -42,7 +42,7 @@ public class WeightControllerTest extends ControllerTestInterface<UserWeightServ
     @WithMockUser
     public void testGetUsersWeightEntries_ReturnOk() throws Exception {
         UUID id = UUID.randomUUID();
-        TestObjects.user1.setId(id); // Mock id generation
+        TestObjects.userResponse1.setId(id); // Mock id generation
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<WeightEntry> mockPage = new PageImpl<>(TestObjects.weightEntries, pageable, 10);

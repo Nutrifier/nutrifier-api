@@ -1,8 +1,8 @@
 package fi.nutrifier.dto;
 
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.FoodWeightUnit;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.ServingType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class FoodEntryRequest {
 
     @Min(0)
-    private Double amount;
+    private Double servingAmount;
     private LocalDate date;
     private LocalTime time;
 
@@ -26,7 +26,7 @@ public class FoodEntryRequest {
     private MealType mealType;
 
     @Enumerated(EnumType.STRING)
-    private FoodWeightUnit unit;
+    private ServingType servingType;
 
     private Integer fineliId;
     private UUID foodId;
@@ -34,11 +34,11 @@ public class FoodEntryRequest {
     public FoodEntry toEntity(UUID userId, Double calories, Double fat, Double carbs, Double protein) {
         return new FoodEntry(
                 null,
-                this.amount,
+                this.servingAmount,
                 this.date,
                 this.time,
                 this.mealType,
-                this.unit,
+                this.servingType,
                 calories,
                 fat,
                 carbs,

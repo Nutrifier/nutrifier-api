@@ -45,7 +45,7 @@ public class AdminUserControllerTest extends ControllerTestInterface<UserService
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetAll_AsAdmin_ReturnLogs() throws Exception {
-        List<UserResponse> users = List.of(TestObjects.user1, TestObjects.user2);
+        List<UserResponse> users = List.of(TestObjects.userResponse1, TestObjects.userResponse2);
 
         Pageable pageable = PageRequest.of(1, 10);
         Page<UserResponse> mockPage = new PageImpl<>(users, pageable, users.size());
@@ -79,7 +79,7 @@ public class AdminUserControllerTest extends ControllerTestInterface<UserService
     @WithMockUser(roles = "ADMIN")
     public void testGetById_AsAdmin_ReturnOk() throws Exception {
         when(service.getById(TestObjects.id))
-                .thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.userResponse1, HttpStatus.OK));
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
@@ -102,15 +102,15 @@ public class AdminUserControllerTest extends ControllerTestInterface<UserService
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testUpdateUser_AsAdmin_ReturnUser() throws Exception {
-        TestObjects.user1.setEmail("again@gmail.com");
+        TestObjects.userResponse1.setEmail("again@gmail.com");
 
         // Use eq(1L) to match the exact ID and any(User.class) to allow any User instance.
         when(service.update(eq(TestObjects.id), any(UserUpdateRequest.class)))
-                .thenReturn(new ResponseEntity<>(TestObjects.user1, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(TestObjects.userResponse1, HttpStatus.OK));
 
         mockMvc.perform(patch(baseUrl + "/{id}", TestObjects.id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.user1)))
+                .content(objectMapper.writeValueAsString(TestObjects.userResponse1)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email", CoreMatchers.is("again@gmail.com")))
                 .andExpect(jsonPath("$.password").doesNotExist());
@@ -119,11 +119,11 @@ public class AdminUserControllerTest extends ControllerTestInterface<UserService
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testUpdateUser_AsAdmin_InvalidInput_ReturnBadRequest() throws Exception {
-        TestObjects.user1.setEmail("mywebsite.fi");
+        TestObjects.userResponse1.setEmail("mywebsite.fi");
 
         mockMvc.perform(patch(baseUrl + "/{id}", UUID.randomUUID().toString())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(TestObjects.user1)))
+                .content(objectMapper.writeValueAsString(TestObjects.userResponse1)))
                 .andExpect(status().isBadRequest());
     }
 

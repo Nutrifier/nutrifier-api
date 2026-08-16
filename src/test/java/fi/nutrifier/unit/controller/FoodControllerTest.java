@@ -32,6 +32,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(FoodController.class)
@@ -44,17 +45,16 @@ class FoodControllerTest extends ControllerTestInterface<FoodService> {
     }
 
     @Test
-    @WithMockUser(
-            username = "550e8400-e29b-41d4-a716-446655440000",
-            roles = "USER"
-    )
     void testCreateFood_ReturnCreated() throws Exception {
         when(service.create(any(FoodRequest.class), any(UUID.class)))
                 .thenReturn(new ResponseEntity<>(TestObjects.food1.toResponse(), HttpStatus.CREATED));
 
         mockMvc.perform(post(baseUrl)
+                        .with(jwt().jwt(jwt ->
+                                jwt.subject("550e8400-e29b-41d4-a716-446655440000")
+                        ))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(TestObjects.food1)))
+                        .content(objectMapper.writeValueAsString(TestObjects.food1.toRequest())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", CoreMatchers.is(TestObjects.food1.getName())))
                 .andExpect(jsonPath("$.calories", CoreMatchers.is(TestObjects.food1.getCalories())));
@@ -62,12 +62,20 @@ class FoodControllerTest extends ControllerTestInterface<FoodService> {
         verify(service).create(any(FoodRequest.class), any(UUID.class));
     }
 
+    @Test
+    void testJson() throws Exception {
+        mockMvc.perform(post(baseUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(TestObjects.food1.toRequest())))
+                .andDo(print());
+    }
+
     @ParameterizedTest
     @WithMockUser(
             username = "550e8400-e29b-41d4-a716-446655440000",
             roles = "USER"
     )
-    @ValueSource(strings = { "name", "calories", "servingSize" })
+    @ValueSource(strings = { "name", "calories" })
     void testCreateFood_InvalidFields_ReturnBadRequest(String missingField) throws Exception {
         when(service.create(any(FoodRequest.class), any(UUID.class)))
                 .thenReturn(new ResponseEntity<>(TestObjects.food1.toResponse(), HttpStatus.CREATED));
@@ -78,9 +86,6 @@ class FoodControllerTest extends ControllerTestInterface<FoodService> {
                 break;
             case "calories":
                 TestObjects.food1.setCalories(null);
-                break;
-            case "servingSize":
-                TestObjects.food1.setServingSize(0);
                 break;
         }
 

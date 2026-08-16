@@ -1,8 +1,7 @@
 package fi.nutrifier.controllers;
 
 import fi.nutrifier.dto.*;
-import fi.nutrifier.enums.Role;
-import fi.nutrifier.entities.User;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.services.UserService;
@@ -40,7 +39,8 @@ public class AuthenticationController {
                 UserResponse userResponse = created.getBody();
 
                 if (userResponse != null) {
-                    String token = jwtTokenUtil.generateToken(userResponse.getId(), Role.REGULAR);
+                    String token = jwtTokenUtil.generateToken(userResponse.getId(), created.getBody().getRole());
+
                     LoginResponse loginResponse = new LoginResponse(token, userResponse.getId());
 
                     return new ResponseEntity<>(loginResponse, HttpStatus.CREATED);

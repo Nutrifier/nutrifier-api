@@ -41,8 +41,9 @@ public class Settings {
     @Column(name = "time_between_meals")
     private Integer timeBetweenMeals;
 
-    @Column(name = "diet", length = 20)
-    private String diet;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "diet_id")
+    private Diet diet;
 
     @Column(name = "week_starts_on", nullable = false)
     private Integer weekStartsOn;
@@ -68,7 +69,7 @@ public class Settings {
         this.setNutrientDisplayMode("FULL_CIRCLE");
         this.setLanguage("EN");
         this.setTimeBetweenMeals(3);
-        this.setDiet("STANDARD");
+        //this.setDiet("STANDARD"); // TODO: Check how to initialize as standard
         this.setWeekStartsOn(1);
         this.setProteinEfficiencyEnabled(true);
         this.setMealReminderEnabled(true);

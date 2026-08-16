@@ -1,6 +1,6 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.enums.ActivityLevel;
+import fi.nutrifier.entities.ActivityLevel;
 import fi.nutrifier.enums.Sex;
 import lombok.AllArgsConstructor;
 import lombok.Data;

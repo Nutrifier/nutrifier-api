@@ -5,14 +5,14 @@ import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.GoalType;
-import fi.nutrifier.enums.Role;
 import fi.nutrifier.enums.Sex;
 import fi.nutrifier.exceptions.EncryptionKeyException;
 import fi.nutrifier.exceptions.FailedCryptionException;
 import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.UserService;
+import fi.nutrifier.services.reference.DietService;
+import fi.nutrifier.services.reference.RoleService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
 import fi.nutrifier.utils.SecurityUtil;
@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static fi.nutrifier.unit.utils.TestObjects.ROLE_REGULAR;
+import static fi.nutrifier.unit.utils.TestObjects.toUser;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -46,6 +48,12 @@ public class UserServiceTest {
 
     @InjectMocks
     private UserService service;
+
+    @Mock
+    private DietService dietService;
+
+    @Mock
+    private RoleService roleService;
 
     @Mock
     private UserRepository repository;
@@ -78,14 +86,16 @@ public class UserServiceTest {
         when(weightRepository.save(any(WeightEntry.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(profileRepository.save(any(Profile.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(goalsRepository.save(any(Goals.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(dietService.of(anyString())).thenReturn(TestObjects.DIET_STANDARD);
+        when(roleService.of(anyString())).thenReturn(TestObjects.ROLE_REGULAR);
 
         RegisterRequest registerRequest = new RegisterRequest(
-                TestObjects.user1.getEmail(),
+                TestObjects.userResponse1.getEmail(),
                 "Qwerty123!",
                 Sex.FEMALE,
                 20,
                 170,
-                ActivityLevel.SEDENTARY,
+                TestObjects.ACTIVITY_LEVEL_SEDENTARY,
                 GoalType.MAINTAIN,
                 50.0,
                 50.0,
@@ -101,9 +111,9 @@ public class UserServiceTest {
     @Test
     public void testFindById_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
         // The service expects the email to be encrypted
-        TestObjects.user1.setEmail(SecurityUtil.encrypt(TestObjects.user1.getEmail()));
+        TestObjects.userResponse1.setEmail(SecurityUtil.encrypt(TestObjects.userResponse1.getEmail()));
 
-        when(repository.findById(TestObjects.id)).thenReturn(Optional.ofNullable(TestObjects.user1.toUser()));
+        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(toUser(TestObjects.userResponse1, ROLE_REGULAR)));
 
         ResponseEntity<UserResponse> response = service.getById(TestObjects.id);
 
@@ -120,13 +130,13 @@ public class UserServiceTest {
         user1.setId(UUID.randomUUID());
         user1.setEmail(email);
         user1.setPassword("password");
-        user1.setRole(Role.REGULAR);
+        user1.setRole(TestObjects.ROLE_REGULAR);
 
         User user2 = new User();
         user2.setId(UUID.randomUUID());
         user2.setEmail(email);
         user2.setPassword("password");
-        user2.setRole(Role.REGULAR);
+        user2.setRole(TestObjects.ROLE_REGULAR);
 
         List<User> users = List.of(user1, user2);
 
@@ -150,10 +160,10 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateUser_ReturnsUser() throws FailedCryptionException, EncryptionKeyException {
-        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
-        when(repository.save(any(User.class))).thenReturn(TestObjects.user1.toUser());
+        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(toUser(TestObjects.userResponse1, ROLE_REGULAR)));
+        when(repository.save(any(User.class))).thenReturn(toUser(TestObjects.userResponse1, ROLE_REGULAR));
 
-        ResponseEntity<UserResponse> response = service.update(TestObjects.id, new UserUpdateRequest(TestObjects.user1.getEmail()));
+        ResponseEntity<UserResponse> response = service.update(TestObjects.id, new UserUpdateRequest(TestObjects.userResponse1.getEmail()));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -175,7 +185,7 @@ public class UserServiceTest {
     @Test
     public void testLoginSuccess() throws FailedCryptionException, EncryptionKeyException {
         // Service expects a hashed password
-        User user = TestObjects.user1.toUser();
+        User user = toUser(TestObjects.userResponse1, ROLE_REGULAR);
         String hashedPassword = SecurityUtil.hashPassword("password");
         user.setPassword(hashedPassword);
         when(repository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
@@ -191,8 +201,8 @@ public class UserServiceTest {
     @Test
     public void testLoginFail() throws Exception {
         // Service expects a hashed password
-        when(repository.findByEmail(anyString())).thenReturn(Optional.of(TestObjects.user1.toUser()));
-        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(TestObjects.user1.toUser()));
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(toUser(TestObjects.userResponse1, ROLE_REGULAR)));
+        when(repository.findById(TestObjects.id)).thenReturn(Optional.of(toUser(TestObjects.userResponse1, ROLE_REGULAR)));
 
         ResponseEntity<UserResponse> response = service.login("test@gmail.com", "wrong_password");
 
@@ -202,8 +212,8 @@ public class UserServiceTest {
 
     @Test
     public void testIsEmailTaken_ReturnOk() throws Exception {
-        TestObjects.user1.setEmail(SecurityUtil.encrypt(TestObjects.user1.getEmail()));
-        when(repository.findByEmail(anyString())).thenReturn(Optional.of(TestObjects.user1.toUser()));
+        TestObjects.userResponse1.setEmail(SecurityUtil.encrypt(TestObjects.userResponse1.getEmail()));
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(toUser(TestObjects.userResponse1, ROLE_REGULAR)));
 
         ResponseEntity<Boolean> response = service.isEmailTaken("test@gmail.com");
 
@@ -213,7 +223,7 @@ public class UserServiceTest {
 
     @Test
     public void testIsEmailTaken_ReturnNotFound() throws Exception {
-        TestObjects.user1.setEmail(SecurityUtil.encrypt(TestObjects.user1.getEmail()));
+        TestObjects.userResponse1.setEmail(SecurityUtil.encrypt(TestObjects.userResponse1.getEmail()));
         when(repository.findByEmail(anyString()))
                 .thenReturn(Optional.empty());
 

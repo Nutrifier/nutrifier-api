@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import fi.nutrifier.enums.Role;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -16,6 +15,7 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import fi.nutrifier.entities.Role;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,12 +29,10 @@ public class JwtTokenUtil {
         this.publicKey = publicKey;
     }
 
-    public String generateToken(UUID userId, Role role) throws JOSEException {
-        System.out.println("Generating token with role: " + role.toString());
-
+    public String generateToken(UUID userId, String role) throws JOSEException {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId.toString()) // <-- Use stable user id as an identifier
-                .claim("roles", List.of(role.toString()))
+                .claim("roles", List.of(role))
                 .issueTime(new Date())
                 .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // One week
                 .build();

@@ -3,7 +3,7 @@ package fi.nutrifier.unit.service;
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
 import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.services.FoodUsageService;
@@ -80,8 +80,8 @@ public class FoodEntryServiceTest {
         ResponseEntity<FoodEntryResponse> response = service.create(TestObjects.id1, TestObjects.foodEntry1.toRequest());
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(22, response.getBody().getAmount());
-        assertEquals(MealType.BREAKFAST, response.getBody().getMealType());
+        assertEquals(22, response.getBody().getServingAmount());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, response.getBody().getMealType());
     }
 
     @Test
@@ -92,8 +92,8 @@ public class FoodEntryServiceTest {
         ResponseEntity<FoodEntryResponse> response = service.getByIdAndUserId(TestObjects.id, TestObjects.id1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(22, response.getBody().getAmount());
-        assertEquals(MealType.BREAKFAST, response.getBody().getMealType());
+        assertEquals(22, response.getBody().getServingAmount());
+        assertEquals(TestObjects.MEAL_TYPE_BREAKFAST, response.getBody().getMealType());
     }
 
     @Test
@@ -116,14 +116,14 @@ public class FoodEntryServiceTest {
         when(repository.findByIdAndUserId(TestObjects.id, TestObjects.id1)).thenReturn(Optional.of(TestObjects.foodEntry1));
         when(repository.save(any(FoodEntry.class))).thenReturn(TestObjects.foodEntry1);
 
-        TestObjects.foodEntry1.setMealType(MealType.LUNCH);
-        TestObjects.foodEntry1.setAmount(54.0);
+        TestObjects.foodEntry1.setMealType(TestObjects.MEAL_TYPE_LUNCH);
+        TestObjects.foodEntry1.setServingAmount(54.0);
         ResponseEntity<FoodEntryResponse> response = service.update(TestObjects.id1, TestObjects.id, TestObjects.foodEntry1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(MealType.LUNCH, response.getBody().getMealType());
-        assertEquals(54, response.getBody().getAmount());
+        assertEquals(TestObjects.MEAL_TYPE_LUNCH, response.getBody().getMealType());
+        assertEquals(54, response.getBody().getServingAmount());
     }
 
     @Test

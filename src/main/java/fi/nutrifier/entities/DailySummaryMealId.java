@@ -1,11 +1,6 @@
 package fi.nutrifier.entities;
 
-import fi.nutrifier.enums.MealType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -19,6 +14,7 @@ public class DailySummaryMealId implements Serializable {
 
     private UUID dailySummaryId;
 
-    @Enumerated(EnumType.STRING)
-    private MealType mealType;
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "meal_type_id", columnDefinition = "CHAR(36)")
+    private UUID mealTypeId;
 }

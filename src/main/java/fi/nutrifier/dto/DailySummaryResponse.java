@@ -1,13 +1,10 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.entities.DailySummaryMeal;
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
-import lombok.AllArgsConstructor;
+import fi.nutrifier.entities.MealType;
 import lombok.Data;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -68,10 +65,11 @@ public class DailySummaryResponse {
     }
 
     public void appendNutritionsFromEntry(FoodEntry entry) {
-        this.caloriesConsumed += entry.getCaloriesSnapshot() * (entry.getAmount() / 100);
-        this.fatConsumed += entry.getFatSnapshot() * (entry.getAmount() / 100);
-        this.carbsConsumed += entry.getCarbsSnapshot() * (entry.getAmount() / 100);
-        this.proteinConsumed += entry.getProteinSnapshot() * (entry.getAmount() / 100);
+        // TODO: Duplicate code, move into a helper function
+        this.caloriesConsumed += entry.getCaloriesSnapshot() * (entry.getServingAmount() / 100);
+        this.fatConsumed += entry.getFatSnapshot() * (entry.getServingAmount() / 100);
+        this.carbsConsumed += entry.getCarbsSnapshot() * (entry.getServingAmount() / 100);
+        this.proteinConsumed += entry.getProteinSnapshot() * (entry.getServingAmount() / 100);
 
         DailyMealSummary dailyMealSummary = this.mealSummaries.get(entry.getMealType());
         dailyMealSummary.appendNutritionFromEntry(entry);
@@ -80,9 +78,12 @@ public class DailySummaryResponse {
     }
 
     private void initializeMealSummaries() {
+        /* TODO: Check how to initialize meal summaries
         this.mealSummaries.put(MealType.BREAKFAST, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
         this.mealSummaries.put(MealType.LUNCH, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
         this.mealSummaries.put(MealType.DINNER, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
         this.mealSummaries.put(MealType.SNACKS, new DailyMealSummary(0.0, 0.0, 0.0, 0.0));
+
+         */
     }
 }

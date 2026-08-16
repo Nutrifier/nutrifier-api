@@ -5,12 +5,14 @@ import fi.nutrifier.controllers.FoodEntryController;
 import fi.nutrifier.dto.FoodEntryRequest;
 import fi.nutrifier.dto.FoodEntryResponse;
 import fi.nutrifier.entities.FoodEntry;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
 import fi.nutrifier.services.FoodEntryService;
+import fi.nutrifier.services.reference.MealTypeService;
 import fi.nutrifier.unit.utils.TestObjects;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(SecurityConfig.class)
 public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntryService> {
 
+    @MockBean
+    private MealTypeService mealTypeService;
+
     protected FoodEntryControllerTest() {
         super("/api/v1/food-entries");
     }
@@ -55,8 +60,8 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
                 .content(objectMapper.writeValueAsString(TestObjects.foodEntry1))
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
-            .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType().toString())));
+            .andExpect(jsonPath("$.servingAmount", CoreMatchers.is(TestObjects.foodEntry1.getServingAmount())))
+            .andExpect(jsonPath("$.mealType.name", CoreMatchers.is(TestObjects.foodEntry1.getMealType().getName())));
 
         verify(service).create(any(UUID.class), any(FoodEntryRequest.class));
     }
@@ -67,7 +72,7 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
             roles = "USER"
     )
     public void testCreateLog_InvalidAmount_ReturnBadRequest() throws Exception {
-        TestObjects.foodEntry1.setAmount(-1.0);
+        TestObjects.foodEntry1.setServingAmount(-1.0);
 
         mockMvc.perform(post(baseUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -90,8 +95,8 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
     @Test
     @WithMockUser
     public void testUpdateLog_ReturnFood() throws Exception {
-        TestObjects.foodEntry1.setAmount(100.0);
-        TestObjects.foodEntry1.setMealType(MealType.SNACKS);
+        TestObjects.foodEntry1.setServingAmount(100.0);
+        TestObjects.foodEntry1.setMealType(TestObjects.MEAL_TYPE_SNACKS);
 
         // Use eq(1L) to match the exact ID and any(Log.class) to allow any User instance.
         when(service.update(eq(TestObjects.id1), eq(TestObjects.id), any(FoodEntry.class)))
@@ -102,8 +107,8 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
                 .content(objectMapper.writeValueAsString(TestObjects.foodEntry1))
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.amount", CoreMatchers.is(100.0)))
-            .andExpect(jsonPath("$.mealType", CoreMatchers.is("SNACKS")));
+            .andExpect(jsonPath("$.servingAmount", CoreMatchers.is(100.0)))
+            .andExpect(jsonPath("$.mealType.name", CoreMatchers.is("SNACKS")));
 
         verify(service).update(eq(TestObjects.id1), eq(TestObjects.id), any(FoodEntry.class));
     }
@@ -147,12 +152,13 @@ public class FoodEntryControllerTest extends ControllerTestInterface<FoodEntrySe
         foodEntries.add(TestObjects.foodEntry1.toResponse());
         foodEntries.add(TestObjects.foodEntry2.toResponse());
 
+        when(mealTypeService.of(anyString())).thenReturn(TestObjects.MEAL_TYPE_BREAKFAST);
         when(service.getLogsByDateAndMealTypeAndUserId(any(LocalDate.class), any(MealType.class), any(UUID.class)))
                 .thenReturn(ResponseEntity.ok(foodEntries));
 
         mockMvc.perform(get(baseUrl)
                 .param("date", TestObjects.date.toString())
-                .param("mealType", TestObjects.foodEntry1.getMealType().toString())
+                .param("mealType", TestObjects.foodEntry1.getMealType().getName())
                 .with(jwt().jwt(jwt -> jwt.subject(TestObjects.id1.toString()))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.size()", CoreMatchers.is(2)));

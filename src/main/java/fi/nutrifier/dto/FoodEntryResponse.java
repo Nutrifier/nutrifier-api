@@ -1,7 +1,7 @@
 package fi.nutrifier.dto;
 
-import fi.nutrifier.enums.FoodWeightUnit;
-import fi.nutrifier.enums.MealType;
+import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.ServingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,11 +15,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FoodEntryResponse extends ApiResponse {
     private UUID id;
-    private Double amount;
+    private Double servingAmount;
     private LocalDate date;
     private LocalTime time;
     private MealType mealType;
-    private FoodWeightUnit unit;
+    private ServingType servingType;
     private Double caloriesSnapshot;
     private Double fatSnapshot;
     private Double carbsSnapshot;

@@ -53,8 +53,8 @@ public class AdminFoodEntryControllerTest extends ControllerTestInterface<FoodEn
                 .param("userId", TestObjects.id1.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()", CoreMatchers.is(2)))
-            .andExpect(jsonPath("$.content[0].mealType", CoreMatchers.is("BREAKFAST")))
-            .andExpect(jsonPath("$.content[1].mealType", CoreMatchers.is("LUNCH")));
+            .andExpect(jsonPath("$.content[0].mealType.name", CoreMatchers.is("BREAKFAST")))
+            .andExpect(jsonPath("$.content[1].mealType.name", CoreMatchers.is("LUNCH")));
 
         verify(service, times(1)).getAllByUserId(any(UUID.class), anyInt(), anyInt());
     }
@@ -77,8 +77,8 @@ public class AdminFoodEntryControllerTest extends ControllerTestInterface<FoodEn
 
         mockMvc.perform(get(baseUrl + "/{id}", TestObjects.id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", CoreMatchers.is(TestObjects.foodEntry1.getAmount())))
-                .andExpect(jsonPath("$.mealType", CoreMatchers.is(TestObjects.foodEntry1.getMealType().toString())));
+                .andExpect(jsonPath("$.servingAmount", CoreMatchers.is(TestObjects.foodEntry1.getServingAmount())))
+                .andExpect(jsonPath("$.mealType.name", CoreMatchers.is(TestObjects.foodEntry1.getMealType().getName())));
 
         verify(service, times(1)).getById(TestObjects.id);
     }

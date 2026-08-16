@@ -60,7 +60,6 @@ class AdminFoodControllerTest extends ControllerTestInterface<FoodService> {
         TestObjects.food1.setName("New name");
         TestObjects.food1.setCalories(150.0);
         TestObjects.food1.setBarcode("1536473434");
-        TestObjects.food1.setServingSize(400);
         TestObjects.food1.setCarbs(128.0);
         TestObjects.food1.setProtein(24.0);
         TestObjects.food1.setFat(45.0);
@@ -79,7 +78,6 @@ class AdminFoodControllerTest extends ControllerTestInterface<FoodService> {
                 .andExpect(jsonPath("$.name", CoreMatchers.is("New name")))
                 .andExpect(jsonPath("$.calories", CoreMatchers.is(150.0)))
                 .andExpect(jsonPath("$.barcode", CoreMatchers.is("1536473434")))
-                .andExpect(jsonPath("$.servingSize", CoreMatchers.is(400)))
                 .andExpect(jsonPath("$.carbs", CoreMatchers.is(128.0)))
                 .andExpect(jsonPath("$.protein", CoreMatchers.is(24.0)))
                 .andExpect(jsonPath("$.fat", CoreMatchers.is(45.0)));

@@ -16,7 +16,8 @@ import lombok.Data;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -35,13 +36,15 @@ public class Food {
     @NotBlank
     private String name;
 
-    private String brand;
-    private String category; // TODO: Enumerate
-    private String barcode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private FoodBrand brand;
 
-    @Column(nullable = false)
-    @Min(value = 1)
-    private Integer servingSize = 100;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private FoodCategory category;
+
+    private String barcode;
 
     @Column(nullable = false)
     @NotNull
@@ -81,14 +84,14 @@ public class Food {
     public FoodRequest toRequest() {
         return new FoodRequest(
                 this.name,
-                this.brand,
-                this.category,
+                this.brand != null ? this.brand.getId() : null,
+                this.category != null ? this.category.getId() : null,
                 this.barcode,
-                this.servingSize,
                 this.calories,
                 this.carbs,
                 this.protein,
-                this.fat
+                this.fat,
+                Collections.emptyList()
         );
     }
 
@@ -96,23 +99,42 @@ public class Food {
         return new FoodResponse(
                 this.id,
                 this.name,
-                this.brand,
-                this.category,
+                this.brand != null ? this.brand.getId() : null,
+                this.category != null ? this.category.getId() : null,
                 this.barcode,
-                this.servingSize,
                 this.calories,
                 this.carbs,
                 this.protein,
                 this.fat,
                 this.verified,
-                this.status
+                this.status,
+                new HashMap<>()
+        );
+    }
+
+    public FoodResponse toResponse(List<FoodServing> servingList) {
+        Map<ServingType, Double> servingMap = new HashMap<>();
+        servingList.forEach(s -> servingMap.put(s.getServingType(), s.getAmount()));
+
+        return new FoodResponse(
+                this.id,
+                this.name,
+                this.brand != null ? this.brand.getId() : null,
+                this.category != null ? this.category.getId() : null,
+                this.barcode,
+                this.calories,
+                this.carbs,
+                this.protein,
+                this.fat,
+                this.verified,
+                this.status,
+                servingMap
         );
     }
 
     public void updateEntityFromRequest(FoodRequest request) {
         this.setName(request.getName());
         this.setBarcode(request.getBarcode());
-        this.setServingSize(request.getServingSize());
         this.setCalories(request.getCalories());
         this.setCarbs(request.getCarbs());
         this.setProtein(request.getProtein());

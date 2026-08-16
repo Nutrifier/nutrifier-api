@@ -27,25 +27,27 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
-            final String header = request.getHeader("Authorization");
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                final String header = request.getHeader("Authorization");
 
-            if (header != null) {
-                String jwtToken = header.substring(7); // Remove "Bearer " part
+                if (header != null && header.startsWith("Bearer ")) {
+                    String jwtToken = header.substring(7); // Remove "Bearer " part
 
-                if (jwtTokenUtil.validateToken(jwtToken)) {
-                    String username = jwtTokenUtil.extractUserId(jwtToken);
-                    List<String> roles = jwtTokenUtil.extractRole(jwtToken);
+                    if (jwtTokenUtil.validateToken(jwtToken)) {
+                        String username = jwtTokenUtil.extractUserId(jwtToken);
+                        List<String> roles = jwtTokenUtil.extractRole(jwtToken);
 
-                    List<GrantedAuthority> authorities = roles.stream()
-                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Spring expects roles to be prefixed with "ROLE_"
-                            .collect(Collectors.toList());
+                        List<GrantedAuthority> authorities = roles.stream()
+                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Spring expects roles to be prefixed with "ROLE_"
+                                .collect(Collectors.toList());
 
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    System.out.println("JWT validated successfully. User: " + username + ", Roles: " + roles);
-                } else {
-                    System.out.println("JWT token validation failed: " + jwtToken);
+                        System.out.println("JWT validated successfully. User: " + username + ", Roles: " + roles);
+                    } else {
+                        System.out.println("JWT token validation failed: " + jwtToken);
+                    }
                 }
             } else {
                 System.out.println("No Authorization header present");

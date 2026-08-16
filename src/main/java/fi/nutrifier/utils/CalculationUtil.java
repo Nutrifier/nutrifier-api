@@ -1,6 +1,5 @@
 package fi.nutrifier.utils;
 
-import fi.nutrifier.enums.ActivityLevel;
 import fi.nutrifier.enums.FoodWeightUnit;
 import fi.nutrifier.enums.GoalType;
 import fi.nutrifier.enums.Sex;
@@ -10,18 +9,13 @@ import java.time.temporal.ChronoUnit;
 
 public class CalculationUtil {
 
-    private final static double SEDENTARY_MULTIPLIER = 1.2;
-    private final static double LIGHT_MULTIPLIER = 1.375;
-    private final static double MODERATE_MULTIPLIER = 1.55;
-    private final static double ACTIVE_MULTIPLIER = 1.725;
-    private final static double VERY_ACTIVE_MULTIPLIER = 1.9;
     private final static double GRAM_TO_LB_MULTIPLIER = 453.59237;
     private final static double GRAM_TO_OZ_MULTIPLIER = 28.349523125;
 
     private final static double FAT_TO_KCAL_MULTIPLIER = 9;
     private final static double CARB_PROTEIN_KCAL_MULTIPLIER = 4;
 
-    public final static double CALORIE_FAIL_OFFSET = 80.0;
+    //public final static double CALORIE_FAIL_OFFSET = 80.0;
 
     private static double calculateBMR(double base, double weightMultiplier, double heightMultiplier, double ageMultiplier, double weight, int height, int age) {
         return base + (weightMultiplier * weight) + (heightMultiplier * height) - (ageMultiplier * age);
@@ -74,24 +68,8 @@ public class CalculationUtil {
     }
 
     // Total daily energy expenditure
-    public static int calculateTDEE(double bmr, ActivityLevel activityLevel) {
-        switch (activityLevel) {
-            case LIGHT -> {
-                return (int) Math.round(bmr * LIGHT_MULTIPLIER);
-            }
-            case MODERATE -> {
-                return (int) Math.round(bmr * MODERATE_MULTIPLIER);
-            }
-            case ACTIVE -> {
-                return (int) Math.round(bmr * ACTIVE_MULTIPLIER);
-            }
-            case VERY_ACTIVE -> {
-                return (int) Math.round(bmr * VERY_ACTIVE_MULTIPLIER);
-            }
-            default -> {
-                return (int) Math.round(bmr * SEDENTARY_MULTIPLIER);
-            }
-        }
+    public static int calculateTDEE(double bmr, double activityLevelMultiplier) {
+        return (int) Math.round(bmr * activityLevelMultiplier);
     }
 
     // https://www.health.harvard.edu/staying-healthy/calorie-counting-made-easy
@@ -114,14 +92,13 @@ public class CalculationUtil {
                 // 1 kg of fat is approximately 7700 kcal
                 double dailyDelta = (deltaKg * 7700) / days;
                 // TODO: Notify the user that the goal is ambitious
-                dailyDelta = Math.clamp(dailyDelta, -700, -300); // Restricting too big of a caloric deficit
+                dailyDelta = Math.max(-700, Math.min(dailyDelta, -300)); // Restricting too big of a caloric deficit
                 calorieGoal = tdee + dailyDelta;
             }
-            case BULK -> {
+            case BULK ->
                 // Safe surplus range is 300-500 for muscle gain
                 // https://blog.nasm.org/how-to-clean-bulk
-                calorieGoal = tdee + 300;
-            }
+                    calorieGoal = tdee + 300;
             default -> calorieGoal = tdee;
         }
 

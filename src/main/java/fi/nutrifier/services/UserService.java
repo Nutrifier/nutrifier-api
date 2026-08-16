@@ -4,9 +4,10 @@ import fi.nutrifier.dto.RegisterRequest;
 import fi.nutrifier.dto.UserResponse;
 import fi.nutrifier.dto.UserUpdateRequest;
 import fi.nutrifier.entities.*;
-import fi.nutrifier.enums.Role;
 import fi.nutrifier.exceptions.*;
 import fi.nutrifier.repositories.*;
+import fi.nutrifier.services.reference.DietService;
+import fi.nutrifier.services.reference.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +29,8 @@ public class UserService {
     private final ProfileRepository profileRepository;
     private final GoalsRepository goalsRepository;
     private final WeightRepository weightRepository;
-    private final GoalsService goalsService;
+    private final DietService dietService;
+    private final RoleService roleService;
 
     @Autowired
     public UserService(
@@ -37,14 +39,16 @@ public class UserService {
             ProfileRepository profileRepository,
             GoalsRepository goalsRepository,
             WeightRepository weightRepository,
-            GoalsService goalsService
+            DietService dietService,
+            RoleService roleService
     ) {
         this.repository = repository;
         this.userSettingsRepository = userSettingsRepository;
         this.profileRepository = profileRepository;
         this.goalsRepository = goalsRepository;
         this.weightRepository = weightRepository;
-        this.goalsService = goalsService;
+        this.dietService = dietService;
+        this.roleService = roleService;
     }
 
     @Transactional
@@ -58,10 +62,8 @@ public class UserService {
         User user = new User();
         user.setEmail(encryptedEmail);
         user.setPassword(hashedPassword);
-        user.setRole(Role.REGULAR); // Default to regular user
+        user.setRole(roleService.of("REGULAR")); // Default to regular user
         User savedUser = repository.save(user);
-
-        System.out.println("User service 1");
 
         // Initialize user settings
         Settings settings = new Settings(
@@ -71,7 +73,7 @@ public class UserService {
                 "FULL_CIRCLE",
                 "EN",
                 3,
-                "STANDARD",
+                dietService.of("STANDARD"),
                 1,
                 true,
                 true,
@@ -81,16 +83,12 @@ public class UserService {
         );
         userSettingsRepository.save(settings);
 
-        System.out.println("User service 2");
-
         // Initialize weight
         WeightEntry firstWeightEntry = new WeightEntry();
         firstWeightEntry.setUserId(savedUser.getId());
         firstWeightEntry.setDate(now);
         firstWeightEntry.setWeight(registerRequest.getCurrentWeight());
         WeightEntry savedWeightEntry = weightRepository.save(firstWeightEntry);
-
-        System.out.println("User service 3");
 
         // Initialize profile
         Profile profile = new Profile();
@@ -101,8 +99,6 @@ public class UserService {
         profile.setActivityLevel(registerRequest.getActivityLevel());
         profile.setUpdatedAt(now);
         Profile savedProfile = profileRepository.save(profile);
-
-        System.out.println("User service 4");
 
         // Initialize user goals
         Goals goals = new Goals();
@@ -117,15 +113,11 @@ public class UserService {
         goals.calculateNutrientTargets(savedProfile, savedWeightEntry.getWeight());
         goalsRepository.save(goals);
 
-        System.out.println("User service 5");
-
         UserResponse userResponse = new UserResponse();
         String decryptedEmail = SecurityUtil.decrypt(savedUser.getEmail()); // Plain text email for the return object
         userResponse.setId(savedUser.getId());
         userResponse.setEmail(decryptedEmail);
-        userResponse.setRole(savedUser.getRole());
-
-        System.out.println("User service 6");
+        userResponse.setRole(savedUser.getRole().getName());
 
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
@@ -145,7 +137,7 @@ public class UserService {
                 return new UserResponse(
                         user.getId(),
                         user.getEmail(),
-                        user.getRole()
+                        user.getRole().getName()
                 );
             } catch (FailedCryptionException | EncryptionKeyException e) {
                 return null;
@@ -156,7 +148,7 @@ public class UserService {
     }
 
     public ResponseEntity<UserResponse> getById(UUID id) throws FailedCryptionException, EncryptionKeyException {
-        User user = repository.findById(id).orElseThrow(UserNotFoundException::new);
+        User user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
         user.setEmail(SecurityUtil.decrypt(user.getEmail()));
         user.setPassword(null);
@@ -165,7 +157,7 @@ public class UserService {
     }
 
     public ResponseEntity<UserResponse> update(UUID id, UserUpdateRequest request) throws FailedCryptionException, EncryptionKeyException {
-        User existing = repository.findById(id).orElseThrow(UserNotFoundException::new);
+        User existing = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
         existing.updateEntityFromRequest(request);
         User data = repository.save(existing);
@@ -188,7 +180,7 @@ public class UserService {
 
     public ResponseEntity<String> delete(UUID id) {
         if (!repository.existsById(id)) {
-            throw new UserNotFoundException();
+            throw new UserNotFoundException(id);
         }
 
         repository.deleteById(id);

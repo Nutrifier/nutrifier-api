@@ -3,14 +3,10 @@ package fi.nutrifier.unit.service;
 import fi.nutrifier.config.SecurityConfig;
 import fi.nutrifier.dto.AnalyticsFullResponse;
 import fi.nutrifier.dto.AnalyticsSingleResponse;
-import fi.nutrifier.dto.FoodEntryResponse;
-import fi.nutrifier.entities.FoodEntry;
 import fi.nutrifier.enums.AnalyticsTimePeriod;
 import fi.nutrifier.enums.DayGoalResult;
-import fi.nutrifier.enums.MealType;
 import fi.nutrifier.repositories.*;
 import fi.nutrifier.services.AnalyticsService;
-import fi.nutrifier.services.FoodEntryService;
 import fi.nutrifier.services.FoodUsageService;
 import fi.nutrifier.unit.utils.TestObjects;
 import fi.nutrifier.utils.JwtTokenUtil;
@@ -21,16 +17,11 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,25 +38,13 @@ public class AnalyticsServiceTest {
     private AnalyticsService service;
 
     @Mock
-    private FoodUsageService foodUsageService;
-
-    @Mock
-    private FoodRepository foodRepository;
-
-    @Mock
     private GoalsRepository goalsRepository;
 
     @Mock
     private DailySummaryRepository dailySummaryRepository;
 
     @Mock
-    private FoodUsageRepository foodUsageRepository;
-
-    @Mock
     private FoodEntryRepository foodEntryRepository;
-
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
 
     @BeforeEach
     public void setup() {

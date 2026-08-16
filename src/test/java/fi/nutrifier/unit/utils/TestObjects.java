@@ -2,6 +2,9 @@ package fi.nutrifier.unit.utils;
 
 import fi.nutrifier.dto.*;
 import fi.nutrifier.entities.*;
+import fi.nutrifier.entities.ActivityLevel;
+import fi.nutrifier.entities.MealType;
+import fi.nutrifier.entities.Role;
 import fi.nutrifier.enums.*;
 
 import java.time.LocalDate;
@@ -25,8 +28,8 @@ public class TestObjects {
 
     public static RegisterRequest registerRequest;
 
-    public static UserResponse user1;
-    public static UserResponse user2;
+    public static UserResponse userResponse1;
+    public static UserResponse userResponse2;
 
     public static FoodEntry foodEntry1;
     public static FoodEntry foodEntry2;
@@ -64,6 +67,37 @@ public class TestObjects {
 
     public static AnalyticsFull analyticsFull;
 
+    // Reference constants for ease of use
+    public static final ServingType SERVING_TYPE_GRAMS = new ServingType(UUID.randomUUID(),  "GRAMS");
+    public static final ActivityLevel ACTIVITY_LEVEL_SEDENTARY =
+            new ActivityLevel(UUID.randomUUID(), "SEDENTARY", 1.2, "Mostly sitting, minimal walking");
+    public static final MealType MEAL_TYPE_BREAKFAST =
+            new MealType(UUID.randomUUID(), "BREAKFAST");
+    public static final MealType MEAL_TYPE_LUNCH =
+            new MealType(UUID.randomUUID(), "LUNCH");
+    public static final MealType MEAL_TYPE_DINNER =
+            new MealType(UUID.randomUUID(), "DINNER");
+    public static final MealType MEAL_TYPE_SNACKS =
+            new MealType(UUID.randomUUID(), "SNACKS");
+    public static final Diet DIET_STANDARD =
+            new Diet(UUID.randomUUID(), "STANDARD");
+    public static final Role ROLE_REGULAR =
+            new Role(UUID.randomUUID(), "REGULAR");
+    public static final Role ROLE_ADMIN =
+            new Role(UUID.randomUUID(), "ADMIN");
+    public static final Role ROLE_PREMIUM =
+            new Role(UUID.randomUUID(), "PREMIUM");
+
+
+    public static User toUser(UserResponse userResponse, Role role) {
+        return new User(
+                userResponse.getId(),
+                userResponse.getEmail(),
+                null,
+                role
+        );
+    }
+
 
     public static void reset() {
         LocalDateTime now = LocalDateTime.now();
@@ -75,7 +109,7 @@ public class TestObjects {
                 Sex.FEMALE,
                 18,
                 180,
-                ActivityLevel.SEDENTARY,
+                TestObjects.ACTIVITY_LEVEL_SEDENTARY,
                 GoalType.BULK,
                 80.0,
                 85.0,
@@ -84,21 +118,21 @@ public class TestObjects {
 
         date = LocalDate.of(2025, 1, 15);
 
-        user1 = new UserResponse(id1, "test@gmail.com", Role.REGULAR);
-        user2 = new UserResponse(id2, "test2@gmail.com", Role.REGULAR);
+        userResponse1 = new UserResponse(id1, "test@gmail.com", ROLE_REGULAR.getName());
+        userResponse2 = new UserResponse(id2, "test2@gmail.com", ROLE_REGULAR.getName());
 
-        food1 = new Food(id1, "Kanan rintafilee", "brand", "category", "1234567890", 100, 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id1, id1, now, now);
-        food2 = new Food(id2, "Riisi (keitetty)", "brand", "category", "1234567890", 100, 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);
-        food3 = new Food(id3, "Kalkkunaleike", "brand", "category", "", 100, 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id3, id3, now, now);
+        food1 = new Food(id1, "Kanan rintafilee", null, null, "1234567890", 250.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id1, id1, now, now);
+        food2 = new Food(id2, "Riisi (keitetty)", null, null, "1234567890", 350.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id2, id2, now, now);
+        food3 = new Food(id3, "Kalkkunaleike", null, null, "", 175.0, 0.0, 0.0, 0.0, false, FoodStatus.ACTIVE, id3, id3, now, now);
 
         foodUsage = new FoodUsage(id1, id1, 20, now);
 
         foodReport1 = new FoodReport(id1, id1, id1, ReportType.UPDATE_REQUEST, "Incorrect values", ReportStatus.APPROVED, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, "decision reasoning", id2, now, now);
         foodReport2 = new FoodReport(id2, id2, id2, ReportType.REPORT, "Bad name", ReportStatus.PENDING, "description", "proposedName", 0.0, 0.0, 0.0, 0.0, null, null, null, now);
 
-        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MealType.BREAKFAST, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
-        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
-        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MealType.LUNCH, FoodWeightUnit.GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
+        foodEntry1 = new FoodEntry(id1, 22.0, date, LocalTime.of(9,0, 0), MEAL_TYPE_BREAKFAST, SERVING_TYPE_GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id1);
+        foodEntry2 = new FoodEntry(id2, 120.0, date, LocalTime.of(9,0, 0), MEAL_TYPE_LUNCH, SERVING_TYPE_GRAMS, 120.0, 12.0, 50.0, 24.0, null, id1, id2);
+        foodEntry3 = new FoodEntry(id3, 1500.0, LocalDate.parse("2026-01-01"), LocalTime.of(13,0, 0), MEAL_TYPE_LUNCH, SERVING_TYPE_GRAMS, 120.0, 12.0, 50.0, 24.0, null, id2, id3);
 
         auditLog1 = new AuditLog(id1, id1, "Logged in", "AUTH", "source", now, null, null, null, now);
         auditLog2 = new AuditLog(id1, id1, "Created a food", "FOOD", "source", now, null, null, null, now);
@@ -130,7 +164,7 @@ public class TestObjects {
         newWeightEntries.add(new WeightEntry(id1, id1, 70.0, LocalDateTime.now()));
         weightEntries = newWeightEntries;
 
-        profile = new Profile(id1, 180, 18, Sex.FEMALE, ActivityLevel.SEDENTARY, now);
+        profile = new Profile(id1, 180, 18, Sex.FEMALE, TestObjects.ACTIVITY_LEVEL_SEDENTARY, now);
 
         analyticsFull = new AnalyticsFull(
                 today.minusDays(7),

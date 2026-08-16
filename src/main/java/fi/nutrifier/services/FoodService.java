@@ -1,17 +1,15 @@
 package fi.nutrifier.services;
 
 import fi.nutrifier.dto.*;
-import fi.nutrifier.entities.Food;
-import fi.nutrifier.entities.FoodFavourite;
-import fi.nutrifier.entities.FoodReport;
-import fi.nutrifier.entities.FoodUsage;
+import fi.nutrifier.entities.*;
+import fi.nutrifier.enums.FoodStatus;
 import fi.nutrifier.enums.ResponseCode;
 import fi.nutrifier.exceptions.BarcodeAlreadyExistsException;
 import fi.nutrifier.exceptions.FoodNotFoundException;
-import fi.nutrifier.repositories.FoodFavouriteRepository;
-import fi.nutrifier.repositories.FoodReportRepository;
-import fi.nutrifier.repositories.FoodRepository;
-import fi.nutrifier.repositories.FoodUsageRepository;
+import fi.nutrifier.repositories.*;
+import fi.nutrifier.repositories.FoodServingRepository;
+import fi.nutrifier.services.reference.FoodBrandService;
+import fi.nutrifier.services.reference.FoodCategoryService;
 import fi.nutrifier.utils.CalculationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,18 +29,27 @@ public class FoodService {
     private final FoodFavouriteRepository favouriteRepository;
     private final FoodReportRepository reportRepository;
     private final FoodUsageRepository usageRepository;
+    private final FoodServingRepository servingRepository;
+    private final FoodBrandService foodBrandService;
+    private final FoodCategoryService foodCategoryService;
 
     @Autowired
     public FoodService(
             FoodRepository repository,
             FoodFavouriteRepository favouriteRepository,
             FoodReportRepository reportRepository,
-            FoodUsageRepository usageRepository
+            FoodUsageRepository usageRepository,
+            FoodServingRepository servingRepository,
+            FoodBrandService foodBrandService,
+            FoodCategoryService foodCategoryService
     ) {
         this.repository = repository;
         this.favouriteRepository = favouriteRepository;
         this.reportRepository = reportRepository;
         this.usageRepository = usageRepository;
+        this.servingRepository = servingRepository;
+        this.foodBrandService = foodBrandService;
+        this.foodCategoryService = foodCategoryService;
     }
 
     public ResponseEntity<FoodResponse> create(FoodRequest foodRequest, UUID userId) {
@@ -55,9 +62,20 @@ public class FoodService {
         double calorieSpreadMax = calculatedCalories + 100;
         double calorieSpreadMin = calculatedCalories - 100;
 
-        Food saved = repository.save(foodRequest.toEntity(userId));
+        FoodBrand brand = foodRequest.getBrandId() == null ? null : foodBrandService.getById(foodRequest.getBrandId());
+        FoodCategory category = foodRequest.getCategoryId() == null ? null : foodCategoryService.getById(foodRequest.getBrandId());
+
+        Food saved = repository.save(foodRequest.toEntity(userId, brand, category));
         FoodResponse response = saved.toResponse();
         response.setMessage(ResponseCode.MACRO_TO_CALORIE_CALCULATION_DIFFERED_FROM_INPUTTED_CALORIES.name());
+
+        //System.out.println("Create food servings: " + foodRequest.getServings().);
+
+        for (FoodServing serving : foodRequest.getServings()) {
+            if (serving.getAmount() > 0.0) {
+                servingRepository.save(serving);
+            }
+        }
 
         if (saved.getCalories() > calorieSpreadMax || saved.getCalories() < calorieSpreadMin) {
             return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -84,7 +102,10 @@ public class FoodService {
     public ResponseEntity<Page<FoodResponse>> getAll(Integer page, Integer size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        Page<FoodResponse> dtoPage = repository.findAll(pageRequest).map(Food::toResponse);
+        Page<FoodResponse> dtoPage = repository.findAll(pageRequest).map(f -> {
+                List<FoodServing> servings = servingRepository.findAllById_FoodId(f.getId());
+                return f.toResponse(servings);
+        });
 
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
@@ -96,7 +117,12 @@ public class FoodService {
             throw new FoodNotFoundException();
         }
 
-        return new ResponseEntity<>(data.stream().map(Food::toResponse).toList(), HttpStatus.OK);
+        List<FoodResponse> dataList = data.stream().map(f -> {
+            List<FoodServing> servings = servingRepository.findAllById_FoodId(f.getId());
+            return f.toResponse(servings);
+        }).toList();
+
+        return new ResponseEntity<>(dataList, HttpStatus.OK);
     }
 
     public ResponseEntity<FoodResponse> update(UUID id, UUID userId, FoodRequest foodRequest) {
@@ -125,7 +151,10 @@ public class FoodService {
 
         Page<FoodResponse> dtoPage = repository
                 .findFoodsByNameContainingIgnoreCase(query, pageRequest)
-                .map(Food::toResponse);
+                .map(f -> {
+                    List<FoodServing> servings = servingRepository.findAllById_FoodId(f.getId());
+                    return f.toResponse(servings);
+                });
 
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
@@ -134,7 +163,10 @@ public class FoodService {
         List<FoodResponse> mapped = repository
                 .findFoodsByBarcodeContainingIgnoreCase(query)
                 .stream()
-                .map(Food::toResponse)
+                .map(f -> {
+                    List<FoodServing> servings = servingRepository.findAllById_FoodId(f.getId());
+                    return f.toResponse(servings);
+                })
                 .toList();
 
         return new ResponseEntity<>(mapped, HttpStatus.OK);
@@ -148,7 +180,10 @@ public class FoodService {
 
         List<Food> foods = repository.findAllById(foodIds);
 
-        List<FoodResponse> dtoList = foods.stream().map(Food::toResponse).toList();
+        List<FoodResponse> dtoList = foods.stream().map(f -> {
+            List<FoodServing> servings = servingRepository.findAllById_FoodId(f.getId());
+            return f.toResponse(servings);
+        }).toList();
 
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
@@ -177,7 +212,10 @@ public class FoodService {
                 .map(FoodFavourite::getFoodId)
                 .toList();
 
-        List<FoodResponse> mapped = repository.findAllById(favouriteIds).stream().map(Food::toResponse).toList();
+        List<FoodResponse> mapped = repository.findAllById(favouriteIds).stream().map(f -> {
+            List<FoodServing> servings = servingRepository.findAllById_FoodId(f.getId());
+            return f.toResponse(servings);
+        }).toList();
 
         return new ResponseEntity<>(mapped, HttpStatus.OK);
     }
@@ -207,5 +245,26 @@ public class FoodService {
         Page<FoodReportResponse> dtoPage = reportRepository.findAll(pageRequest).map(FoodReport::toResponse);
 
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
+    }
+
+    public Food mergeFineliFoodIntoDatabaseFood(FineliFoodResponse fineliFood) {
+        LocalDateTime now = LocalDateTime.now();
+        return new Food(
+                null,
+                fineliFood.getName().getFi(), // TODO: Localize
+                foodBrandService.of("FINELI"),
+                null, // TODO: Check if Fineli returns a category and use that
+                null, // No barcodes
+                fineliFood.getEnergyKcal(),
+                fineliFood.getCarbohydrate(),
+                fineliFood.getProtein(),
+                fineliFood.getFat(),
+                true,
+                FoodStatus.ACTIVE,
+                foodBrandService.idOf("FINELI"),
+                foodBrandService.idOf("FINELI"),
+                now,
+                now
+        );
     }
 }
